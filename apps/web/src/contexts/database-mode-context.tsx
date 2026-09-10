@@ -12,7 +12,7 @@ interface DatabaseModeContextValue {
 const DatabaseModeContext = createContext<DatabaseModeContextValue | undefined>(undefined);
 
 export function DatabaseModeProvider({ children }: { children: React.ReactNode }) {
-  const [databaseMode, setDatabaseModeState] = useState<DatabaseMode>('sandbox');
+  const [databaseMode, setDatabaseModeState] = useState<DatabaseMode>('live');
   const client = FirestoreDomainClient.getInstance();
 
   useEffect(() => {
@@ -20,9 +20,12 @@ export function DatabaseModeProvider({ children }: { children: React.ReactNode }
       const savedMode = localStorage.getItem('fsm_database_mode') as DatabaseMode;
       if (savedMode === 'sandbox' || savedMode === 'live') {
         setDatabaseModeState(savedMode);
+      } else {
+        setDatabaseModeState('live');
       }
     } catch {
-      // Fallback to sandbox
+      // Fallback to live
+      setDatabaseModeState('live');
     }
   }, []);
 

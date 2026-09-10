@@ -279,21 +279,12 @@ export interface PaymentUserRecord {
 }
 
 const initialPaymentUsers: PaymentUserRecord[] = [
-  { id: 'pu-1', firstName: 'Payzer', lastName: 'Admin', email: 'admin17900@payzer.com', phone: '', userType: 'Admin', emailReceipts: 'None', canRefundVoid: true, manualCardEntry: true },
-  { id: 'pu-2', firstName: 'Joe', lastName: 'Colacino', email: '8504200991m@gmail.com', phone: '850-420-0991', userType: 'Field', emailReceipts: 'None', canRefundVoid: true, manualCardEntry: true },
-  { id: 'pu-3', firstName: 'Minor', lastName: 'Cover', email: 'minorcover@gmail.com', phone: '', userType: 'Field', emailReceipts: 'Own', canRefundVoid: true, manualCardEntry: true },
-  { id: 'pu-4', firstName: 'Matt', lastName: 'Curtsinger', email: 'curtmatt967@gmail.com', phone: '', userType: 'Field', emailReceipts: 'None', canRefundVoid: true, manualCardEntry: true },
-  { id: 'pu-5', firstName: 'Justin', lastName: 'Dunlap', email: 'justin@murphyshomeservices.com', phone: '', userType: 'Office', emailReceipts: 'Own', canRefundVoid: true, manualCardEntry: true },
-  { id: 'pu-6', firstName: 'Amanda', lastName: 'Hoover', email: 'amanda@murphyshomeservices.com', phone: '', userType: 'Office', emailReceipts: 'Own', canRefundVoid: true, manualCardEntry: true },
-  { id: 'pu-7', firstName: 'Robert', lastName: 'Hudson', email: '8502590012m@gmail.com', phone: '850-259-0012', userType: 'Field', emailReceipts: 'None', canRefundVoid: true, manualCardEntry: true, isPendingRegistration: true },
-  { id: 'pu-8', firstName: 'Justin', lastName: 'Lung', email: 'justinlung@murphyshomeservices.com', phone: '', userType: 'Admin', emailReceipts: 'Own', canRefundVoid: true, manualCardEntry: true, isMe: true },
-  { id: 'pu-9', firstName: 'Jon', lastName: 'Martin', email: 'liljon081405@gmail.com', phone: '', userType: 'Field', emailReceipts: 'None', canRefundVoid: true, manualCardEntry: true },
-  { id: 'pu-10', firstName: 'Ethan', lastName: 'Mitchell', email: 'saethanmitchell@gmail.com', phone: '', userType: 'Field', emailReceipts: 'None', canRefundVoid: true, manualCardEntry: true },
-  { id: 'pu-11', firstName: 'Nancy', lastName: 'Murphy (P)', email: 'nancy@murphyshomeservices.com', phone: '', userType: 'Admin', emailReceipts: 'None', canRefundVoid: true, manualCardEntry: true },
-  { id: 'pu-12', firstName: 'Andrew', lastName: '( Jr) Murphy', email: 'jr@murphyshomeservices.com', phone: '', userType: 'Admin', emailReceipts: 'Own', canRefundVoid: true, manualCardEntry: true },
-  { id: 'pu-13', firstName: 'Ethan', lastName: 'Murphy', email: '8506056069m@gmail.com', phone: '850-605-6069', userType: 'Field', emailReceipts: 'None', canRefundVoid: true, manualCardEntry: true },
-  { id: 'pu-14', firstName: 'Danny', lastName: 'Pardo', email: 'appliances@murphyshomeservices.com', phone: '', userType: 'Office', emailReceipts: 'Own', canRefundVoid: true, manualCardEntry: true },
-  { id: 'pu-15', firstName: 'Wes', lastName: 'Rykoskey', email: '8506990384m@gmail.com', phone: '850-699-0384', userType: 'Field', emailReceipts: 'None', canRefundVoid: true, manualCardEntry: true },
+  { id: 'pu-1', firstName: 'Alex', lastName: 'Reynolds', email: 'admin@apex.com', phone: '555-0100', userType: 'Admin', emailReceipts: 'Own', canRefundVoid: true, manualCardEntry: true, isMe: true },
+  { id: 'pu-2', firstName: 'Sarah', lastName: 'Jenkins', email: 'dispatch@apex.com', phone: '555-0101', userType: 'Office', emailReceipts: 'Own', canRefundVoid: true, manualCardEntry: true },
+  { id: 'pu-3', firstName: 'Marcus', lastName: 'Vance', email: 'tech.hvac1@apex.com', phone: '555-0102', userType: 'Field', emailReceipts: 'None', canRefundVoid: true, manualCardEntry: true },
+  { id: 'pu-4', firstName: 'Carlos', lastName: 'Mendez', email: 'tech.hvac2@apex.com', phone: '555-0103', userType: 'Field', emailReceipts: 'None', canRefundVoid: true, manualCardEntry: true },
+  { id: 'pu-5', firstName: 'David', lastName: 'Ross', email: 'tech.appliance1@apex.com', phone: '555-0104', userType: 'Field', emailReceipts: 'None', canRefundVoid: true, manualCardEntry: true },
+  { id: 'pu-6', firstName: 'Tyler', lastName: 'Reed', email: 'tech.appliance2@apex.com', phone: '555-0105', userType: 'Field', emailReceipts: 'None', canRefundVoid: true, manualCardEntry: true },
 ];
 
 const sidebarMenu: MenuItem[] = [

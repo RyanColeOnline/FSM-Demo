@@ -49,20 +49,25 @@ export interface SessionContextType {
   hasPermission: (permission: keyof UserPermissions) => boolean;
 }
 
-const DEV_SANDBOX_STORAGE_KEY = 'murphys_dev_sandbox_session';
+const DEV_SANDBOX_STORAGE_KEY = 'fsm_demo_dev_sandbox_session';
 const defaultOfficePermissions = getDefaultPermissions('office', 'office_staff');
 
 function buildUserSession(userId: string, user: FirebaseUser | null, data: any): UserSession {
   const actualId = data?.id || userId;
+  const userEmail = (user?.email || data?.email || '').toLowerCase().trim();
+  const isAdminEmail = userEmail === 'admin@apex.com' || userEmail.startsWith('admin@');
+
   if (data) {
     const rawAccountType =
-      data.accountType ||
-      data.role ||
-      data.permissions?.accountType ||
-      (typeof data.permissions === 'string' ? data.permissions : undefined);
+      isAdminEmail
+        ? 'admin'
+        : (data.accountType ||
+           data.role ||
+           data.permissions?.accountType ||
+           (typeof data.permissions === 'string' ? data.permissions : undefined));
     const accountType = normalizeAccountType(rawAccountType);
     const dispatchGroup = normalizeDispatchGroupCategory(
-      Array.isArray(data.dispatchGroups) ? data.dispatchGroups[0] : (data.dispatchGroup || 'office_staff')
+      Array.isArray(data.dispatchGroups) ? data.dispatchGroups[0] : (data.dispatchGroup || (accountType === 'admin' ? 'office_staff' : 'office_staff'))
     );
     const defaultPerms = getDefaultPermissions(accountType, dispatchGroup);
     const rawPerms = typeof data.permissions === 'object' && data.permissions !== null ? data.permissions : {};
@@ -71,8 +76,8 @@ function buildUserSession(userId: string, user: FirebaseUser | null, data: any):
       ...rawPerms,
       accountType,
       hasWebPortalAccess: accountType === 'admin' || accountType === 'office',
-      reportingTabVisibility: rawPerms.reportingTabVisibility !== undefined ? Boolean(rawPerms.reportingTabVisibility) : defaultPerms.reportingTabVisibility,
-      moreAppsAndSettingsVisibility: rawPerms.moreAppsAndSettingsVisibility !== undefined ? Boolean(rawPerms.moreAppsAndSettingsVisibility) : (accountType === 'admin' ? true : defaultPerms.moreAppsAndSettingsVisibility),
+      reportingTabVisibility: accountType === 'admin' ? true : (rawPerms.reportingTabVisibility !== undefined ? Boolean(rawPerms.reportingTabVisibility) : defaultPerms.reportingTabVisibility),
+      moreAppsAndSettingsVisibility: accountType === 'admin' ? true : (rawPerms.moreAppsAndSettingsVisibility !== undefined ? Boolean(rawPerms.moreAppsAndSettingsVisibility) : defaultPerms.moreAppsAndSettingsVisibility),
       appointmentVisibility: rawPerms.appointmentVisibility || defaultPerms.appointmentVisibility,
       allCustomerVisibility: rawPerms.allCustomerVisibility !== undefined ? Boolean(rawPerms.allCustomerVisibility) : defaultPerms.allCustomerVisibility,
       scheduleEventsPermission: rawPerms.scheduleEventsPermission || defaultPerms.scheduleEventsPermission,
@@ -86,7 +91,7 @@ function buildUserSession(userId: string, user: FirebaseUser | null, data: any):
       viewJobPnL: rawPerms.viewJobPnL !== undefined ? Boolean(rawPerms.viewJobPnL) : defaultPerms.viewJobPnL,
     };
 
-    const resolvedName = data.displayName || data.name || (data.firstName && data.lastName ? `${data.firstName} ${data.lastName}` : '') || user?.displayName || 'Murphy Staff';
+    const resolvedName = data.displayName || data.name || (data.firstName && data.lastName ? `${data.firstName} ${data.lastName}` : '') || user?.displayName || (isAdminEmail ? 'Alex Reynolds' : 'Demo Staff');
 
     return {
       id: actualId,
@@ -100,19 +105,18 @@ function buildUserSession(userId: string, user: FirebaseUser | null, data: any):
     };
   } else {
     // Check if canonical mock matches by email
-    const emailToMatch = (user?.email || '').toLowerCase().trim();
-    const canonicalMatch = emailToMatch ? CANONICAL_OFFICIAL_USERS.find((u) => (u.email || '').toLowerCase().trim() === emailToMatch) : null;
+    const canonicalMatch = userEmail ? CANONICAL_OFFICIAL_USERS.find((u) => (u.email || '').toLowerCase().trim() === userEmail) : null;
     if (canonicalMatch) {
       return buildUserSession(canonicalMatch.id, user, canonicalMatch);
     }
 
-    const fallbackAccountType: AccountType = 'office';
+    const fallbackAccountType: AccountType = isAdminEmail ? 'admin' : 'office';
     const fallbackGroup: DispatchGroupCategory = 'office_staff';
     return {
       id: user?.uid || actualId,
       uid: user?.uid || actualId,
-      name: user?.displayName || 'Murphy Staff',
-      email: user?.email || '',
+      name: user?.displayName || (isAdminEmail ? 'Alex Reynolds' : 'Demo Staff'),
+      email: user?.email || (isAdminEmail ? 'admin@apex.com' : ''),
       accountType: fallbackAccountType,
       dispatchGroup: fallbackGroup,
       permissions: getDefaultPermissions(fallbackAccountType, fallbackGroup),
@@ -120,6 +124,7 @@ function buildUserSession(userId: string, user: FirebaseUser | null, data: any):
     };
   }
 }
+
 
 const SessionContext = createContext<SessionContextType>({
   currentUser: null,
@@ -332,8 +337,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     const updatedSession: UserSession = {
       id: currentUser?.id || 'usr-sandbox',
       uid: currentUser?.uid || 'usr-sandbox',
-      name: currentUser?.name || 'Sandbox Tester',
-      email: currentUser?.email || 'test@murphysservices.com',
+      name: currentUser?.name || 'Alex Reynolds',
+      email: currentUser?.email || 'admin@apex.com',
       accountType,
       dispatchGroup,
       permissions: getDefaultPermissions(accountType, dispatchGroup),
@@ -358,12 +363,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setIsSandboxOverride(false);
 
     if (firebaseUser) {
-      const fallbackAccountType: AccountType = 'office';
+      const fallbackAccountType: AccountType = (firebaseUser.email?.toLowerCase().includes('admin') ? 'admin' : 'office');
       const fallbackGroup: DispatchGroupCategory = 'office_staff';
       setCurrentUser({
         id: firebaseUser.uid,
         uid: firebaseUser.uid,
-        name: firebaseUser.displayName || 'Murphy Staff',
+        name: firebaseUser.displayName || (fallbackAccountType === 'admin' ? 'Alex Reynolds' : 'Demo Staff'),
         email: firebaseUser.email || '',
         accountType: fallbackAccountType,
         dispatchGroup: fallbackGroup,

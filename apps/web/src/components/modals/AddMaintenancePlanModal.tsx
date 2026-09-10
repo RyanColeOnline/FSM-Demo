@@ -65,9 +65,7 @@ const MONTH_INDEX: Record<string, number> = {
 };
 
 const SALES_AGENTS = [
-  'Justin Lung',
-  'Ryan Cole',
-  'Austin Murphy',
+  'Alex Reynolds',
   'Sarah Jenkins',
   'David Miller',
 ];

@@ -45,21 +45,12 @@ import { FOLLOW_UP_TYPES } from '@/constants/globalChoices';
 export const mockFollowUpTypes = [...FOLLOW_UP_TYPES];
 
 export const mockAssignees = [
-  'Andrew (Jr) Murphy',
-  'Amanda Hoover',
-  'Christian Nguyen',
-  'Danny Pardo',
-  'Ethan Mitchell',
-  'Ethan Murphy',
-  'Joe Colacino',
-  'Jon Martin',
-  'Justin Dunlap',
-  'Justin Lung',
-  'Matt Curtsinger',
-  'Minor Cover',
-  'Nancy Murphy',
-  'Robert Hudson',
-  'Wes Rykoskey',
+  'Alex Reynolds',
+  'Sarah Jenkins',
+  'Marcus Vance',
+  'Carlos Mendez',
+  'David Ross',
+  'Tyler Reed',
 ];
 
 export const getCurrentFormattedTimestamp = (): string => {

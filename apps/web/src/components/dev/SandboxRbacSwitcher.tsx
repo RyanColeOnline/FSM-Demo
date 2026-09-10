@@ -19,13 +19,13 @@ export function SandboxRbacSwitcher() {
   const { currentUser, permissions, switchRole, resetSandboxOverride, isSandboxOverride } = useSession();
   const { databaseMode, setDatabaseMode } = useDatabaseMode();
 
-  // Strictly gated: Only visible when logged in as Justin Lung
+  // Strictly gated: Visible when logged in as admin
   const userEmail = currentUser?.email?.toLowerCase().trim();
   const isAuthorizedAdmin =
+    userEmail === 'admin@apex.com' ||
+    currentUser?.accountType === 'admin' ||
     userEmail === 'justinlung@murphyshomeservices.com' ||
-    userEmail === 'jlung@murphyshomeservices.com' ||
-    currentUser?.id === 'DtSwSvfAHcUHYTgWYyMoxOjO4Xp1' ||
-    currentUser?.id === 'usr-7';
+    currentUser?.id === 'usr-admin';
 
   if (!isAuthorizedAdmin) {
     return null;

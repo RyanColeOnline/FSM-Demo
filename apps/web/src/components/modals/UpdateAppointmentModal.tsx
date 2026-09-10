@@ -137,21 +137,12 @@ export interface UpdateAppointmentModalProps {
 }
 
 export const ALL_USERS_LIST = [
-  'Andrew (Jr) Murphy',
-  'Amanda Hoover',
-  'Christian Nguyen',
-  'Danny Pardo',
-  'Ethan Mitchell',
-  'Ethan Murphy',
-  'Joe Colacino',
-  'Jon Martin',
-  'Justin Dunlap',
-  'Justin Lung',
-  'Matt Curtsinger',
-  'Minor Cover',
-  'Nancy Murphy',
-  'Robert Hudson',
-  'Wes Rykoskey',
+  'Alex Reynolds',
+  'Sarah Jenkins',
+  'Marcus Vance',
+  'Carlos Mendez',
+  'David Ross',
+  'Tyler Reed',
 ];
 
 export function getClosestCentralTimeSlot(): {

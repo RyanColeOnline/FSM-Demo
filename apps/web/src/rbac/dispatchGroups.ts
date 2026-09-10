@@ -21,25 +21,25 @@ export const DISPATCH_GROUPS: Record<DispatchGroupCategory, DispatchGroupMetadat
     id: 'appliance_techs',
     name: 'Appliance Techs',
     displayName: 'Appliance Techs',
-    mockTechnicians: ['Minor Cover', 'Justin Lung', 'Wes Rykoskey'],
+    mockTechnicians: ['David Ross', 'Tyler Reed'],
   },
   hvac_techs: {
     id: 'hvac_techs',
     name: 'HVAC Techs',
     displayName: 'HVAC Techs',
-    mockTechnicians: ['Joe Colacino', 'Robert Hudson', 'Ethan Mitchell', 'Andrew (Jr) Murphy'],
+    mockTechnicians: ['Marcus Vance', 'Carlos Mendez'],
   },
   installer: {
     id: 'installer',
     name: 'Installer',
     displayName: 'Installer',
-    mockTechnicians: ['Matt Curtsinger', 'Jon Martin', 'Ethan Murphy', 'Christian Nguyen'],
+    mockTechnicians: ['Carlos Mendez', 'David Ross'],
   },
   office_staff: {
     id: 'office_staff',
     name: 'Office Staff',
     displayName: 'Office Staff',
-    mockTechnicians: ['Justin Dunlap', 'Amanda Hoover', 'Nancy Murphy', 'Danny Pardo'],
+    mockTechnicians: ['Alex Reynolds', 'Sarah Jenkins'],
   },
 };
 

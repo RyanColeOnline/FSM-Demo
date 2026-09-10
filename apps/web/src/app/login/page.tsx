@@ -315,13 +315,14 @@ export default function LoginPage() {
 
       {/* Center Group: Logo + Auth Card brought together */}
       <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md mx-auto z-10 pt-2 pb-6">
-        {/* Header Logo - Positioned slightly higher */}
-        <div className="flex items-center justify-center pb-5 -mt-6">
-          <img
-            src="/login-logo-dark.png"
-            alt="Apex Field Solutions"
-            className="h-32 sm:h-36 md:h-40 w-auto max-w-md sm:max-w-lg object-contain drop-shadow-2xl"
-          />
+        {/* Header Title */}
+        <div className="text-center pb-6 -mt-4 space-y-1">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white drop-shadow-md">
+            Demo FSM
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-400 font-medium">
+            Field Service Management Portal
+          </p>
         </div>
 
         {/* Center Auth Card Wrapped in Suspense */}

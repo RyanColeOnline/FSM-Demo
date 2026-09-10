@@ -27,7 +27,7 @@ export function WebPortalAuthGuard({ children }: { children: React.ReactNode }) 
     return (
       <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4 text-center">
-          <img src="/login-logo-dark.png" alt="Murphy's" className="h-16 object-contain opacity-90 animate-pulse" />
+          <div className="text-2xl font-extrabold text-white tracking-tight animate-pulse">Demo FSM</div>
           <div className="flex items-center gap-2 text-slate-400 text-sm font-medium">
             <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
             <span>Loading portal session...</span>
@@ -49,9 +49,8 @@ export function WebPortalAuthGuard({ children }: { children: React.ReactNode }) 
         {/* Top Header Brand */}
         <div className="flex items-center justify-between max-w-4xl mx-auto w-full">
           <div className="flex items-center gap-3">
-            <img src="/login-logo-dark.png" alt="Apex Logo" className="h-10 object-contain" />
-            <span className="text-lg font-bold tracking-tight text-white pl-2 border-l border-white/20">
-              Apex FSM
+            <span className="text-xl font-bold tracking-tight text-white">
+              Demo FSM
             </span>
           </div>
 
@@ -104,9 +103,9 @@ export function WebPortalAuthGuard({ children }: { children: React.ReactNode }) 
                 Sign Out
               </Button>
 
-              {(currentUser?.email?.toLowerCase().trim() === 'justinlung@murphyshomeservices.com' || currentUser?.id === 'DtSwSvfAHcUHYTgWYyMoxOjO4Xp1' || currentUser?.id === 'usr-7') && (
+              {(currentUser?.email?.toLowerCase().trim() === 'admin@apex.com' || currentUser?.accountType === 'admin') && (
                 <Button
-                  className="w-full justify-center bg-emerald-600 hover:bg-emerald-500 text-white font-medium"
+                  className="w-full justify-center bg-blue-600 hover:bg-blue-500 text-white font-medium"
                   onClick={() => switchRole('office', 'office_staff')}
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
@@ -115,7 +114,7 @@ export function WebPortalAuthGuard({ children }: { children: React.ReactNode }) 
               )}
             </div>
 
-            {isSandboxOverride && (currentUser?.email?.toLowerCase().trim() === 'justinlung@murphyshomeservices.com' || currentUser?.id === 'DtSwSvfAHcUHYTgWYyMoxOjO4Xp1') && (
+            {isSandboxOverride && (
               <p className="text-xs text-amber-400/90 italic">
                 Active in Dev Sandbox Preview Mode
               </p>
@@ -125,7 +124,7 @@ export function WebPortalAuthGuard({ children }: { children: React.ReactNode }) 
 
         {/* Footer */}
         <div className="text-center text-xs text-slate-500 max-w-4xl mx-auto w-full">
-          Murphy&apos;s Home Services &copy; {new Date().getFullYear()} &bull; All Rights Reserved
+          Demo FSM Platform &copy; {new Date().getFullYear()} &bull; All Rights Reserved
         </div>
       </div>
     );

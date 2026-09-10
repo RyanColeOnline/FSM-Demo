@@ -24,6 +24,7 @@ import {
   DEMO_WARRANTIES,
   DEMO_DISPATCH_GROUPS,
   DEMO_PROCESSING_STATEMENTS,
+  DEMO_PROPOSALS,
 } from '../mock/demo/index';
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || process.env.GCLOUD_PROJECT || 'fsm-demo-266c8';
@@ -135,21 +136,42 @@ async function provisionAuthUsers() {
   }
 
   console.log(`\n🔐 Provisioning Firebase Authentication Demo Users & Custom Claims...`);
+
+  // Clean up obsolete accounts from earlier iterations
+  try {
+    const listResult = await auth.listUsers(100);
+    for (const u of listResult.users) {
+      const email = u.email?.toLowerCase() || '';
+      if (email.endsWith('@apexfieldsolutions.com') || email.includes('murphys') || email.includes('payzer.com')) {
+        await auth.deleteUser(u.uid);
+        console.log(`  🗑️ Removed legacy auth account: ${u.email}`);
+      }
+    }
+  } catch (cleanErr: any) {
+    console.warn(`  ⚠️ Could not clean up legacy auth accounts:`, cleanErr?.message || cleanErr);
+  }
+
   for (const user of DEMO_USERS) {
     try {
       let authUser;
       try {
         authUser = await auth.getUserByEmail(user.email);
+        // Update password to ensure it matches Fsmdemo2026!
+        await auth.updateUser(authUser.uid, {
+          password: 'Fsmdemo2026!',
+          displayName: user.displayName,
+        });
+        console.log(`  ✓ Updated Auth User: ${user.email} (Password: Fsmdemo2026!)`);
       } catch (err: any) {
         if (err.code === 'auth/user-not-found') {
           authUser = await auth.createUser({
             uid: user.id,
             email: user.email,
             displayName: user.displayName,
-            password: 'ApexDemo2026!',
+            password: 'Fsmdemo2026!',
             emailVerified: true,
           });
-          console.log(`  ✓ Created Auth User: ${user.email} (Password: ApexDemo2026!)`);
+          console.log(`  ✓ Created Auth User: ${user.email} (Password: Fsmdemo2026!)`);
         } else {
           throw err;
         }
@@ -177,24 +199,42 @@ export async function runDemoReset() {
   console.log(`🎯 Target Project: ${PROJECT_ID}`);
   console.log(`=====================================================================\n`);
 
-  console.log(`STEP 1: Purging target collections...`);
+  console.log(`STEP 1: Purging target collections (Live & Sandbox)...`);
   const collectionsToPurge = [
     'users',
+    'sandbox_users',
     'customers',
+    'sandbox_customers',
     'equipment',
+    'sandbox_equipment',
     'jobs',
+    'sandbox_jobs',
     'appointments',
+    'sandbox_appointments',
     'invoices',
+    'sandbox_invoices',
+    'proposals',
+    'sandbox_proposals',
     'time_records',
+    'sandbox_time_records',
     'timeClock',
+    'sandbox_timeClock',
     'price_book',
+    'sandbox_price_book',
     'priceBook',
+    'sandbox_priceBook',
     'checklists',
+    'sandbox_checklists',
     'checklistTemplates',
+    'sandbox_checklistTemplates',
     'warranties',
+    'sandbox_warranties',
     'dispatchGroups',
+    'sandbox_dispatchGroups',
     'processing_statements',
+    'sandbox_processing_statements',
     'settings',
+    'sandbox_settings',
   ];
 
   for (const col of collectionsToPurge) {
@@ -203,20 +243,22 @@ export async function runDemoReset() {
 
   console.log(`\nSTEP 2: Seeding pristine canonical demo datasets...`);
   
-  // 1. Users
+  // 1. Users (Live & Sandbox)
   await seedCollection('users', DEMO_USERS, 'Users');
+  await seedCollection('sandbox_users', DEMO_USERS, 'Sandbox Users');
 
-  // 2. Dispatch Groups
+  // 2. Dispatch Groups (Live & Sandbox)
   await seedCollection('dispatchGroups', DEMO_DISPATCH_GROUPS, 'Dispatch Groups');
+  await seedCollection('sandbox_dispatchGroups', DEMO_DISPATCH_GROUPS, 'Sandbox Dispatch Groups');
 
-  // 3. Settings (Single Master Document)
-  process.stdout.write(`  📦 Seeding master Settings document... `);
-  await db.collection('settings').doc('company_settings').set({
+  // 3. Settings (Single Master Document - Live & Sandbox)
+  process.stdout.write(`  📦 Seeding master Settings documents... `);
+  const companySettings = {
     companyName: 'Apex Field Solutions',
     legalName: 'Apex Field Solutions LLC',
     phone: '(800) 555-2739',
-    email: 'support@apexfieldsolutions.com',
-    billingEmail: 'billing@apexfieldsolutions.com',
+    email: 'support@apex.com',
+    billingEmail: 'billing@apex.com',
     address: '100 Innovation Parkway, Suite 400, Orlando, FL 32801',
     defaultTaxRate: 7.0,
     invoicePrefix: 'INV-',
@@ -224,39 +266,56 @@ export async function runDemoReset() {
     enableStripePayments: true,
     timezone: 'America/New_York',
     updatedAt: new Date().toISOString(),
-  });
+  };
+  await db.collection('settings').doc('company_settings').set(companySettings);
+  await db.collection('sandbox_settings').doc('company_settings').set(companySettings);
   console.log(`✓ done`);
 
   // 4. Warranties
   await seedCollection('warranties', DEMO_WARRANTIES, 'Warranties');
+  await seedCollection('sandbox_warranties', DEMO_WARRANTIES, 'Sandbox Warranties');
 
   // 5. Checklists
   await seedCollection('checklistTemplates', DEMO_CHECKLIST_TEMPLATES, 'Checklist Templates');
+  await seedCollection('sandbox_checklistTemplates', DEMO_CHECKLIST_TEMPLATES, 'Sandbox Checklist Templates');
   await seedCollection('checklists', DEMO_CHECKLIST_TEMPLATES, 'Checklists');
+  await seedCollection('sandbox_checklists', DEMO_CHECKLIST_TEMPLATES, 'Sandbox Checklists');
 
   // 6. Price Book (both priceBook and price_book for complete compatibility)
   await seedCollection('priceBook', DEMO_PRICEBOOK_ITEMS, 'Price Book Items');
+  await seedCollection('sandbox_priceBook', DEMO_PRICEBOOK_ITEMS, 'Sandbox Price Book Items');
   await seedCollection('price_book', DEMO_PRICEBOOK_ITEMS, 'Price Book Items');
+  await seedCollection('sandbox_price_book', DEMO_PRICEBOOK_ITEMS, 'Sandbox Price Book Items');
 
   // 7. Customers
   await seedCollection('customers', DEMO_CUSTOMERS, 'Customers');
+  await seedCollection('sandbox_customers', DEMO_CUSTOMERS, 'Sandbox Customers');
 
   // 8. Equipment
   await seedCollection('equipment', DEMO_EQUIPMENT, 'Equipment');
+  await seedCollection('sandbox_equipment', DEMO_EQUIPMENT, 'Sandbox Equipment');
 
   // 9. Jobs & Appointments
   await seedCollection('jobs', DEMO_JOBS, 'Jobs');
+  await seedCollection('sandbox_jobs', DEMO_JOBS, 'Sandbox Jobs');
   await seedCollection('appointments', DEMO_APPOINTMENTS, 'Appointments');
+  await seedCollection('sandbox_appointments', DEMO_APPOINTMENTS, 'Sandbox Appointments');
 
-  // 10. Invoices
+  // 10. Invoices & Proposals
   await seedCollection('invoices', DEMO_INVOICES, 'Invoices');
+  await seedCollection('sandbox_invoices', DEMO_INVOICES, 'Sandbox Invoices');
+  await seedCollection('proposals', DEMO_PROPOSALS, 'Proposals');
+  await seedCollection('sandbox_proposals', DEMO_PROPOSALS, 'Sandbox Proposals');
 
   // 11. Time Clock / Time Records
   await seedCollection('timeClock', DEMO_TIME_RECORDS, 'Time Clock Logs');
+  await seedCollection('sandbox_timeClock', DEMO_TIME_RECORDS, 'Sandbox Time Clock Logs');
   await seedCollection('time_records', DEMO_TIME_RECORDS, 'Time Records');
+  await seedCollection('sandbox_time_records', DEMO_TIME_RECORDS, 'Sandbox Time Records');
 
   // 12. Processing Statements
   await seedCollection('processing_statements', DEMO_PROCESSING_STATEMENTS, 'Merchant Processing Statements');
+  await seedCollection('sandbox_processing_statements', DEMO_PROCESSING_STATEMENTS, 'Sandbox Merchant Processing Statements');
 
   // Step 3: Auth Provisioning
   await provisionAuthUsers();
@@ -271,6 +330,7 @@ export async function runDemoReset() {
     'jobs',
     'appointments',
     'invoices',
+    'proposals',
     'time_records',
     'price_book',
     'warranties',

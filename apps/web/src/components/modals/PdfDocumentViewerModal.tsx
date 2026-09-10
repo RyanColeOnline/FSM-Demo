@@ -230,7 +230,7 @@ export function PdfDocumentViewerModal({
             >
               {/* Header: Company Logo & Details (Left) + Document Meta (Right) */}
               <div className="flex items-start justify-between border-b-2 border-slate-200 pb-6">
-                {/* Left: Logo & Murphy's Address */}
+                {/* Left: Logo & Company Address */}
                 <div className="max-w-[50%]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 

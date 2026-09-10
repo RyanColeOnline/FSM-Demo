@@ -174,13 +174,13 @@ export function TopNavTabs() {
             onClick={() => setOpenDropdown(null)}
             className={`relative px-3.5 py-2.5 text-sm font-semibold transition-all duration-150 flex items-center ${
               isScheduleActive
-                ? 'text-[#3f6b35] font-bold'
+                ? 'text-[#0f2744] font-bold'
                 : 'text-slate-700 hover:text-slate-900'
             }`}
           >
             <span>Schedule</span>
             {isScheduleActive && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-[#3f6b35] rounded-full" />
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-[#0f2744] rounded-full" />
             )}
           </Link>
 
@@ -191,13 +191,13 @@ export function TopNavTabs() {
             onClick={() => setOpenDropdown(null)}
             className={`relative px-3.5 py-2.5 text-sm font-semibold transition-all duration-150 flex items-center ${
               isCustomersActive
-                ? 'text-[#3f6b35] font-bold'
+                ? 'text-[#0f2744] font-bold'
                 : 'text-slate-700 hover:text-slate-900'
             }`}
           >
             <span>Customers</span>
             {isCustomersActive && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-[#3f6b35] rounded-full" />
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-[#0f2744] rounded-full" />
             )}
           </Link>
 
@@ -210,14 +210,14 @@ export function TopNavTabs() {
               type="button"
               className={`relative px-3.5 py-2.5 text-sm font-semibold transition-all duration-150 flex items-center gap-1.5 ${
                 isJobsActive || openDropdown === 'jobs'
-                  ? 'text-[#3f6b35] font-bold'
+                  ? 'text-[#0f2744] font-bold'
                   : 'text-slate-700 hover:text-slate-900'
               }`}
             >
               <span>Jobs</span>
-              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${openDropdown === 'jobs' ? 'rotate-180 text-[#3f6b35]' : 'text-slate-400'}`} />
+              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${openDropdown === 'jobs' ? 'rotate-180 text-[#0f2744]' : 'text-slate-400'}`} />
               {(isJobsActive || openDropdown === 'jobs') && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-[#3f6b35] rounded-full" />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-[#0f2744] rounded-full" />
               )}
             </button>
 
@@ -235,11 +235,11 @@ export function TopNavTabs() {
                         onClick={() => setOpenDropdown(null)}
                         className={`flex items-center gap-3 px-4 py-2 text-sm font-medium transition-colors ${
                           isSubActive 
-                            ? 'bg-emerald-50 text-[#3f6b35] font-semibold' 
+                            ? 'bg-emerald-50 text-[#0f2744] font-semibold' 
                             : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
                         }`}
                       >
-                        {Icon && <Icon className={`w-4 h-4 ${isSubActive ? 'text-[#3f6b35]' : 'text-slate-500'}`} />}
+                        {Icon && <Icon className={`w-4 h-4 ${isSubActive ? 'text-[#0f2744]' : 'text-slate-500'}`} />}
                         <span>{item.label}</span>
                       </Link>
                     );
@@ -257,13 +257,13 @@ export function TopNavTabs() {
               onClick={() => setOpenDropdown(null)}
               className={`relative px-3.5 py-2.5 text-sm font-semibold transition-all duration-150 flex items-center ${
                 isReportingActive
-                  ? 'text-[#3f6b35] font-bold'
+                  ? 'text-[#0f2744] font-bold'
                   : 'text-slate-700 hover:text-slate-900'
               }`}
             >
               <span>Reporting</span>
               {isReportingActive && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-[#3f6b35] rounded-full" />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-[#0f2744] rounded-full" />
               )}
             </Link>
           )}
@@ -277,14 +277,14 @@ export function TopNavTabs() {
               type="button"
               className={`relative px-3.5 py-2.5 text-sm font-semibold transition-all duration-150 flex items-center gap-1.5 ${
                 isPaymentOptionsActive || openDropdown === 'payment-options'
-                  ? 'text-[#3f6b35] font-bold'
+                  ? 'text-[#0f2744] font-bold'
                   : 'text-slate-700 hover:text-slate-900'
               }`}
             >
               <span>Payment Options</span>
-              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${openDropdown === 'payment-options' ? 'rotate-180 text-[#3f6b35]' : 'text-slate-400'}`} />
+              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${openDropdown === 'payment-options' ? 'rotate-180 text-[#0f2744]' : 'text-slate-400'}`} />
               {(isPaymentOptionsActive || openDropdown === 'payment-options') && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-[#3f6b35] rounded-full" />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-[#0f2744] rounded-full" />
               )}
             </button>
 
@@ -306,12 +306,12 @@ export function TopNavTabs() {
                             type="button"
                             className={`w-full flex items-center justify-between px-4 py-2 text-sm font-medium transition-colors text-left ${
                               isSubmenuOpen
-                                ? 'bg-emerald-50 text-[#3f6b35] font-semibold' 
+                                ? 'bg-emerald-50 text-[#0f2744] font-semibold' 
                                 : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
                             }`}
                           >
                             <div className="flex items-center gap-3">
-                              {Icon && <Icon className={`w-4 h-4 ${isSubmenuOpen ? 'text-[#3f6b35]' : 'text-slate-500'}`} />}
+                              {Icon && <Icon className={`w-4 h-4 ${isSubmenuOpen ? 'text-[#0f2744]' : 'text-slate-500'}`} />}
                               <span>{item.label}</span>
                             </div>
                             <ChevronRight className="w-4 h-4 text-slate-400" />
@@ -351,11 +351,11 @@ export function TopNavTabs() {
                                     }}
                                     className={`flex items-center gap-3 px-4 py-2 text-sm font-medium transition-colors ${
                                       isLeafActive
-                                        ? 'bg-emerald-50 text-[#3f6b35] font-semibold'
+                                        ? 'bg-emerald-50 text-[#0f2744] font-semibold'
                                         : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
                                     }`}
                                   >
-                                    {SubIcon && <SubIcon className={`w-4 h-4 ${isLeafActive ? 'text-[#3f6b35]' : 'text-slate-500'}`} />}
+                                    {SubIcon && <SubIcon className={`w-4 h-4 ${isLeafActive ? 'text-[#0f2744]' : 'text-slate-500'}`} />}
                                     <span>{subItem.label}</span>
                                   </Link>
                                 );
@@ -381,14 +381,14 @@ export function TopNavTabs() {
                 type="button"
                 className={`relative px-3.5 py-2.5 text-sm font-semibold transition-all duration-150 flex items-center gap-1.5 ${
                   isMoreActive || openDropdown === 'more'
-                    ? 'text-[#3f6b35] font-bold'
+                    ? 'text-[#0f2744] font-bold'
                     : 'text-slate-700 hover:text-slate-900'
                 }`}
               >
                 <span>More</span>
-                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${openDropdown === 'more' ? 'rotate-180 text-[#3f6b35]' : 'text-slate-400'}`} />
+                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${openDropdown === 'more' ? 'rotate-180 text-[#0f2744]' : 'text-slate-400'}`} />
                 {(isMoreActive || openDropdown === 'more') && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-[#3f6b35] rounded-full" />
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-[#0f2744] rounded-full" />
                 )}
               </button>
 
@@ -410,12 +410,12 @@ export function TopNavTabs() {
                               type="button"
                               className={`w-full flex items-center justify-between px-4 py-2 text-sm font-medium transition-colors text-left ${
                                 isSubmenuOpen
-                                  ? 'bg-emerald-50 text-[#3f6b35] font-semibold'
+                                  ? 'bg-emerald-50 text-[#0f2744] font-semibold'
                                   : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
                               }`}
                             >
                               <div className="flex items-center gap-3">
-                                {Icon && <Icon className={`w-4 h-4 ${isSubmenuOpen ? 'text-[#3f6b35]' : 'text-slate-500'}`} />}
+                                {Icon && <Icon className={`w-4 h-4 ${isSubmenuOpen ? 'text-[#0f2744]' : 'text-slate-500'}`} />}
                                 <span>{item.label}</span>
                               </div>
                               <ChevronRight className="w-4 h-4 text-slate-400" />
@@ -429,11 +429,11 @@ export function TopNavTabs() {
                               }}
                               className={`flex items-center gap-3 px-4 py-2 text-sm font-medium transition-colors ${
                                 pathname === item.href
-                                  ? 'bg-emerald-50 text-[#3f6b35] font-semibold'
+                                  ? 'bg-emerald-50 text-[#0f2744] font-semibold'
                                   : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
                               }`}
                             >
-                              {Icon && <Icon className={`w-4 h-4 ${pathname === item.href ? 'text-[#3f6b35]' : 'text-slate-500'}`} />}
+                              {Icon && <Icon className={`w-4 h-4 ${pathname === item.href ? 'text-[#0f2744]' : 'text-slate-500'}`} />}
                               <span>{item.label}</span>
                             </Link>
                           )}
@@ -460,11 +460,11 @@ export function TopNavTabs() {
                                         }}
                                         className={`flex items-center gap-3 px-4 py-2 text-sm font-medium transition-colors ${
                                           isLeafActive
-                                            ? 'bg-emerald-50 text-[#3f6b35] font-semibold'
+                                            ? 'bg-emerald-50 text-[#0f2744] font-semibold'
                                             : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
                                         }`}
                                       >
-                                        {SubIcon && <SubIcon className={`w-4 h-4 ${isLeafActive ? 'text-[#3f6b35]' : 'text-slate-500'}`} />}
+                                        {SubIcon && <SubIcon className={`w-4 h-4 ${isLeafActive ? 'text-[#0f2744]' : 'text-slate-500'}`} />}
                                         <span>{subItem.label}</span>
                                       </Link>
                                     </React.Fragment>

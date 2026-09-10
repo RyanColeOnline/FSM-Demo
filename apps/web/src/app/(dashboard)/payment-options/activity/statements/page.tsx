@@ -348,8 +348,8 @@ export default function WexStatementsPage() {
           documentType="Statement"
           filename={viewingStatement.filename}
           pdfUrl={viewingStatement.viewUrl || `/api/stripe/statements/${viewingStatement.fileId}/view`}
-          customerName="Murphy's Merchant Statement"
-          billToCustomer="Murphy's Heating & Air Conditioning"
+          customerName="Apex Merchant Statement"
+          billToCustomer="Apex Field Solutions LLC"
           issueDate={viewingStatement.monthYear || 'August 2026'}
           status={viewingStatement.status}
           amount="$148,290.50"

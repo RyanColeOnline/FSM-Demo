@@ -39,16 +39,6 @@ export function TopHeader() {
     }).length;
   }, [followUps, currentUser]);
 
-  // Default to the AppLogoExample logo asset `/app-logo-example.png`
-  const [logoSrc, setLogoSrc] = useState<string>('/app-logo-example.png');
-
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setLogoSrc(url);
-    }
-  };
 
   const handleOpenMyProfile = () => {
     const targetUserId = currentUser?.id || currentUser?.uid || '';
@@ -63,28 +53,13 @@ export function TopHeader() {
   };
 
   return (
-    <header className="w-full h-11 sm:h-12 bg-[#3f6b35] text-white shadow-md border-b border-[#34572c] flex items-center">
+    <header className="w-full h-11 sm:h-12 bg-[#0f2744] text-white shadow-md border-b border-[#173559] flex items-center">
       <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 h-full flex items-center justify-between">
-        {/* Left Side: Brand Logo (AppLogoExample) */}
+        {/* Left Side: Clean Demo FSM Text Title */}
         <div className="flex items-center h-full">
-          <div 
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center h-full cursor-pointer outline-none focus:outline-none focus-visible:outline-none"
-            title="Click to replace logo image"
-          >
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleLogoUpload} 
-              accept="image/*" 
-              className="hidden" 
-            />
-            <img 
-              src={logoSrc} 
-              alt="Apex Field Solutions" 
-              className="h-[22px] sm:h-[24px] w-auto max-w-[160px] object-contain object-left block" 
-            />
-          </div>
+          <span className="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2 select-none">
+            Demo FSM
+          </span>
         </div>
 
         {/* Right Side Utility Indicators */}

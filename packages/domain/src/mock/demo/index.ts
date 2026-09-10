@@ -10,3 +10,4 @@ export * from './checklists';
 export * from './warranties';
 export * from './dispatchGroups';
 export * from './processingStatements';
+export * from './proposals';
