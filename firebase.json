@@ -1,0 +1,59 @@
+{
+  "firestore": {
+    "database": "(default)",
+    "location": "nam5",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "auth": {
+    "providers": {
+      "emailPassword": true
+    }
+  },
+  "functions": {
+    "source": "functions"
+  },
+  "hosting": {
+    "public": "apps/web/out",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/stripe/**",
+        "function": "stripeApi"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "extensions": {
+    "fs-bq-customers": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-jobs": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-appointments": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-invoices": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-equipment": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-proposals": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-maintenance-plans": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-payments": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-notes": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-price-book": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-users": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-dispatch-groups": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-warranties": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-calls": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-time-clock": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-time-entries": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-archive-jobs": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-archive-appointments": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-archive-invoices": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-archive-proposals": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-archive-maintenance-plans": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-archive-equipment": "firebase/firestore-bigquery-export@0.3.3",
+    "fs-bq-archive-customers": "firebase/firestore-bigquery-export@0.3.3"
+  }
+}

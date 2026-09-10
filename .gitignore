@@ -1,0 +1,30 @@
+.DS_Store
+node_modules/
+build/
+.build/
+.xcworkspace/
+*.xcuserstate
+xcuserdata/
+DerivedData/
+.swiftpm/
+.next/
+out/
+dist/
+sources.tar
+sources.tar.gz
+*.tar.gz
+.scratch/
+__pycache__/
+.gradle/
+transition/
+payzer-export/
+crash/
+data/
+Murphys Icon.icon/
+*.icon/
+
+# Secrets & Local Environment Credentials
+serviceAccountKey*.json
+*.local
+.env*.local
+**/.env*.local

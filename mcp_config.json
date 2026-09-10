@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "google-cloud-firestore": {
+      "env": {
+        "GOOGLE_CLOUD_PROJECT": "murphys-app"
+      }
+    },
+    "xcode-tools": {
+      "command": "ssh",
+      "args": [
+        "ryancole@45.74.241.194",
+        "xcrun mcpbridge"
+      ]
+    }
+  }
+}

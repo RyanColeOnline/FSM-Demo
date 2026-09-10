@@ -1,0 +1,10 @@
+{
+  "name": "@murphys/migration",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Legacy WEX data parsers, transformers, and bulk migration scripts",
+  "main": "src/scripts/index.ts",
+  "scripts": {
+    "parse:wex": "ts-node src/scripts/parse-wex.ts"
+  }
+}

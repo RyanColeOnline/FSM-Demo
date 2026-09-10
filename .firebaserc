@@ -1,0 +1,35 @@
+{
+  "projects": {
+    "default": "fsm-demo-266c8"
+  },
+  "targets": {},
+  "etags": {
+    "murphys-fsm-staging": {
+      "extensionInstances": {
+        "fs-bq-appointments": "79117918ee54d9d4c815017222e72634e06ea8f4320edac1bb4e98bddfba3adb",
+        "fs-bq-archive-appointments": "056a1ed2f06037083cc17318c93e57098a862c0f36a49c3562eda9afe6ba42fa",
+        "fs-bq-archive-customers": "5732655f2c93b4197cc328678261ad9761eae7da9699f81a6a58d2ca8cd20642",
+        "fs-bq-archive-equipment": "d8e78fb4ed7aeb3a47f7d31950af708be6d4ab9bf14f911c085365da86012ce6",
+        "fs-bq-archive-invoices": "eca6b649e9abbc55d814094baef901a819e781d55fed89609424162d04342269",
+        "fs-bq-archive-jobs": "1430b76033a71a13d77d75cff4a91f73ff4adae6aae6005734c5d455cc00a8b8",
+        "fs-bq-archive-maintenance-plans": "2e009a78ba32b59ee94dc2c96bea161be28adc186f35323c95cc9bd1cdb7d57b",
+        "fs-bq-archive-proposals": "a9f637f5e7327f7e8f161fc0911ba3aedd2aa6bb343087453ebc0b1d510ef6ba",
+        "fs-bq-calls": "7f64c55c206e23cc2a4965497adbb80aefe5eb8025b4e1c091a5e4a0a954e745",
+        "fs-bq-customers": "f1d416bfba5c972d167d839f882a995ff9b4dca67070cb3000aec85aeedfd67d",
+        "fs-bq-dispatch-groups": "70e546317ebc3e60d97881e2e4647771b0dad95b4a48bd0066cec3d222712033",
+        "fs-bq-equipment": "eb8d2a51c5a90276cce77a7eefd5aaa033255284382420b58feda24b3fa79390",
+        "fs-bq-invoices": "9e49b234b040fd1f65916345d8898baba2ec501077c89f35f7d32885807d4833",
+        "fs-bq-jobs": "1d892db1e45c4e23acc300a34d1499756e5e72470f16d3ef301ba8089765905a",
+        "fs-bq-maintenance-plans": "3c1e79b223e68025608180efebff0215765b3170a4dd727dbaf34651b0243367",
+        "fs-bq-notes": "bbcda1418c0b56dd57248b82268dc1e20d10cc02eb441758600e2ee6766ef268",
+        "fs-bq-payments": "28a31a82b66b6dde27c60c49a4308bb5c474b5b1084970da07e481f58103eea5",
+        "fs-bq-price-book": "d378960714d270b44ac068d6bb89f70bdb948e7c865b0efd5af78fb972d004c3",
+        "fs-bq-proposals": "ab0aca4c448a44fee5dc6960f4cbf9e5e5908a65f5ceec38ba04ea77e68792a9",
+        "fs-bq-time-clock": "b7519b1d22fe29117792427e66a319b5dd683c11c07f95d384cf1a60d7363be4",
+        "fs-bq-time-entries": "e1578ae186c53fcacebd944e0bb3d389f2005f67b698b966d793cba9460d6f25",
+        "fs-bq-users": "fcf913bcfc36f186c4f5d5818ed5bbd5976a1bffd86cf0749dc8ff9bb128e628",
+        "fs-bq-warranties": "2d7a52a6d94adbce7d383fb9fe89ff75f29232aa9ec8a5a13e5c0f7d9ca6b59c"
+      }
+    }
+  }
+}

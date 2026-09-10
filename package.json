@@ -1,0 +1,27 @@
+{
+  "name": "fsm-baseline-core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Apex Field Solutions - Baseline Core FSM Platform & Demo Environment",
+  "workspaces": [
+    "apps/web",
+    "packages/domain",
+    "packages/migration",
+    "functions"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --prefix apps/web",
+    "build:web": "npm run build --prefix apps/web",
+    "build:domain": "npm run build --prefix packages/domain",
+    "demo:reset": "npm run demo:reset --prefix packages/domain"
+  },
+  "keywords": [
+    "fsm",
+    "field-service-management",
+    "baseline",
+    "white-label",
+    "demo"
+  ],
+  "author": "Apex Field Solutions",
+  "license": "UNLICENSED"
+}

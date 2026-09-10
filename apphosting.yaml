@@ -1,0 +1,31 @@
+# Firebase App Hosting Configuration for Murphy's FSM Platform
+# Documentation: https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  minInstances: 0
+  maxInstances: 5
+  concurrency: 80
+  cpu: 2
+  memoryMiB: 2048
+
+env:
+  - variable: NODE_OPTIONS
+    value: --max-old-space-size=4096
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: murphys-fsm-staging
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: murphys-fsm-staging.firebaseapp.com
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_DATABASE_MODE
+    value: sandbox
+    availability:
+      - BUILD
+      - RUNTIME

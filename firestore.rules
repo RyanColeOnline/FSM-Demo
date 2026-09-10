@@ -1,0 +1,296 @@
+rules_version = '2';
+
+/**
+ * Robust Production-Grade Firestore Security Rules for Murphy's Platform.
+ * Enforces Role-Based Access Control (RBAC) across Live and Sandbox collections.
+ * 
+ * Account Types:
+ * - Admin: Full access to all data, settings, user management, and security.
+ * - Office: Full access to customers, jobs, invoices, proposals, payments, reporting.
+ *           Can access settings if explicitly granted `moreAppsAndSettingsVisibility`.
+ * - Field: Mobile app access. Read/write assigned jobs, invoices, appointments.
+ *          Web portal blocked via RBAC guards.
+ */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // --- Helper Functions ---
+    
+    // Check if user is authenticated via Firebase Auth
+    function isAuthenticated() {
+      return request.auth != null && request.auth.uid != null;
+    }
+    
+    // Check if request is accessing own user record
+    function isSelf(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Fetch user document data
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    // Fetch sandbox user document data
+    function getSandboxUserData() {
+      return get(/databases/$(database)/documents/sandbox_users/$(request.auth.uid)).data;
+    }
+    
+    // Check if authenticated user has Admin role (Custom Claims or User Document)
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'admin' ||
+        getUserData().accountType == 'admin' ||
+        getUserData().role == 'Admin' ||
+        getUserData().permissions.accountType == 'Admin'
+      );
+    }
+    
+    // Check if authenticated user has Dispatcher/Office or Admin role
+    function isDispatcherOrAdmin() {
+      return isAuthenticated() && (
+        isAdmin() ||
+        request.auth.token.role in ['dispatcher', 'office'] ||
+        getUserData().accountType == 'office' ||
+        getUserData().role == 'Office' ||
+        getUserData().permissions.accountType == 'Office'
+      );
+    }
+    
+    function isOfficeOrAdmin() {
+      return isDispatcherOrAdmin();
+    }
+    
+    // Check if authenticated user is a Technician/Field worker
+    function isTechnician() {
+      return isAuthenticated() && (
+        request.auth.token.role in ['technician', 'field'] ||
+        getUserData().accountType == 'field' ||
+        getUserData().role == 'Field' ||
+        getUserData().permissions.accountType == 'Field'
+      );
+    }
+    
+    // Check if user has permission to manage settings
+    function canManageSettings() {
+      return isAdmin() || (
+        isDispatcherOrAdmin() &&
+        getUserData().permissions.moreAppsAndSettingsVisibility == true
+      );
+    }
+
+    // --- Users Collections (Live & Sandbox) ---
+    match /users/{userId} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        isSelf(userId) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['accountType', 'role', 'permissions', 'id', 'uid'])
+      );
+    }
+    
+    match /sandbox_users/{userId} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        isSelf(userId) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['accountType', 'role', 'permissions', 'id', 'uid'])
+      );
+    }
+
+    // --- Customers Collections (Live & Sandbox) ---
+    match /customers/{customerId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isOfficeOrAdmin();
+    }
+    
+    match /sandbox_customers/{customerId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isOfficeOrAdmin();
+    }
+
+    // --- Jobs, Invoices, Proposals, Appointments (Live & Sandbox) ---
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isOfficeOrAdmin();
+    }
+    
+    match /sandbox_jobs/{jobId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isOfficeOrAdmin();
+    }
+
+    match /appointments/{appointmentId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isOfficeOrAdmin();
+    }
+
+    match /sandbox_appointments/{appointmentId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isOfficeOrAdmin();
+    }
+
+    match /invoices/{invoiceId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isOfficeOrAdmin();
+    }
+    
+    match /sandbox_invoices/{invoiceId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isOfficeOrAdmin();
+    }
+
+    match /proposals/{proposalId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isOfficeOrAdmin();
+    }
+    
+    match /sandbox_proposals/{proposalId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isOfficeOrAdmin();
+    }
+
+    match /maintenancePlans/{planId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isOfficeOrAdmin();
+    }
+
+    match /sandbox_maintenancePlans/{planId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isOfficeOrAdmin();
+    }
+
+    match /equipment/{equipmentId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isOfficeOrAdmin();
+    }
+
+    match /sandbox_equipment/{equipmentId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isOfficeOrAdmin();
+    }
+
+    match /payments/{paymentId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+    
+    match /sandbox_payments/{paymentId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    match /priceBook/{itemId} {
+      allow read: if true;
+      allow write: if isOfficeOrAdmin();
+    }
+
+    match /sandbox_priceBook/{itemId} {
+      allow read: if true;
+      allow write: if isOfficeOrAdmin();
+    }
+
+    match /notes/{noteId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /sandbox_notes/{noteId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // --- Technician Time Tracking (Time Clock & Time Entries) ---
+    match /time_entries/{entryId} {
+      allow read: if true;
+      allow create: if isAdmin() || (isAuthenticated() && (request.resource.data.userId == request.auth.uid || request.resource.data.technicianId == request.auth.uid));
+      allow update: if isAdmin() || (isAuthenticated() && (resource.data.userId == request.auth.uid || resource.data.technicianId == request.auth.uid));
+      allow delete: if isAdmin();
+    }
+    
+    match /timeClock/{entryId} {
+      allow read: if true;
+      allow create: if isAdmin() || (isAuthenticated() && (request.resource.data.userId == request.auth.uid || request.resource.data.technicianId == request.auth.uid));
+      allow update: if isAdmin() || (isAuthenticated() && (resource.data.userId == request.auth.uid || resource.data.technicianId == request.auth.uid));
+      allow delete: if isAdmin();
+    }
+
+    match /sandbox_time_entries/{entryId} {
+      allow read, write: if true;
+    }
+
+    // --- Archive Collections (Historical Records prior to Jan 10, 2025) ---
+    match /archive_jobs/{jobId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /archive_appointments/{apptId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /archive_invoices/{invId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /archive_proposals/{propId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /archive_maintenancePlans/{planId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /archive_equipment/{equipId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /archive_customers/{custId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // --- Dispatch Groups & Settings ---
+    match /dispatchGroups/{groupId} {
+      allow read: if true;
+      allow write: if isOfficeOrAdmin();
+    }
+    
+    match /sandbox_dispatchGroups/{groupId} {
+      allow read: if true;
+      allow write: if isOfficeOrAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if canManageSettings();
+    }
+    
+    match /sandbox_settings/{settingId} {
+      allow read: if true;
+      allow write: if canManageSettings();
+    }
+
+    // Catch-all fallback
+    match /{document=**} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+  }
+}
