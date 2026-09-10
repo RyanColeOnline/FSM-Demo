@@ -391,9 +391,9 @@ function JobListContent() {
     setCurrentPage(1);
   }, [debouncedSearch, startDate, endDate, jobTypeFilter, statusFilter, showFlaggedOnly, followUpTypeFilter, assigneeFilter]);
 
-  const totalJobs = paginatedData?.total ?? 0;
-  const totalPages = paginatedData?.totalPages ?? 1;
   const rawJobsList = paginatedData?.jobs ?? [];
+  const totalJobs = showFlaggedOnly ? paginatedJobs.length : (paginatedData?.total ?? 0);
+  const totalPages = showFlaggedOnly ? (Math.ceil(paginatedJobs.length / pageSize) || 1) : (paginatedData?.totalPages ?? 1);
 
   // Edit Follow Up Flag Modal State
   const [editingFlagJob, setEditingFlagJob] = useState<JobRecord | null>(null);
@@ -409,11 +409,16 @@ function JobListContent() {
   // Transform canonical jobs to JobRecord UI model
   const paginatedJobs: JobRecord[] = React.useMemo(() => {
     if (rawJobsList.length > 0) {
-      return rawJobsList.map((j) => {
+      let mapped = rawJobsList.map((j) => {
         const isCompleted = (j.status || '').toLowerCase() === 'closed';
         const isAbandoned = (j.status || '').toLowerCase() === 'abandoned';
         const statusVal: 'Opened' | 'Closed' | 'Abandoned' = isCompleted ? 'Closed' : isAbandoned ? 'Abandoned' : 'Opened';
-        const isFlagged = Boolean(j.isFlagged || j.followUpFlag === 'Y');
+
+        const matchedFollowUp = followUps.find(
+          (f) => f.jobId === j.id || (j.jobNumber && String(f.jobNumber) === String(j.jobNumber).replace(/\D/g, ''))
+        );
+
+        const isFlagged = Boolean(j.isFlagged || (j.followUpFlag && j.followUpFlag !== 'N') || (j as any).flagged || matchedFollowUp);
 
         const custName = j.customerName || 'Customer';
         const line2 = j.address?.addressLine2 || (j.address as any)?.street2 || '';
@@ -436,10 +441,6 @@ function JobListContent() {
           .filter(Boolean)
           .join(', ');
         const finalCityStateZip = parsedCityStateZip || fallbackCityStateZip || '';
-
-        const matchedFollowUp = followUps.find(
-          (f) => f.jobId === j.id || (j.jobNumber && String(f.jobNumber) === String(j.jobNumber).replace(/\D/g, ''))
-        );
 
         const matchedNotes: FlagNoteEntry[] = (matchedFollowUp?.notes || (j as any).followUpNotes || []).map((n: any) => ({
           id: n.id || `note-${Date.now()}`,
@@ -471,9 +472,24 @@ function JobListContent() {
           notes: matchedNotes,
         };
       });
+
+      if (showFlaggedOnly) {
+        mapped = mapped.filter((j) => j.isFlagged);
+      }
+
+      if (followUpTypeFilter) {
+        const fType = followUpTypeFilter.toLowerCase();
+        mapped = mapped.filter((j) => (j.followUpType || '').toLowerCase().includes(fType));
+      }
+
+      if (assigneeFilter && assigneeFilter !== 'All') {
+        mapped = mapped.filter((j) => j.assignee === assigneeFilter);
+      }
+
+      return mapped;
     }
     return [];
-  }, [rawJobsList, followUps]);
+  }, [rawJobsList, followUps, showFlaggedOnly, followUpTypeFilter, assigneeFilter]);
 
   useEffect(() => {
     if (flaggedParam === 'true') {

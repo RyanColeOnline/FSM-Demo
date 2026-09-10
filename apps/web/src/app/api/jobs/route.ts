@@ -91,15 +91,15 @@ async function getTotalJobsCount(col: string): Promise<number> {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const mode = (searchParams.get('mode') || 'sandbox') as DatabaseMode;
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
     const pageSize = Math.max(1, Math.min(100, parseInt(searchParams.get('pageSize') || '20', 10)));
     const search = (searchParams.get('search') || '').trim();
     const status = searchParams.get('status') || 'All';
+    const flagged = searchParams.get('flagged') === 'true';
     const startDate = searchParams.get('startDate') || '';
     const endDate = searchParams.get('endDate') || '';
 
-    const col = mode === 'live' ? 'jobs' : 'sandbox_jobs';
+    const col = 'jobs';
 
     // 1. Search Query
     if (search) {
@@ -159,9 +159,13 @@ export async function GET(request: NextRequest) {
 
       if (res.ok) {
         const rawData = await res.json();
-        const jobs: CanonicalJob[] = (Array.isArray(rawData) ? rawData : [])
+        let jobs: CanonicalJob[] = (Array.isArray(rawData) ? rawData : [])
           .filter((d: any) => d.document)
           .map((d: any) => parseFirestoreDocument(d.document));
+
+        if (flagged) {
+          jobs = jobs.filter((j: any) => Boolean(j.isFlagged || (j.followUpFlag && j.followUpFlag !== 'N') || j.flagged));
+        }
 
         return NextResponse.json({
           jobs,
@@ -173,7 +177,51 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 2. Direct paginated structured query
+    // 2. Flagged Filter Query
+    if (flagged) {
+      const queryUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery?key=${API_KEY}`;
+      const res = await fetch(queryUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: col }],
+            limit: 200,
+          },
+        }),
+      });
+
+      if (res.ok) {
+        const rawData = await res.json();
+        let allJobs: CanonicalJob[] = (Array.isArray(rawData) ? rawData : [])
+          .filter((d: any) => d.document)
+          .map((d: any) => parseFirestoreDocument(d.document));
+
+        let filtered = allJobs.filter((j: any) =>
+          Boolean(j.isFlagged || (j.followUpFlag && j.followUpFlag !== 'N') || j.flagged)
+        );
+
+        if (status !== 'All') {
+          const normStatus = status.toLowerCase();
+          filtered = filtered.filter((j) => (j.status || '').toLowerCase() === normStatus);
+        }
+
+        const offset = (page - 1) * pageSize;
+        const pageJobs = filtered.slice(offset, offset + pageSize);
+        const total = filtered.length;
+        const totalPages = Math.ceil(total / pageSize) || 1;
+
+        return NextResponse.json({
+          jobs: pageJobs,
+          total,
+          page,
+          pageSize,
+          totalPages,
+        });
+      }
+    }
+
+    // 3. Direct paginated structured query
     const offset = (page - 1) * pageSize;
     const structuredQuery: any = {
       from: [{ collectionId: col }],

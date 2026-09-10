@@ -1,7 +1,6 @@
 import React from 'react';
 import { DatabaseModeProvider } from '@/contexts/database-mode-context';
 import { WebPortalAuthGuard } from '@/rbac/guards/WebPortalAuthGuard';
-import { SandboxRbacSwitcher } from '@/components/dev/SandboxRbacSwitcher';
 import { TopHeader } from '@/components/layout/top-header';
 import { TopNavTabs } from '@/components/layout/top-nav-tabs';
 import { TimeClockProvider } from '@/contexts/time-clock-context';
@@ -30,9 +29,6 @@ export default function DashboardLayout({
                 {children}
               </main>
             </div>
-
-            {/* 3. Dev Sandbox Preview Switcher */}
-            <SandboxRbacSwitcher />
           </div>
         </TimeClockProvider>
       </WebPortalAuthGuard>

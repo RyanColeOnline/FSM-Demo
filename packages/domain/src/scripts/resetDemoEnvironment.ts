@@ -243,15 +243,13 @@ export async function runDemoReset() {
 
   console.log(`\nSTEP 2: Seeding pristine canonical demo datasets...`);
   
-  // 1. Users (Live & Sandbox)
+  // 1. Users
   await seedCollection('users', DEMO_USERS, 'Users');
-  await seedCollection('sandbox_users', DEMO_USERS, 'Sandbox Users');
 
-  // 2. Dispatch Groups (Live & Sandbox)
+  // 2. Dispatch Groups
   await seedCollection('dispatchGroups', DEMO_DISPATCH_GROUPS, 'Dispatch Groups');
-  await seedCollection('sandbox_dispatchGroups', DEMO_DISPATCH_GROUPS, 'Sandbox Dispatch Groups');
 
-  // 3. Settings (Single Master Document - Live & Sandbox)
+  // 3. Settings (Single Master Document)
   process.stdout.write(`  📦 Seeding master Settings documents... `);
   const companySettings = {
     companyName: 'Apex Field Solutions',
@@ -268,54 +266,48 @@ export async function runDemoReset() {
     updatedAt: new Date().toISOString(),
   };
   await db.collection('settings').doc('company_settings').set(companySettings);
-  await db.collection('sandbox_settings').doc('company_settings').set(companySettings);
   console.log(`✓ done`);
 
   // 4. Warranties
   await seedCollection('warranties', DEMO_WARRANTIES, 'Warranties');
-  await seedCollection('sandbox_warranties', DEMO_WARRANTIES, 'Sandbox Warranties');
 
   // 5. Checklists
   await seedCollection('checklistTemplates', DEMO_CHECKLIST_TEMPLATES, 'Checklist Templates');
-  await seedCollection('sandbox_checklistTemplates', DEMO_CHECKLIST_TEMPLATES, 'Sandbox Checklist Templates');
   await seedCollection('checklists', DEMO_CHECKLIST_TEMPLATES, 'Checklists');
-  await seedCollection('sandbox_checklists', DEMO_CHECKLIST_TEMPLATES, 'Sandbox Checklists');
 
   // 6. Price Book (both priceBook and price_book for complete compatibility)
   await seedCollection('priceBook', DEMO_PRICEBOOK_ITEMS, 'Price Book Items');
-  await seedCollection('sandbox_priceBook', DEMO_PRICEBOOK_ITEMS, 'Sandbox Price Book Items');
   await seedCollection('price_book', DEMO_PRICEBOOK_ITEMS, 'Price Book Items');
-  await seedCollection('sandbox_price_book', DEMO_PRICEBOOK_ITEMS, 'Sandbox Price Book Items');
 
   // 7. Customers
-  await seedCollection('customers', DEMO_CUSTOMERS, 'Customers');
-  await seedCollection('sandbox_customers', DEMO_CUSTOMERS, 'Sandbox Customers');
+  const customersToSeed = DEMO_CUSTOMERS.map((c) => {
+    const qbName = c.qbName || (c.lastName && c.firstName ? `${c.lastName}, ${c.firstName}` : c.name);
+    return {
+      ...c,
+      qbName,
+      autoSyncStatus: c.autoSyncStatus || 'Synced',
+      customerStatus: c.customerStatus || 'Active',
+    };
+  });
+  await seedCollection('customers', customersToSeed, 'Customers');
 
   // 8. Equipment
   await seedCollection('equipment', DEMO_EQUIPMENT, 'Equipment');
-  await seedCollection('sandbox_equipment', DEMO_EQUIPMENT, 'Sandbox Equipment');
 
   // 9. Jobs & Appointments
   await seedCollection('jobs', DEMO_JOBS, 'Jobs');
-  await seedCollection('sandbox_jobs', DEMO_JOBS, 'Sandbox Jobs');
   await seedCollection('appointments', DEMO_APPOINTMENTS, 'Appointments');
-  await seedCollection('sandbox_appointments', DEMO_APPOINTMENTS, 'Sandbox Appointments');
 
   // 10. Invoices & Proposals
   await seedCollection('invoices', DEMO_INVOICES, 'Invoices');
-  await seedCollection('sandbox_invoices', DEMO_INVOICES, 'Sandbox Invoices');
   await seedCollection('proposals', DEMO_PROPOSALS, 'Proposals');
-  await seedCollection('sandbox_proposals', DEMO_PROPOSALS, 'Sandbox Proposals');
 
   // 11. Time Clock / Time Records
   await seedCollection('timeClock', DEMO_TIME_RECORDS, 'Time Clock Logs');
-  await seedCollection('sandbox_timeClock', DEMO_TIME_RECORDS, 'Sandbox Time Clock Logs');
   await seedCollection('time_records', DEMO_TIME_RECORDS, 'Time Records');
-  await seedCollection('sandbox_time_records', DEMO_TIME_RECORDS, 'Sandbox Time Records');
 
   // 12. Processing Statements
   await seedCollection('processing_statements', DEMO_PROCESSING_STATEMENTS, 'Merchant Processing Statements');
-  await seedCollection('sandbox_processing_statements', DEMO_PROCESSING_STATEMENTS, 'Sandbox Merchant Processing Statements');
 
   // Step 3: Auth Provisioning
   await provisionAuthUsers();

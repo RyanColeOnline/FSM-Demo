@@ -180,10 +180,7 @@ export class FirestoreDomainClient {
     return url.toString();
   }
 
-  private getCollectionName(baseCollection: string, mode: DatabaseMode): string {
-    if (mode === 'sandbox') {
-      return `sandbox_${baseCollection}`;
-    }
+  private getCollectionName(baseCollection: string, _mode?: DatabaseMode): string {
     return baseCollection;
   }
 
@@ -1162,21 +1159,57 @@ export class FirestoreDomainClient {
         const data = await res.json();
         const results = Array.isArray(data) ? data : [];
         const rawDocs = results.map((item: any) => item.document).filter(Boolean);
-        const hasNextPage = rawDocs.length > pageSize;
-        const pageDocs = rawDocs.slice(0, pageSize);
-        const customers = pageDocs.map((d: any) => this.normalizeCustomer(this.parseFirestoreDocument(d)));
-        const lastItem = customers[customers.length - 1];
+        if (rawDocs.length > 0) {
+          const hasNextPage = rawDocs.length > pageSize;
+          const pageDocs = rawDocs.slice(0, pageSize);
+          const customers = pageDocs.map((d: any) => this.normalizeCustomer(this.parseFirestoreDocument(d)));
+          const lastItem = customers[customers.length - 1];
 
-        return {
-          customers,
-          totalCount,
-          hasNextPage,
-          hasPreviousPage: cursor !== null,
-          endCursor: lastItem ? { qbName: lastItem.qbName || lastItem.name, id: lastItem.id } : null,
-        };
+          return {
+            customers,
+            totalCount: totalCount > 0 ? totalCount : customers.length,
+            hasNextPage,
+            hasPreviousPage: cursor !== null,
+            endCursor: lastItem ? { qbName: lastItem.qbName || lastItem.name, id: lastItem.id } : null,
+          };
+        }
       }
     } catch (err: any) {
       console.error(`[Firestore Paginated Query Error - ${col}]: ${err.message}`);
+    }
+
+    // Resilient fallback: fetch customers via fetchCustomers(mode) and paginate client-side
+    try {
+      const all = await this.fetchCustomers(mode);
+      if (all && all.length > 0) {
+        let filtered = all;
+        if (customerStatus && customerStatus !== 'All') {
+          filtered = filtered.filter((c) => c.customerStatus === customerStatus);
+        }
+        if (syncFilter && syncFilter !== 'All') {
+          filtered = filtered.filter((c) => c.autoSyncStatus === syncFilter);
+        }
+        filtered.sort((a, b) => (a.qbName || a.name || '').localeCompare(b.qbName || b.name || ''));
+
+        let startIndex = 0;
+        if (cursor) {
+          const foundIdx = filtered.findIndex((c) => (c.qbName || c.name) === cursor.qbName && c.id === cursor.id);
+          if (foundIdx >= 0) {
+            startIndex = foundIdx + 1;
+          }
+        }
+        const paged = filtered.slice(startIndex, startIndex + pageSize);
+        const lastItem = paged[paged.length - 1];
+        return {
+          customers: paged,
+          totalCount: filtered.length,
+          hasNextPage: startIndex + pageSize < filtered.length,
+          hasPreviousPage: startIndex > 0,
+          endCursor: lastItem ? { qbName: lastItem.qbName || lastItem.name, id: lastItem.id } : null,
+        };
+      }
+    } catch (fallbackErr: any) {
+      console.error(`[Firestore Fallback Customers Error]:`, fallbackErr);
     }
 
     return {
