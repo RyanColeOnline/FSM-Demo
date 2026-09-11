@@ -118,7 +118,23 @@ export default function GoogleMapsRouteView({
 }: GoogleMapsRouteViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
+  const markersMapRef = useRef<Map<string, { marker: any; job: MapJobItem }>>(new Map());
+  const lastBoundsKeyRef = useRef<string>('');
+
+  // Keep latest callbacks in ref to avoid recreating markers or re-running effects on hover
+  const callbacksRef = useRef({
+    onHoverAppointment,
+    onLeaveAppointment,
+    onSelectAppointment,
+  });
+
+  useEffect(() => {
+    callbacksRef.current = {
+      onHoverAppointment,
+      onLeaveAppointment,
+      onSelectAppointment,
+    };
+  });
 
   const apiKey =
     process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
@@ -188,15 +204,22 @@ export default function GoogleMapsRouteView({
     };
   }, [apiKey]);
 
-  // Update Markers whenever displayJobs changes
+  // Reconcile Markers stably without destroying them on hover
   useEffect(() => {
     const google = (window as any).google;
     const map = mapInstanceRef.current;
     if (!google || !map) return;
 
-    // Clear previous markers
-    markersRef.current.forEach((m) => m.setMap(null));
-    markersRef.current = [];
+    const currentMap = markersMapRef.current;
+    const activeIds = new Set(displayJobs.map((j) => j.id));
+
+    // Remove obsolete markers that are no longer in displayJobs
+    currentMap.forEach((item, id) => {
+      if (!activeIds.has(id)) {
+        item.marker.setMap(null);
+        currentMap.delete(id);
+      }
+    });
 
     if (displayJobs.length === 0) return;
 
@@ -207,50 +230,62 @@ export default function GoogleMapsRouteView({
       const pos = new google.maps.LatLng(coords.lat, coords.lng);
       bounds.extend(pos);
 
-      const marker = new google.maps.Marker({
-        position: pos,
-        map: map,
-        icon: createPinIcon(google, job.colorHex || '#be4646'),
-        title: `${job.jobNumber} - ${job.customer}`,
-      });
+      const existing = currentMap.get(job.id);
+      if (existing) {
+        // Keep existing marker stable in the DOM to avoid any hover flicker
+        existing.job = job;
+      } else {
+        // Create new marker
+        const marker = new google.maps.Marker({
+          position: pos,
+          map: map,
+          icon: createPinIcon(google, job.colorHex || '#be4646'),
+          title: `${job.jobNumber} - ${job.customer}`,
+        });
 
-      marker.addListener('mouseover', (e: any) => {
-        const domEvent = e?.domEvent as MouseEvent | undefined;
-        const clientX = domEvent?.clientX ?? 300;
-        const clientY = domEvent?.clientY ?? 200;
-        onHoverAppointment(job, clientX, clientY);
-      });
+        marker.addListener('mouseover', (e: any) => {
+          const domEvent = e?.domEvent as MouseEvent | undefined;
+          const clientX = domEvent?.clientX ?? 300;
+          const clientY = domEvent?.clientY ?? 200;
+          callbacksRef.current.onHoverAppointment(job, clientX, clientY);
+        });
 
-      marker.addListener('mouseout', () => {
-        onLeaveAppointment();
-      });
+        marker.addListener('mouseout', () => {
+          callbacksRef.current.onLeaveAppointment();
+        });
 
-      marker.addListener('click', () => {
-        onSelectAppointment?.(job);
-      });
+        marker.addListener('click', () => {
+          callbacksRef.current.onSelectAppointment?.(job);
+        });
 
-      markersRef.current.push(marker);
+        currentMap.set(job.id, { marker, job });
+      }
     });
 
-    // Fit map to markers
-    if (displayJobs.length === 1) {
-      map.setCenter(bounds.getCenter());
-      map.setZoom(13);
-    } else {
-      map.fitBounds(bounds, { top: 60, bottom: 60, left: 60, right: 60 });
-      const listener = google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
-        if (map.getZoom() > 14) {
-          map.setZoom(14);
-        }
-      });
+    // Only update map bounds if the active appointments or selected user actually changed
+    const boundsKey = `${selectedUser}_${Array.from(activeIds).sort().join(',')}`;
+    if (lastBoundsKeyRef.current !== boundsKey) {
+      lastBoundsKeyRef.current = boundsKey;
+      if (displayJobs.length === 1) {
+        map.setCenter(bounds.getCenter());
+        map.setZoom(13);
+      } else {
+        map.fitBounds(bounds, { top: 60, bottom: 60, left: 60, right: 60 });
+        google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
+          if (map.getZoom() > 14) {
+            map.setZoom(14);
+          }
+        });
+      }
     }
-  }, [displayJobs, onHoverAppointment, onLeaveAppointment, onSelectAppointment]);
+  }, [displayJobs, selectedUser]);
 
-  // Cleanup on unmount
+  // Cleanup all markers on unmount
   useEffect(() => {
     return () => {
-      markersRef.current.forEach((m) => m.setMap(null));
-      markersRef.current = [];
+      markersMapRef.current.forEach((item) => item.marker.setMap(null));
+      markersMapRef.current.clear();
+      lastBoundsKeyRef.current = '';
     };
   }, []);
 

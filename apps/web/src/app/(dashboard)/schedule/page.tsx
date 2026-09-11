@@ -122,7 +122,7 @@ function splitAddressParts(rawAddress?: string, customerName?: string): {
 
 
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   Calendar as CalendarIcon, 
@@ -512,33 +512,132 @@ function formatDecimalHoursTo12h(decimalHours: number): string {
   return `${h12}:${String(m).padStart(2, '0')}${ampm}`;
 }
 
-// Clean Data Model Tracing Helper Function
+// Clean Data Model Tracing Helper Function reading Live Firestore Data
 function buildHoverDetailsFromJob(
   job: ScheduledJob,
   dateStr: string,
   posX: number,
-  posY: number
+  posY: number,
+  allAppointments?: CanonicalAppointment[],
+  allCustomers?: CanonicalCustomer[],
+  allJobs?: CanonicalJob[]
 ): HoverDetailsData {
-  const start12h = formatTimeTo12h(job.startTime);
-  const end12h = formatTimeTo12h(job.endTime || '16:00');
-  const timeRange = `${start12h} - ${end12h}`;
-  const typeSuffix = job.jobType ? `: ${job.jobType}` : '';
-  const numOnly = job.jobNumber.replace(/[^0-9]/g, '') || '108889';
-  const formattedJobNumber = job.jobNumber.includes(':') 
-    ? job.jobNumber 
-    : `Job: #${numOnly}${typeSuffix}`;
+  // 1. Resolve live Firestore appointment document
+  const cleanId = (job.id || '').replace(/^appt-/, '');
+  const cleanJobDigits = (job.jobNumber || '').replace(/[^0-9]/g, '');
+
+  const liveAppt = allAppointments?.find(
+    (a) =>
+      a.id === job.id ||
+      a.appointmentId === job.id ||
+      a.id === `appt-${cleanId}` ||
+      (a.jobNumber && String(a.jobNumber).replace(/[^0-9]/g, '') === cleanJobDigits)
+  );
+
+  // 2. Resolve live Firestore customer document
+  const custId = liveAppt?.customerId || job.customerId;
+  const liveCust = allCustomers?.find(
+    (c) =>
+      (custId && (c.id === custId || c.customerNumber === custId || c.accountNumber === custId)) ||
+      (c.name && (c.name.toLowerCase() === (liveAppt?.customerName || job.customer).toLowerCase()))
+  );
+
+  // 3. Resolve live Firestore job document
+  const liveJob = allJobs?.find(
+    (j) =>
+      j.id === liveAppt?.jobId ||
+      j.id === (job as any).jobId ||
+      (j.jobNumber && String(j.jobNumber).replace(/[^0-9]/g, '') === cleanJobDigits)
+  );
+
+  // 4. Derive live time range
+  let timeRange = '';
+  if (liveAppt) {
+    const { startTime: pStart, endTime: pEnd } = parseAppointmentTimes(liveAppt);
+    const start12h = formatTimeTo12h(pStart || job.startTime);
+    const end12h = formatTimeTo12h(pEnd || job.endTime || '16:00');
+    timeRange = `${start12h} - ${end12h}`;
+  } else {
+    const start12h = formatTimeTo12h(job.startTime);
+    const end12h = formatTimeTo12h(job.endTime || '16:00');
+    timeRange = `${start12h} - ${end12h}`;
+  }
+
+  // 5. Derive customer name directly from live Firestore
+  const customerName = liveCust?.name || liveAppt?.customerName || job.customer;
+
+  // 6. Derive address directly from live Firestore
+  let addrLine1 = '';
+  let addrLine2 = '';
+
+  if (liveAppt?.locationAddress) {
+    const { street, addressLine2: line2, cityStateZip } = splitAddressParts(liveAppt.locationAddress, customerName);
+    addrLine1 = [street, line2].filter(Boolean).join(', ') || liveAppt.locationStreet || '';
+    addrLine2 = cityStateZip || [(liveAppt as any).locationCity, `${(liveAppt as any).locationState || 'FL'} ${(liveAppt as any).locationZip || ''}`.trim()].filter(Boolean).join(', ');
+  } else if (liveCust?.address) {
+    const st = liveCust.address.street || '';
+    const line2 = liveCust.address.addressLine2 || '';
+    addrLine1 = line2 && !st.includes(line2) ? `${st}, ${line2}` : st;
+    addrLine2 = [liveCust.address.city, `${liveCust.address.state || 'FL'} ${liveCust.address.zipCode || ''}`.trim()].filter(Boolean).join(', ');
+  }
+
+  if (!addrLine1) addrLine1 = job.addressStreet || '400 Harbor Blvd';
+  if (!addrLine2) addrLine2 = job.addressCityStateZip || 'Destin, FL 32541';
+
+  // 7. Derive phone directly from live Firestore
+  const rawPhone =
+    liveAppt?.phone ||
+    liveCust?.phone ||
+    liveCust?.mobilePhone ||
+    liveCust?.homePhone ||
+    job.phone ||
+    '(850) 556-8402';
+  const phone = rawPhone.replace('(M):', '').trim();
+
+  // 8. Derive job number & type directly from live Firestore
+  const rawJobNum = liveAppt?.jobNumber || liveJob?.jobNumber || job.jobNumber;
+  const numOnly = String(rawJobNum).replace(/[^0-9]/g, '') || cleanJobDigits || '108889';
+  const effectiveJobType = liveAppt?.jobType || liveJob?.jobType || job.jobType || '';
+  const typeSuffix = effectiveJobType ? `: ${effectiveJobType}` : '';
+  const formattedJobNumber = `Job: #${numOnly}${typeSuffix}`;
+
+  // 9. Derive technicians directly from live Firestore
+  let techList: string[] = [];
+  if (liveAppt) {
+    techList = getAppointmentTechs(liveAppt);
+  }
+  if (techList.length === 0 && job.technicians && job.technicians.length > 0) {
+    techList = job.technicians;
+  }
+  if (techList.length === 0) {
+    techList = ['Marcus Vance'];
+  }
+
+  // 10. Derive call notes directly from live Firestore
+  const callNotes =
+    liveAppt?.serviceNotes ||
+    liveAppt?.summaryNotes ||
+    liveAppt?.appointmentNote ||
+    liveAppt?.callNotes ||
+    (liveAppt as any)?.notes ||
+    (liveAppt as any)?.note ||
+    (liveJob as any)?.description ||
+    (liveJob as any)?.jobDescription ||
+    (liveJob as any)?.serviceNotes ||
+    job.callNotes ||
+    'Scheduled appointment.';
 
   return {
-    id: job.id,
-    customerId: job.customerId,
+    id: liveAppt?.id || job.id,
+    customerId: liveCust?.id || liveAppt?.customerId || job.customerId,
     dateTimeRangeStr: `${dateStr} ${timeRange}`,
-    customerName: job.customer,
-    addressLine1: job.addressStreet || '400 Harbor Blvd',
-    addressLine2: job.addressCityStateZip || 'Destin, FL 32541',
-    phone: job.phone?.replace('(M):', '').trim() || '(850) 556-8402',
+    customerName,
+    addressLine1: addrLine1,
+    addressLine2: addrLine2,
+    phone,
     jobNumberStr: formattedJobNumber,
-    technicians: job.technicians && job.technicians.length > 0 ? job.technicians : ['Marcus Vance'],
-    callNotes: job.callNotes || 'Scheduled appointment.',
+    technicians: techList,
+    callNotes,
     posX,
     posY,
   };
@@ -786,7 +885,7 @@ function mapCanonicalAppointmentToScheduledJob(
     colorHex: tripHex,
     jobType: appt.jobType || 'Residential - Diagnostic',
     technicians: extractedTechs,
-    callNotes: appt.serviceNotes || '',
+    callNotes: appt.serviceNotes || appt.summaryNotes || appt.appointmentNote || appt.callNotes || (appt as any).notes || (appt as any).note || '',
     designationOverride: appt.designationOverride || undefined,
   };
 }
@@ -1527,25 +1626,50 @@ function formatInstallDate(rawDate?: string | null): string {
     return map;
   }, [appointments, currentDateObj, customers, databaseMode]);
 
-  // Active technicians with at least one scheduled appointment on the selected date
-  const activeDateUsers = useMemo(() => {
-    return techUsers
-      .filter((tech) => tech.scheduledJobs && tech.scheduledJobs.length > 0)
-      .map((tech) => tech.name)
-      .filter((name, idx, arr) => arr.indexOf(name) === idx)
-      .sort((a, b) => a.localeCompare(b));
-  }, [techUsers]);
-
-  // All unique scheduled jobs across all technicians for the selected date
+  // All unique scheduled jobs across all technicians for the selected date mapped directly from live Firestore
   const allDayScheduledJobs = useMemo(() => {
+    const year = currentDateObj.getFullYear();
+    const month = currentDateObj.getMonth();
+    const day = currentDateObj.getDate();
+
+    const dayAppts = appointments.filter((appt) => {
+      if (
+        appt.type === 'service_request' ||
+        appt.scheduleMode === 'request' ||
+        appt.isServiceRequest === true ||
+        (appt.status || '').toLowerCase() === 'unscheduled' ||
+        appt.isScheduled === false
+      ) {
+        return false;
+      }
+      const d = parseAppointmentDate(appt);
+      if (!d) return false;
+      return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
+    });
+
     const jobMap = new Map<string, MapJobItem>();
+
+    dayAppts.forEach((appt) => {
+      const scheduledJob = mapCanonicalAppointmentToScheduledJob(appt, customers);
+      const techs = getAppointmentTechs(appt);
+      const primaryTechName = techs[0] || appt.assignedTech || appt.technician || '';
+
+      jobMap.set(scheduledJob.id, {
+        ...scheduledJob,
+        techName: primaryTechName,
+        technicians: techs.length > 0 ? techs : scheduledJob.technicians,
+        colorHex: '#be4646',
+      });
+    });
+
+    // Also include any jobs from techUsers
     techUsers.forEach((tech) => {
       tech.scheduledJobs.forEach((job) => {
         if (!jobMap.has(job.id)) {
           jobMap.set(job.id, {
             ...job,
             techName: tech.name,
-            colorHex: tech.avatarColor || '#be4646',
+            colorHex: '#be4646',
           });
         } else {
           const existing = jobMap.get(job.id)!;
@@ -1555,8 +1679,25 @@ function formatInstallDate(rawDate?: string | null): string {
         }
       });
     });
+
     return Array.from(jobMap.values());
-  }, [techUsers]);
+  }, [appointments, customers, currentDateObj, techUsers]);
+
+  // Active technicians with at least one scheduled appointment on the selected date
+  const activeDateUsers = useMemo(() => {
+    const names = new Set<string>();
+    allDayScheduledJobs.forEach((job) => {
+      if (job.techName && job.techName.toLowerCase() !== 'unassigned') {
+        names.add(job.techName);
+      }
+      if (Array.isArray(job.technicians)) {
+        job.technicians.forEach((t) => {
+          if (t && t.toLowerCase() !== 'unassigned') names.add(t);
+        });
+      }
+    });
+    return Array.from(names).sort((a, b) => a.localeCompare(b));
+  }, [allDayScheduledJobs]);
 
   // Reset selectedMapUser to 'all' if the selected technician has no appointments on the new date
   useEffect(() => {
@@ -1688,6 +1829,9 @@ function formatInstallDate(rawDate?: string | null): string {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
+  // Active hover job id tracker to prevent repeated re-trigger flicker
+  const activeHoverJobIdRef = useRef<string | null>(null);
+
   // Hover 1.5s Delay Handlers with Mouse Travel Grace Period
   const handleTileMouseEnter = (
     e: React.MouseEvent<HTMLDivElement>, 
@@ -1697,6 +1841,9 @@ function formatInstallDate(rawDate?: string | null): string {
       setHoverDetails(null);
       return;
     }
+    if (activeHoverJobIdRef.current === job.id) return;
+    activeHoverJobIdRef.current = job.id;
+
     if (hoverGraceTimerRef.current) {
       clearTimeout(hoverGraceTimerRef.current);
     }
@@ -1712,7 +1859,7 @@ function formatInstallDate(rawDate?: string | null): string {
     const formattedDateStr = `${activeMonthYearStr.split('/')[0]}/${String(currentDateObj.getDate()).padStart(2, '0')}/${currentDateObj.getFullYear()}`;
 
     hoverTimerRef.current = setTimeout(() => {
-      setHoverDetails(buildHoverDetailsFromJob(job, formattedDateStr, posX, posY));
+      setHoverDetails(buildHoverDetailsFromJob(job, formattedDateStr, posX, posY, appointments, customers, jobs));
     }, 1500); // Exact 1.5 Seconds Hover Delay
   };
 
@@ -1722,50 +1869,64 @@ function formatInstallDate(rawDate?: string | null): string {
     }
     // 200ms Grace Period allowing cursor to travel onto the hover card
     hoverGraceTimerRef.current = setTimeout(() => {
+      activeHoverJobIdRef.current = null;
       setHoverDetails(null);
     }, 200);
   };
 
-  // Map Marker Hover Handlers reusing the exact same hoverDetails popover card
-  const handleMapMarkerHover = (job: ScheduledJob, clientX: number, clientY: number) => {
-    if (hoverGraceTimerRef.current) {
-      clearTimeout(hoverGraceTimerRef.current);
-    }
-    if (hoverTimerRef.current) {
-      clearTimeout(hoverTimerRef.current);
-    }
+  // Map Marker Hover Handlers reusing the exact same hoverDetails popover card with live Firestore data
+  const handleMapMarkerHover = useCallback(
+    (job: ScheduledJob, clientX: number, clientY: number) => {
+      if (activeHoverJobIdRef.current === job.id) return;
+      activeHoverJobIdRef.current = job.id;
 
-    const cardWidth = 320;
-    const cardHeight = 260;
-    let posX = clientX - cardWidth / 2;
-    if (posX + cardWidth > window.innerWidth - 20) {
-      posX = window.innerWidth - cardWidth - 20;
-    }
-    if (posX < 20) {
-      posX = 20;
-    }
+      if (hoverGraceTimerRef.current) {
+        clearTimeout(hoverGraceTimerRef.current);
+      }
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+      }
 
-    let posY = clientY - cardHeight - 15;
-    if (posY < 20) {
-      posY = clientY + 25;
-    }
+      const cardWidth = 320;
+      const cardHeight = 260;
+      let posX = clientX - cardWidth / 2;
+      if (posX + cardWidth > window.innerWidth - 20) {
+        posX = window.innerWidth - cardWidth - 20;
+      }
+      if (posX < 20) {
+        posX = 20;
+      }
 
-    const activeMonthYearStr = currentDateObj.toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' });
-    const formattedDateStr = `${activeMonthYearStr.split('/')[0]}/${String(currentDateObj.getDate()).padStart(2, '0')}/${currentDateObj.getFullYear()}`;
+      // Position above marker with clearance, or below if near top
+      let posY = clientY - cardHeight - 20;
+      if (posY < 20) {
+        posY = clientY + 30;
+      }
 
-    hoverTimerRef.current = setTimeout(() => {
-      setHoverDetails(buildHoverDetailsFromJob(job, formattedDateStr, posX, posY));
-    }, 100);
-  };
+      const activeMonthYearStr = currentDateObj.toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' });
+      const formattedDateStr = `${activeMonthYearStr.split('/')[0]}/${String(currentDateObj.getDate()).padStart(2, '0')}/${currentDateObj.getFullYear()}`;
 
-  const handleMapMarkerLeave = () => {
+      // Fast display (80ms) for high responsiveness on map
+      hoverTimerRef.current = setTimeout(() => {
+        setHoverDetails(buildHoverDetailsFromJob(job, formattedDateStr, posX, posY, appointments, customers, jobs));
+      }, 80);
+    },
+    [currentDateObj, appointments, customers, jobs]
+  );
+
+  const handleMapMarkerLeave = useCallback(() => {
     if (hoverTimerRef.current) {
       clearTimeout(hoverTimerRef.current);
     }
     hoverGraceTimerRef.current = setTimeout(() => {
+      activeHoverJobIdRef.current = null;
       setHoverDetails(null);
     }, 250);
-  };
+  }, []);
+
+  const handleSelectAppointment = useCallback((job: ScheduledJob) => {
+    setSelectedJobModal(job);
+  }, []);
 
   // Dynamic Date Navigation Handlers
   const handlePrevDate = () => {
@@ -3259,7 +3420,7 @@ function formatInstallDate(rawDate?: string | null): string {
                   selectedDate={currentDateObj}
                   onHoverAppointment={handleMapMarkerHover}
                   onLeaveAppointment={handleMapMarkerLeave}
-                  onSelectAppointment={(job) => setSelectedJobModal(job)}
+                  onSelectAppointment={handleSelectAppointment}
                 />
               )}
             </div>
@@ -3278,7 +3439,10 @@ function formatInstallDate(rawDate?: string | null): string {
           onMouseEnter={() => {
             if (hoverGraceTimerRef.current) clearTimeout(hoverGraceTimerRef.current);
           }}
-          onMouseLeave={() => setHoverDetails(null)}
+          onMouseLeave={() => {
+            activeHoverJobIdRef.current = null;
+            setHoverDetails(null);
+          }}
           className="z-50 bg-white rounded-lg shadow-2xl border border-slate-300 w-80 p-3.5 text-xs text-slate-700 font-sans animate-in fade-in zoom-in-95 duration-150 space-y-2 pointer-events-auto cursor-default"
         >
           {/* Date & Time Header */}
