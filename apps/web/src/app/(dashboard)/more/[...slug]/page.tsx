@@ -24,14 +24,13 @@ export function generateStaticParams() {
   ];
 }
 
-interface Props {
-  params: {
-    slug?: string[];
-  };
-}
-
-export default function MoreSubPage({ params }: Props) {
-  const currentSubPath = params.slug?.[0] || 'price-book';
+export default async function MoreSubPage({
+  params,
+}: {
+  params: Promise<{ slug?: string[] }>;
+}) {
+  const resolvedParams = await params;
+  const currentSubPath = resolvedParams.slug?.[0] || 'price-book';
 
   const details: Record<string, { title: string; desc: string; icon: React.ElementType }> = {
     'price-book': { title: 'Price Book', desc: 'Manage service rates, flat-rate pricing, and job packages.', icon: BookOpen },

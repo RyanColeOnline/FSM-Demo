@@ -2663,17 +2663,22 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
   const currentEqLocation = equipmentLocations.find((l) => l.id === activeEqLocId) || equipmentLocations[0];
 
   const activeLocationEquipment = React.useMemo(() => {
-    if (!currentEqLocation || equipmentLocations.length === 0) return [];
+    if (!currentEqLocation || equipmentLocations.length === 0) return equipmentList as any[];
     const stClean = (currentEqLocation.addr1 || '').replace(/^(best beach getaways|southern vacation rentals|360 blue|beachwalk vacation rentals)[\s\n-]+/i, '').replace(/[^a-z0-9\s]/gi, ' ').toLowerCase().trim();
     const tokens = stClean.split(/\s+/).filter((t: string) => t.length > 2);
-    if (!tokens.length) return [];
+    if (!tokens.length) return equipmentList as any[];
 
-    return (equipmentList as any[]).filter((eq) => {
+    const matched = (equipmentList as any[]).filter((eq) => {
       const eqLoc = (eq.locationAddress || eq.locationStreet || '').toLowerCase();
       if (!eqLoc) return false;
       if (eqLoc.includes(stClean) || stClean.includes(eqLoc)) return true;
       return tokens.some((t: string) => eqLoc.includes(t));
     });
+
+    if (matched.length === 0 && (equipmentList as any[]).length > 0) {
+      return equipmentList as any[];
+    }
+    return matched;
   }, [equipmentList, currentEqLocation, equipmentLocations]);
 
   const activeMaintLocId = selectedMaintLocId && maintPlanLocations.some((l) => l.id === selectedMaintLocId)
@@ -2692,7 +2697,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
       const pLoc = (p.locationAddress || p.locationStreet || p.location?.street || '').toLowerCase();
       return pLoc.includes(activeMaintStreet) || (p.locationId && p.locationId === currentMaintLocation?.id);
     });
-    return matching[0] || null;
+    return matching[0] || (dbPlans && dbPlans.length > 0 ? dbPlans[0] : null);
   }, [dbPlans, showExpiredMaintPlans, maintPlanLocations, activeMaintStreet, currentMaintLocation]);
 
   // Form Mode State
@@ -2977,7 +2982,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
       : (parseInt(bookingSelectedJob.replace(/\D/g, '') || '135000', 10));
 
     const start12h = `${hr}:${bookingStartMin || '00'} ${bookingStartAmpm}`;
-    const cleanPrimaryTech = bookingAssignLater ? 'Unassigned' : cleanUserDisplayName(bookingPrimaryTech || 'Wes Rykoskey');
+    const cleanPrimaryTech = bookingAssignLater ? 'Unassigned' : cleanUserDisplayName(bookingPrimaryTech || 'Marcus Vance');
 
     const newAppt: CanonicalAppointment = {
       id: apptId,
@@ -4296,7 +4301,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
                     : 'text-[#be4646] hover:underline font-medium'
                 }`}
               >
-                Equipment{equipmentList.length > 0 ? ` (${equipmentList.length})` : ''}
+                Equipment{activeLocationEquipment.length > 0 ? ` (${activeLocationEquipment.length})` : ''}
               </button>
               <button
                 type="button"
@@ -4307,7 +4312,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
                     : 'text-[#be4646] hover:underline font-medium'
                 }`}
               >
-                Maintenance Plans{maintPlanLocations.length > 0 ? ` (${maintPlanLocations.length})` : (dbPlans.length > 0 ? ` (${dbPlans.length})` : '')}
+                Maintenance Plans{dbPlans && dbPlans.length > 0 ? ` (${dbPlans.length})` : ''}
               </button>
               <button
                 type="button"
@@ -5710,11 +5715,6 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
                               <tr key={person.id} className="hover:bg-slate-50 transition-colors">
                                 <td className="p-2.5 font-semibold text-slate-900">
                                   {person.firstName} {person.lastName}
-                                  {person.isPrimary && (
-                                    <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-[#2d82b7] border border-sky-300">
-                                      Primary
-                                    </span>
-                                  )}
                                 </td>
                                 <td className="p-2.5 text-slate-700 font-normal">
                                   {person.positionLabel || '—'}

@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "MurphysLogoLight.png",
+      "filename" : "FSMDemoLogoLight.png",
       "idiom" : "universal"
     },
     {
@@ -11,7 +11,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "MurphysLogoDark.png",
+      "filename" : "FSMDemoLogoDark.png",
       "idiom" : "universal"
     }
   ],

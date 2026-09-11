@@ -2,21 +2,21 @@
 import PackageDescription
 
 let package = Package(
-    name: "MurphysUI",
+    name: "FSMDemoUI",
     defaultLocalization: "en",
     platforms: [
         .iOS(.v17),
         .macOS(.v14)
     ],
     products: [
-        .library(name: "MurphysUI", type: .dynamic, targets: ["MurphysUI"])
+        .library(name: "FSMDemoUI", type: .dynamic, targets: ["FSMDemoUI"])
     ],
     dependencies: [],
     targets: [
         .target(
-            name: "MurphysUI",
+            name: "FSMDemoUI",
             dependencies: [],
-            path: "Sources/MurphysUI"
+            path: "Sources/FSMDemoUI"
         )
     ]
 )

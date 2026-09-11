@@ -37,6 +37,7 @@ interface SubMenuItem {
   label: string;
   href: string;
   icon?: React.ElementType;
+  disabled?: boolean;
 }
 
 interface MenuItem {
@@ -119,10 +120,10 @@ export function TopNavTabs() {
       icon: CreditCard,
       hasSubmenu: true,
       submenuItems: [
-        { label: 'Consumer Loan Application', href: '/payment-options/financing/consumer-loan-application', icon: FileCheck },
-        { label: 'Commercial Loan Application', href: '/payment-options/financing/commercial-loan-application', icon: Building2 },
-        { label: 'Financing Dashboard', href: '/payment-options/financing/dashboard', icon: LayoutDashboard },
-        { label: 'Manage Loan Options', href: '/payment-options/financing/manage-loan-options', icon: Settings2 },
+        { label: 'Consumer Loan Application', href: '/payment-options/financing/consumer-loan-application', icon: FileCheck, disabled: true },
+        { label: 'Commercial Loan Application', href: '/payment-options/financing/commercial-loan-application', icon: Building2, disabled: true },
+        { label: 'Financing Dashboard', href: '/payment-options/financing/dashboard', icon: LayoutDashboard, disabled: true },
+        { label: 'Manage Loan Options', href: '/payment-options/financing/manage-loan-options', icon: Settings2, disabled: true },
       ]
     },
     { 
@@ -345,6 +346,24 @@ export function TopNavTabs() {
                               {item.submenuItems.map((subItem) => {
                                 const SubIcon = subItem.icon;
                                 const isLeafActive = pathname === subItem.href;
+
+                                if (subItem.disabled) {
+                                  return (
+                                    <div
+                                      key={subItem.href}
+                                      className="flex items-center justify-between px-4 py-2 text-sm font-medium text-slate-400 cursor-not-allowed opacity-60 select-none"
+                                      title="This financing feature is disabled in this environment"
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        {SubIcon && <SubIcon className="w-4 h-4 text-slate-400" />}
+                                        <span>{subItem.label}</span>
+                                      </div>
+                                      <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 bg-slate-100 text-slate-400 rounded border border-slate-200">
+                                        Disabled
+                                      </span>
+                                    </div>
+                                  );
+                                }
 
                                 return (
                                   <Link

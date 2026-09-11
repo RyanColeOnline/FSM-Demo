@@ -26,6 +26,12 @@
       "@/*": [
         "./src/*"
       ],
+      "@fsmdemo/domain": [
+        "./src/domain/index.ts"
+      ],
+      "@fsmdemo/domain/*": [
+        "./src/domain/*"
+      ],
       "@murphys/domain": [
         "./src/domain/index.ts"
       ],

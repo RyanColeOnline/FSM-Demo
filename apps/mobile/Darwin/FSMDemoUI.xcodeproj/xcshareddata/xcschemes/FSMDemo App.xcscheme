@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "499CD4382AC5B799001AE8D8"
-               BuildableName = "MurphysUI.app"
-               BlueprintName = "Murphys App"
-               ReferencedContainer = "container:MurphysUI.xcodeproj">
+               BuildableName = "FSMDemoUI.app"
+               BlueprintName = "FSMDemo App"
+               ReferencedContainer = "container:FSMDemoUI.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "499CD4382AC5B799001AE8D8"
-            BuildableName = "MurphysUI.app"
-            BlueprintName = "Murphys App"
-            ReferencedContainer = "container:MurphysUI.xcodeproj">
+            BuildableName = "FSMDemoUI.app"
+            BlueprintName = "FSMDemo App"
+            ReferencedContainer = "container:FSMDemoUI.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "499CD4382AC5B799001AE8D8"
-            BuildableName = "MurphysUI.app"
-            BlueprintName = "Murphys App"
-            ReferencedContainer = "container:MurphysUI.xcodeproj">
+            BuildableName = "FSMDemoUI.app"
+            BlueprintName = "FSMDemo App"
+            ReferencedContainer = "container:FSMDemoUI.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -4,7 +4,7 @@ public struct LogoView: View {
     public init() {}
     
     public var body: some View {
-        Image("MurphysLogo")
+        Image("FSMDemoLogo")
             .resizable()
             .scaledToFit()
     }

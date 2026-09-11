@@ -11,7 +11,7 @@ import {
 import { PageHeader } from '@/components/ui';
 import { PdfDocumentViewerModal } from '@/components/modals/PdfDocumentViewerModal';
 
-export function StripeWordmark({ className = "h-4 w-auto", fill = "currentColor" }: { className?: string; fill?: string }) {
+function StripeWordmark({ className = "h-4 w-auto", fill = "currentColor" }: { className?: string; fill?: string }) {
   return (
     <svg 
       viewBox="0 0 360 150" 
@@ -132,7 +132,7 @@ const legacyMockStatements: ProcessingStatement[] = [
   },
 ];
 
-export function formatStatementLabel(stmt: ProcessingStatement): string {
+function formatStatementLabel(stmt: ProcessingStatement): string {
   const fn = stmt.filename.toLowerCase();
 
   // Pattern: monthly_processing_statement_july_2026.pdf

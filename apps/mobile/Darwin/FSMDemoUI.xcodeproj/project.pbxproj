@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		491F27822DA55B72004926EE /* MurphysUI in Frameworks */ = {isa = PBXBuildFile; productRef = 491F27812DA55B72004926EE /* MurphysUI */; };
-		491F27832DA55B72004926EE /* MurphysUI in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 491F27812DA55B72004926EE /* MurphysUI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		491F27822DA55B72004926EE /* FSMDemoUI in Frameworks */ = {isa = PBXBuildFile; productRef = 491F27812DA55B72004926EE /* FSMDemoUI */; };
+		491F27832DA55B72004926EE /* FSMDemoUI in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 491F27812DA55B72004926EE /* FSMDemoUI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		496BDBEE2B8A7E9C00C09264 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 496BDBED2B8A7E9C00C09264 /* Localizable.xcstrings */; };
-		499CD43B2AC5B799001AE8D8 /* MurphysApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F90C2B2A52156200F06D93 /* MurphysApp.swift */; };
+		499CD43B2AC5B799001AE8D8 /* FSMDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F90C2B2A52156200F06D93 /* FSMDemoApp.swift */; };
 		499CD4402AC5B799001AE8D8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 49F90C2F2A52156300F06D93 /* Assets.xcassets */; };
 		49F90C332A52156300F06D93 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49F90C322A52156300F06D93 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
@@ -22,7 +22,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				491F27832DA55B72004926EE /* MurphysUI in Embed Frameworks */,
+				491F27832DA55B72004926EE /* FSMDemoUI in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -31,15 +31,15 @@
 
 /* Begin PBXFileReference section */
 		4900101C2BACEA710000DE33 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		493609562A6B7EAE00C401E2 /* Murphys */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Murphys; path = ..; sourceTree = "<group>"; };
-		496BDBEB2B89A47800C09264 /* MurphysUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MurphysUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		493609562A6B7EAE00C401E2 /* Murphys */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FSMDemo; path = ..; sourceTree = "<group>"; };
+		496BDBEB2B89A47800C09264 /* FSMDemoUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FSMDemoUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		496BDBED2B8A7E9C00C09264 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = ../Sources/Murphys/Resources/Localizable.xcstrings; sourceTree = "<group>"; };
 		496EB72F2A6AE4DE00C1253A /* Skip.env */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Skip.env; path = ../Skip.env; sourceTree = "<group>"; };
-		496EB72F2A6AE4DE00C1253B /* Murphys.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Murphys.xcconfig; sourceTree = "<group>"; };
+		496EB72F2A6AE4DE00C1253B /* FSMDemo.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = FSMDemo.xcconfig; sourceTree = "<group>"; };
 		496EB72F2A6AE4DE00C1253C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		4971EFA92FA4FEA50002D3F7 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		499AB9082B0581F4005E8330 /* plugins */ = {isa = PBXFileReference; lastKnownFileType = folder; name = plugins; path = ../../Intermediates.noindex/BuildToolPluginIntermediates; sourceTree = BUILT_PRODUCTS_DIR; };
-		49F90C2B2A52156200F06D93 /* MurphysApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MurphysApp.swift; path = Shared/MurphysApp.swift; sourceTree = SOURCE_ROOT; };
+		49F90C2B2A52156200F06D93 /* FSMDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FSMDemoApp.swift; path = Shared/FSMDemoApp.swift; sourceTree = SOURCE_ROOT; };
 		49F90C2F2A52156300F06D93 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		49F90C312A52156300F06D93 /* Entitlements.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Entitlements.plist; sourceTree = "<group>"; };
 		49F90C322A52156300F06D93 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "Shared/GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -50,7 +50,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				491F27822DA55B72004926EE /* MurphysUI in Frameworks */,
+				491F27822DA55B72004926EE /* FSMDemoUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -60,7 +60,7 @@
 		496BDBEC2B89A47800C09264 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				496BDBEB2B89A47800C09264 /* MurphysUI.app */,
+				496BDBEB2B89A47800C09264 /* FSMDemoUI.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -78,7 +78,7 @@
 			children = (
 				496EB72F2A6AE4DE00C1253C /* README.md */,
 				496EB72F2A6AE4DE00C1253A /* Skip.env */,
-				496EB72F2A6AE4DE00C1253B /* Murphys.xcconfig */,
+				496EB72F2A6AE4DE00C1253B /* FSMDemo.xcconfig */,
 				496BDBED2B8A7E9C00C09264 /* Localizable.xcstrings */,
 				493609562A6B7EAE00C401E2 /* Murphys */,
 				49F90C2A2A52156200F06D93 /* App */,
@@ -90,7 +90,7 @@
 		49F90C2A2A52156200F06D93 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				49F90C2B2A52156200F06D93 /* MurphysApp.swift */,
+				49F90C2B2A52156200F06D93 /* FSMDemoApp.swift */,
 				49F90C322A52156300F06D93 /* GoogleService-Info.plist */,
 				49F90C2F2A52156300F06D93 /* Assets.xcassets */,
 				49F90C312A52156300F06D93 /* Entitlements.plist */,
@@ -103,9 +103,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		499CD4382AC5B799001AE8D8 /* Murphys App */ = {
+		499CD4382AC5B799001AE8D8 /* FSMDemo App */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 499CD4412AC5B799001AE8D8 /* Build configuration list for PBXNativeTarget "Murphys App" */;
+			buildConfigurationList = 499CD4412AC5B799001AE8D8 /* Build configuration list for PBXNativeTarget "FSMDemo App" */;
 			buildPhases = (
 				499CD43A2AC5B799001AE8D8 /* Sources */,
 				499CD43C2AC5B799001AE8D8 /* Frameworks */,
@@ -117,12 +117,12 @@
 			);
 			dependencies = (
 			);
-			name = "Murphys App";
+			name = "FSMDemo App";
 			packageProductDependencies = (
-				491F27812DA55B72004926EE /* MurphysUI */,
+				491F27812DA55B72004926EE /* FSMDemoUI */,
 			);
 			productName = App;
-			productReference = 496BDBEB2B89A47800C09264 /* MurphysUI.app */;
+			productReference = 496BDBEB2B89A47800C09264 /* FSMDemoUI.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -135,7 +135,7 @@
 				LastSwiftUpdateCheck = 1430;
 				LastUpgradeCheck = 1630;
 			};
-			buildConfigurationList = 49F90C232A52156200F06D93 /* Build configuration list for PBXProject "MurphysUI" */;
+			buildConfigurationList = 49F90C232A52156200F06D93 /* Build configuration list for PBXProject "FSMDemoUI" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -153,7 +153,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				499CD4382AC5B799001AE8D8 /* Murphys App */,
+				499CD4382AC5B799001AE8D8 /* FSMDemo App */,
 			);
 		};
 /* End PBXProject section */
@@ -198,7 +198,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				499CD43B2AC5B799001AE8D8 /* MurphysApp.swift in Sources */,
+				499CD43B2AC5B799001AE8D8 /* FSMDemoApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -207,7 +207,7 @@
 /* Begin XCBuildConfiguration section */
 		499CD4422AC5B799001AE8D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 496EB72F2A6AE4DE00C1253B /* Murphys.xcconfig */;
+			baseConfigurationReference = 496EB72F2A6AE4DE00C1253B /* FSMDemo.xcconfig */;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -221,7 +221,7 @@
 		};
 		499CD4432AC5B799001AE8D8 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 496EB72F2A6AE4DE00C1253B /* Murphys.xcconfig */;
+			baseConfigurationReference = 496EB72F2A6AE4DE00C1253B /* FSMDemo.xcconfig */;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -278,7 +278,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		499CD4412AC5B799001AE8D8 /* Build configuration list for PBXNativeTarget "Murphys App" */ = {
+		499CD4412AC5B799001AE8D8 /* Build configuration list for PBXNativeTarget "FSMDemo App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				499CD4422AC5B799001AE8D8 /* Debug */,
@@ -287,7 +287,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		49F90C232A52156200F06D93 /* Build configuration list for PBXProject "MurphysUI" */ = {
+		49F90C232A52156200F06D93 /* Build configuration list for PBXProject "FSMDemoUI" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				49F90C4B2A52156300F06D93 /* Debug */,
@@ -299,9 +299,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		491F27812DA55B72004926EE /* MurphysUI */ = {
+		491F27812DA55B72004926EE /* FSMDemoUI */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = MurphysUI;
+			productName = FSMDemoUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

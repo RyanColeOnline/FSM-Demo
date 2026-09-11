@@ -26,14 +26,13 @@ export function generateStaticParams() {
   ];
 }
 
-interface Props {
-  params: {
-    slug?: string[];
-  };
-}
-
-export default function JobsSubPage({ params }: Props) {
-  const currentSubPath = params.slug?.[0] || 'list';
+export default async function JobsSubPage({
+  params,
+}: {
+  params: Promise<{ slug?: string[] }>;
+}) {
+  const resolvedParams = await params;
+  const currentSubPath = resolvedParams.slug?.[0] || 'list';
 
   const subPageDetails: Record<string, { title: string; desc: string; icon: React.ElementType }> = {
     'call-list': { title: 'Call List', desc: 'Active dispatch calls, incoming requests, and triage items.', icon: PhoneCall },

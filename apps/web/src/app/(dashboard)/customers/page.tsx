@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Store, ChevronDown, Plus, Loader2 } from 'lucide-react';
 import { 
@@ -47,7 +47,7 @@ interface CustomerRecord {
   };
 }
 
-export function getCustomerNameParts(c: any): { firstName: string; lastName: string; lastFirst: string; firstLast: string } {
+function getCustomerNameParts(c: any): { firstName: string; lastName: string; lastFirst: string; firstLast: string } {
   const isCommercial = c.customerType === 'commercial' || c.custType === 'Commercial' || Boolean(c.businessName);
   if (isCommercial) {
     const bName = (c.businessName || c.name || 'Commercial Customer').trim();
@@ -106,7 +106,31 @@ export default function WexCustomersPage() {
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [expandedRowIds, setExpandedRowIds] = useState<string[]>([]);
-  const [nameSortOrder, setNameSortOrder] = useState<'lastFirst' | 'firstLast'>('lastFirst');
+  const [nameSortOrder, setNameSortOrderState] = useState<'lastFirst' | 'firstLast'>('lastFirst');
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('fsm_customer_name_sort_order');
+      if (saved === 'lastFirst' || saved === 'firstLast') {
+        setNameSortOrderState(saved);
+      }
+    } catch {
+      // fallback
+    }
+  }, []);
+
+  const setNameSortOrder = (orderOrFn: 'lastFirst' | 'firstLast' | ((prev: 'lastFirst' | 'firstLast') => 'lastFirst' | 'firstLast')) => {
+    setNameSortOrderState((prev) => {
+      const next = typeof orderOrFn === 'function' ? orderOrFn(prev) : orderOrFn;
+      try {
+        localStorage.setItem('fsm_customer_name_sort_order', next);
+        document.cookie = `fsm_customer_name_sort_order=${next}; path=/; max-age=31536000`;
+      } catch {
+        // fallback
+      }
+      return next;
+    });
+  };
 
   // Add Customer Modal State
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);

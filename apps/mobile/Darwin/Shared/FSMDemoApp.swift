@@ -1,5 +1,5 @@
 import SwiftUI
-import MurphysUI
+import FSMDemoUI
 #if os(iOS)
 import UIKit
 #endif
@@ -64,7 +64,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 #endif
 
 @main
-struct MurphysApp: App {
+struct FSMDemoApp: App {
     #if os(iOS)
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     #endif

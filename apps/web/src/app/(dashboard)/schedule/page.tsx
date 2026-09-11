@@ -1,6 +1,6 @@
 'use client';
 
-export function formatCleanLocationString(loc: any): string {
+function formatCleanLocationString(loc: any): string {
   if (!loc) return '';
   if (typeof loc === 'string') {
     let s = loc.trim();
@@ -37,7 +37,7 @@ export function formatCleanLocationString(loc: any): string {
 }
 
 
-export function splitAddressParts(rawAddress?: string, customerName?: string): {
+function splitAddressParts(rawAddress?: string, customerName?: string): {
   street: string;
   addressLine2: string;
   cityStateZip: string;
@@ -345,7 +345,7 @@ export interface NotificationRecipient {
 }
 
 // Phone Number Masking Helper: (888) 888-8888 format capped at 10 digits
-export function formatPhoneNumber(val: string): string {
+function formatPhoneNumber(val: string): string {
   const digits = val.replace(/\D/g, '').slice(0, 10);
   if (digits.length === 0) return '';
   if (digits.length <= 3) {
@@ -357,7 +357,7 @@ export function formatPhoneNumber(val: string): string {
   return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
 }
 
-export function formatTimeTo12h(timeStr: string): string {
+function formatTimeTo12h(timeStr: string): string {
   if (!timeStr) return '';
   if (timeStr.toLowerCase().includes('am') || timeStr.toLowerCase().includes('pm')) {
     return timeStr.toLowerCase();
@@ -375,7 +375,7 @@ export function formatTimeTo12h(timeStr: string): string {
   return `${h}:${m}${ampm}`;
 }
 
-export function parseTimeToDecimalHours(timeStr: string): number {
+function parseTimeToDecimalHours(timeStr: string): number {
   if (!timeStr) return 8.0;
   const clean = timeStr.trim().toLowerCase();
   const isPM = clean.includes('pm');
@@ -400,14 +400,14 @@ export function parseTimeToDecimalHours(timeStr: string): number {
   return h + m / 60;
 }
 
-export function formatDecimalHoursToTimeStr(decimalHours: number): string {
+function formatDecimalHoursToTimeStr(decimalHours: number): string {
   const clamped = Math.max(7, Math.min(18.75, decimalHours));
   const h = Math.floor(clamped);
   const m = Math.round((clamped - h) * 60);
   return `${h}:${String(m).padStart(2, '0')}`;
 }
 
-export function formatDecimalHoursTo12h(decimalHours: number): string {
+function formatDecimalHoursTo12h(decimalHours: number): string {
   const clamped = Math.max(7, Math.min(18.75, decimalHours));
   let h = Math.floor(clamped);
   const m = Math.round((clamped - h) * 60);
@@ -418,7 +418,7 @@ export function formatDecimalHoursTo12h(decimalHours: number): string {
 }
 
 // Clean Data Model Tracing Helper Function
-export function buildHoverDetailsFromJob(
+function buildHoverDetailsFromJob(
   job: ScheduledJob,
   dateStr: string,
   posX: number,
@@ -449,12 +449,12 @@ export function buildHoverDetailsFromJob(
   };
 }
 
-export function normalizeTechName(name: string | null | undefined): string {
+function normalizeTechName(name: string | null | undefined): string {
   if (!name) return '';
   return name.replace(/\s*\(\s*/g, ' (').replace(/\s*\)\s*/g, ') ').replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
-export function getDeterministicTechRank(techName: string): number {
+function getDeterministicTechRank(techName: string): number {
   const norm = normalizeTechName(techName);
   let rank = 1000;
   CANONICAL_OFFICIAL_DISPATCH_GROUPS.forEach((group, gIdx) => {
@@ -467,14 +467,14 @@ export function getDeterministicTechRank(techName: string): number {
   return rank;
 }
 
-export function sortTechsDeterministically(a: TechUser, b: TechUser): number {
+function sortTechsDeterministically(a: TechUser, b: TechUser): number {
   const rankA = getDeterministicTechRank(a.name);
   const rankB = getDeterministicTechRank(b.name);
   if (rankA !== rankB) return rankA - rankB;
   return a.name.localeCompare(b.name);
 }
 
-export function getAppointmentTechs(appt: CanonicalAppointment | any): string[] {
+function getAppointmentTechs(appt: CanonicalAppointment | any): string[] {
   const list: string[] = [];
   const rawAssigned = cleanUserDisplayName(appt.assignedTech || appt.primaryTech || appt.technician || '');
 
@@ -509,7 +509,7 @@ export function getAppointmentTechs(appt: CanonicalAppointment | any): string[] 
   return filtered.length > 0 ? Array.from(new Set(filtered)) : ['Unassigned'];
 }
 
-export function getCentralTimeParts(date: Date = new Date()): { hours: number; minutes: number; floatHours: number; displayStr: string } {
+function getCentralTimeParts(date: Date = new Date()): { hours: number; minutes: number; floatHours: number; displayStr: string } {
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Chicago',
     hour: 'numeric',
@@ -531,7 +531,7 @@ export function getCentralTimeParts(date: Date = new Date()): { hours: number; m
   return { hours: h, minutes: m, floatHours: h + m / 60, displayStr: displayFormatter.format(date) };
 }
 
-export function parseAppointmentDate(appt: any): Date | null {
+function parseAppointmentDate(appt: any): Date | null {
   if (!appt) return null;
   if (appt.appointmentDate && /^\d{4}-\d{2}-\d{2}$/.test(appt.appointmentDate)) {
     const [y, m, d] = appt.appointmentDate.split('-').map(Number);
@@ -553,7 +553,7 @@ export function parseAppointmentDate(appt: any): Date | null {
   return isNaN(d.getTime()) ? null : d;
 }
 
-export function parseAppointmentTimes(appt: any): { startTime: string; endTime: string; durationHours: number } {
+function parseAppointmentTimes(appt: any): { startTime: string; endTime: string; durationHours: number } {
   let startTime = appt.startTime || '';
   let endTime = appt.endTime || '';
   let duration = appt.durationHours || appt.expectedDurationHours || 1;
@@ -598,7 +598,7 @@ export function parseAppointmentTimes(appt: any): { startTime: string; endTime: 
   return { startTime, endTime, durationHours: duration };
 }
 
-export function mapCanonicalAppointmentToScheduledJob(
+function mapCanonicalAppointmentToScheduledJob(
   appt: CanonicalAppointment,
   customersList: CanonicalCustomer[]
 ): ScheduledJob {
@@ -1337,16 +1337,19 @@ function formatInstallDate(rawDate?: string | null): string {
       const name = u.displayName || `${u.firstName} ${u.lastName}`.trim() || 'Tech';
       const normUName = normalizeTechName(name);
       
-      let group = u.dispatchGroups?.[0];
-      if (!group && liveDispatchGroups && liveDispatchGroups.length > 0) {
+      let group = '';
+      if (liveDispatchGroups && liveDispatchGroups.length > 0) {
         const matchDg = liveDispatchGroups.find((dg) => dg.members.some((m) => normalizeTechName(m) === normUName));
         if (matchDg) group = matchDg.name;
+      }
+      if (!group && u.dispatchGroups?.[0]) {
+        group = u.dispatchGroups[0];
       }
       if (!group) {
         const matchDg = CANONICAL_OFFICIAL_DISPATCH_GROUPS.find((dg) => dg.members.some((m) => normalizeTechName(m) === normUName));
         if (matchDg) group = matchDg.name;
       }
-      if (!group) group = 'Appliance Techs';
+      if (!group) group = 'HVAC Techs';
 
       const techAppts = dayAppts.filter((a) => {
         const assigned = getAppointmentTechs(a);
@@ -1365,35 +1368,7 @@ function formatInstallDate(rawDate?: string | null): string {
       };
     });
 
-    // Also include any extra technician columns if they have appointments on this day
-    const knownTechNames = new Set(allUsersList.map((u) => normalizeTechName(u.displayName || `${u.firstName} ${u.lastName}`.trim())));
-    const extraTechsMap = new Map<string, CanonicalAppointment[]>();
-    for (const a of dayAppts) {
-      const assigned = getAppointmentTechs(a);
-      for (const t of assigned) {
-        const normT = normalizeTechName(t);
-        if (normT && normT !== 'unassigned' && !knownTechNames.has(normT)) {
-          if (!extraTechsMap.has(t)) {
-            extraTechsMap.set(t, []);
-          }
-          extraTechsMap.get(t)!.push(a);
-        }
-      }
-    }
-
     const generatedTechs = [...standardTechs];
-    extraTechsMap.forEach((apptsList, techName) => {
-      const initials = techName.split(' ').map((p) => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'TH';
-      const rank = getDeterministicTechRank(techName);
-      generatedTechs.push({
-        id: `tech-extra-${techName.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
-        name: techName,
-        initials,
-        avatarColor: TECH_AVATAR_COLORS[rank % TECH_AVATAR_COLORS.length],
-        dispatchGroup: 'Appliance Techs',
-        scheduledJobs: apptsList.map((a) => mapCanonicalAppointmentToScheduledJob(a, customers)),
-      });
-    });
 
     setTechUsers((prev) => {
       if (prev.length > 0) {
@@ -1459,9 +1434,7 @@ function formatInstallDate(rawDate?: string | null): string {
       );
       if (matchingGroupDoc && Array.isArray(matchingGroupDoc.members)) {
         const normTech = normalizeTechName(techName);
-        if (matchingGroupDoc.members.some((m) => normalizeTechName(m) === normTech)) {
-          return true;
-        }
+        return matchingGroupDoc.members.some((m) => normalizeTechName(m) === normTech);
       }
     }
 

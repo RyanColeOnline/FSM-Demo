@@ -376,14 +376,14 @@ function getUserProfileFormData(user: UserRecord) {
   };
 }
 
-export function getInitialsFontSizeClass(initials: string): string {
+function getInitialsFontSizeClass(initials: string): string {
   const len = (initials || '').length;
   if (len <= 2) return 'text-xs font-bold';
   if (len === 3) return 'text-[10px] font-bold tracking-tight';
   return 'text-[9px] font-extrabold tracking-tighter';
 }
 
-export function getUserStatusBadgeClass(status: string): string {
+function getUserStatusBadgeClass(status: string): string {
   const s = (status || '').toLowerCase().trim();
   if (s.includes('in') && !s.includes('out')) {
     return 'bg-emerald-50 text-emerald-700 border-emerald-200';
@@ -1412,6 +1412,28 @@ function SettingsContent() {
 
     await persistCanonicalGroup(groupPayload);
 
+    // Sync each affected user's dispatchGroups in Firestore
+    for (const u of users) {
+      const uName = u.name;
+      const isMember = selectedGroupMembers.includes(uName);
+      const currentGroups = u.dispatchGroups || [];
+      const hasGroup = currentGroups.includes(groupPayload.name);
+
+      let newGroups = [...currentGroups];
+      if (isMember && !hasGroup) {
+        newGroups.push(groupPayload.name);
+      } else if (!isMember && hasGroup) {
+        newGroups = newGroups.filter((g) => g !== groupPayload.name);
+      }
+
+      if (JSON.stringify(newGroups) !== JSON.stringify(currentGroups)) {
+        await persistCanonicalUser({
+          ...u,
+          dispatchGroups: newGroups,
+        } as any);
+      }
+    }
+
     if (editingGroupId) {
       setDispatchGroups((prev) =>
         prev.map((g) =>
@@ -1436,6 +1458,16 @@ function SettingsContent() {
     if (confirm(`Are you sure you want to delete the dispatch group "${group.name}"? This action cannot be undone.`)) {
       await deleteCanonicalGroup(group.id);
       setDispatchGroups((prev) => prev.filter((g) => g.id !== group.id));
+
+      // Remove from users
+      for (const u of users) {
+        if (u.dispatchGroups && u.dispatchGroups.includes(group.name)) {
+          await persistCanonicalUser({
+            ...u,
+            dispatchGroups: u.dispatchGroups.filter((g) => g !== group.name),
+          } as any);
+        }
+      }
     }
   };
 

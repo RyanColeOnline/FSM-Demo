@@ -1,7 +1,7 @@
 // Native iOS & iPadOS Configuration for Apex Field Solutions Baseline Mobile App
 // Bundle ID: com.fsm.demo
 
-PRODUCT_NAME = MurphysUI
+PRODUCT_NAME = FSMDemoUI
 PRODUCT_BUNDLE_IDENTIFIER = com.fsm.demo
 DEVELOPMENT_TEAM = FD83A3NPN6
 MARKETING_VERSION = 1.0.0

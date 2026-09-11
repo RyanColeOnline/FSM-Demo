@@ -1,8 +1,8 @@
 {
-  "name": "@murphys/functions",
+  "name": "@fsmdemo/functions",
   "version": "0.1.0",
   "private": true,
-  "description": "Firebase Cloud Functions backend for Murphy's FSM Platform",
+  "description": "Firebase Cloud Functions backend for FSM Demo Platform",
   "main": "lib/index.js",
   "engines": {
     "node": "20"

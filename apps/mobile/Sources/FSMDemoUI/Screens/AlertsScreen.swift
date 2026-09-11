@@ -2,7 +2,7 @@ import SwiftUI
 
 public struct AlertsScreen: View {
     @State var alerts = [
-        AlertItem(id: 1, title: "New Job Assigned", message: "Job #4930 at Murphys Grill has been assigned to you.", time: "10m ago", category: .schedule, isUnread: true),
+        AlertItem(id: 1, title: "New Job Assigned", message: "Job #4930 at Magnolia Bay Bistro has been assigned to you.", time: "10m ago", category: .schedule, isUnread: true),
         AlertItem(id: 2, title: "Customer Update", message: "Aaron Knight updated their phone number to 555-0192.", time: "1h ago", category: .customer, isUnread: true),
         AlertItem(id: 3, title: "Invoice Paid", message: "Invoice #1029 for $350.00 was paid successfully.", time: "3h ago", category: .billing, isUnread: false),
         AlertItem(id: 4, title: "Time Card Warning", message: "Please check your clocked-in hours for Monday, July 13.", time: "1d ago", category: .system, isUnread: false)
