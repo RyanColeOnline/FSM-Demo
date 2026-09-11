@@ -47,7 +47,6 @@ export const ALL_DISPATCH_GROUPS: DispatchGroupCategory[] = [
   'appliance_techs',
   'hvac_techs',
   'installer',
-  'office_staff',
 ];
 
 export function getDispatchGroupDisplayName(group: DispatchGroupCategory): string {
