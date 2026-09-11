@@ -19,7 +19,8 @@ __pycache__/
 transition/
 payzer-export/
 crash/
-data/
+/data/
+!apps/web/src/data/
 Murphys Icon.icon/
 *.icon/
 
