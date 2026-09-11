@@ -200,6 +200,7 @@ import {
 import { AddCustomerModal } from '@/components/modals/AddCustomerModal';
 import { HierarchicalJobTypeSelector } from '@/components/ui';
 import { UpdateAppointmentModal, getTechsForJobType, formatCustomerDisplayName } from '@/components/modals/UpdateAppointmentModal';
+import GoogleMapsRouteView from './GoogleMapsRouteView';
 
 export interface ScheduledJob {
   id: string;
@@ -796,14 +797,16 @@ const TECH_AVATAR_COLORS = [
   'bg-teal-600', 'bg-orange-600', 'bg-[#2d82b7]', 'bg-lime-600'
 ];
 
-const initialTechUsers: TechUser[] = CANONICAL_OFFICIAL_USERS.map((u, i) => ({
-  id: u.id,
-  name: cleanUserDisplayName(u.displayName || `${u.firstName} ${u.lastName}`.trim() || 'Tech'),
-  avatarColor: TECH_AVATAR_COLORS[i % TECH_AVATAR_COLORS.length],
-  initials: u.initials || 'TC',
-  dispatchGroup: u.dispatchGroups?.[0] || 'Appliance Techs',
-  scheduledJobs: [],
-}));
+const initialTechUsers: TechUser[] = CANONICAL_OFFICIAL_USERS
+  .filter((u) => (u.role || '').toLowerCase() !== 'office' && (u.accountType || '').toLowerCase() !== 'office')
+  .map((u, i) => ({
+    id: u.id,
+    name: cleanUserDisplayName(u.displayName || `${u.firstName} ${u.lastName}`.trim() || 'Tech'),
+    avatarColor: TECH_AVATAR_COLORS[i % TECH_AVATAR_COLORS.length],
+    initials: u.initials || 'TC',
+    dispatchGroup: u.dispatchGroups?.[0] || 'Appliance Techs',
+    scheduledJobs: [],
+  }));
 
 // Time slots: 7am to 6pm (12 columns total: 7:00 AM to 7:00 PM)
 const hourSlots = [
@@ -820,14 +823,16 @@ export default function WexSchedulePage() {
   }, [liveUsers]);
 
   const allTechNamesList = useMemo(() => {
-    return allUsersList.map((u) => cleanUserDisplayName(u.displayName || `${u.firstName} ${u.lastName}`.trim() || 'Tech'));
+    return allUsersList
+      .filter((u) => (u.role || '').toLowerCase() !== 'office' && (u.accountType || '').toLowerCase() !== 'office')
+      .map((u) => cleanUserDisplayName(u.displayName || `${u.firstName} ${u.lastName}`.trim() || 'Tech'));
   }, [allUsersList]);
 
   const availableDispatchGroups = useMemo(() => {
-    if (liveDispatchGroups && liveDispatchGroups.length > 0) {
-      return liveDispatchGroups.map((g) => g.name);
-    }
-    return CANONICAL_OFFICIAL_DISPATCH_GROUPS.map((g) => g.name);
+    const rawList = (liveDispatchGroups && liveDispatchGroups.length > 0)
+      ? liveDispatchGroups.map((g) => g.name)
+      : CANONICAL_OFFICIAL_DISPATCH_GROUPS.map((g) => g.name);
+    return rawList.filter((g) => !g.toLowerCase().includes('office'));
   }, [liveDispatchGroups]);
 
   // Top View State (Calendar, List, Map)
@@ -857,7 +862,6 @@ export default function WexSchedulePage() {
   // Timeline View State (daily, monthly)
   const [viewMode, setViewMode] = useState<'daily' | 'monthly'>('daily');
   
-  const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
 
   // Popover Position State for "+X more" day appointments card
   const [activeExpandedDayPos, setActiveExpandedDayPos] = useState<ExpandedDayPos | null>(null);
@@ -1427,7 +1431,15 @@ function formatInstallDate(rawDate?: string | null): string {
       return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
     });
 
-    const standardTechs: TechUser[] = allUsersList.map((u) => {
+    const fieldTechsList = allUsersList.filter((u) => {
+      const roleStr = (u.role || '').toLowerCase();
+      const accountTypeStr = (u.accountType || '').toLowerCase();
+      if (roleStr === 'office' || accountTypeStr === 'office') return false;
+      if (u.dispatchGroups?.length === 1 && u.dispatchGroups[0].toLowerCase().includes('office')) return false;
+      return true;
+    });
+
+    const standardTechs: TechUser[] = fieldTechsList.map((u) => {
       const name = u.displayName || `${u.firstName} ${u.lastName}`.trim() || 'Tech';
       const normUName = normalizeTechName(name);
       
@@ -2141,72 +2153,7 @@ function formatInstallDate(rawDate?: string | null): string {
     return items.sort((a, b) => a.startTimeStr.localeCompare(b.startTimeStr));
   }, [techUsers, selectedTechNames]);
 
-  // Live Map Markers & Routes computed dynamically with real Emerald Coast coordinates and numbered stops
-  const { liveMapMarkers, techRoutes } = useMemo(() => {
-    const markers: MapStopMarker[] = [];
-    const routes: Array<{
-      techId: string;
-      techName: string;
-      colorHex: string;
-      stops: Array<{ job: ScheduledJob; latPercent: number; lngPercent: number; stopNumber: number }>;
-    }> = [];
 
-    const activeTechs = techUsers.filter((tech) => selectedTechNames.includes(tech.name));
-
-    for (const tech of activeTechs) {
-      const sortedJobs = [...(tech.scheduledJobs || [])].sort((a, b) =>
-        (a.startTime || '').localeCompare(b.startTime || '')
-      );
-
-      const techStops: Array<{ job: ScheduledJob; latPercent: number; lngPercent: number; stopNumber: number }> = [];
-      let techBaseColor = '#be4646';
-
-      sortedJobs.forEach((job, idx) => {
-        const stopNumber = idx + 1;
-        const fullAddr = `${job.addressStreet || ''}, ${job.addressCityStateZip || ''}`.replace(/^, /, '').trim() || 'Fort Walton Beach, FL';
-        const { latPercent, lngPercent } = getEmeraldCoastCoordinates(fullAddr, job.id);
-        const techName = (job.technicians && job.technicians[0]) || tech.name;
-        const initials = techName.split(' ').map((n: string) => n[0]).join('').slice(0, 4).toUpperCase();
-        const colorHex = job.colorHex || getTripTypeWebHex(job.jobType) || '#10b981';
-        if (idx === 0) techBaseColor = colorHex;
-
-        const markerObj: MapStopMarker = {
-          id: job.id,
-          techInitials: initials,
-          techName: techName,
-          colorHex: colorHex,
-          jobType: job.jobType,
-          timeRange: `${formatTimeTo12h(job.startTime)} - ${formatTimeTo12h(job.endTime || '09:00')}`,
-          jobNumber: job.jobNumber,
-          customer: job.customer,
-          address: fullAddr,
-          latPercent,
-          lngPercent,
-          stopNumber,
-          techId: tech.id,
-        };
-
-        markers.push(markerObj);
-        techStops.push({
-          job,
-          latPercent,
-          lngPercent,
-          stopNumber,
-        });
-      });
-
-      if (techStops.length > 0) {
-        routes.push({
-          techId: tech.id,
-          techName: tech.name,
-          colorHex: techBaseColor,
-          stops: techStops,
-        });
-      }
-    }
-
-    return { liveMapMarkers: markers, techRoutes: routes };
-  }, [techUsers, selectedTechNames]);
 
   return (
     <div className="w-full flex flex-col gap-3 text-slate-800 pb-8 text-xs font-sans">
@@ -3175,138 +3122,12 @@ function formatInstallDate(rawDate?: string | null): string {
                   </div>
                 )
               ) : (
-                /* VIEW 3: ACTUAL GOOGLE MAPS VIEW WITH EMERALD COAST ROUTES */
-                <div className="bg-[#f8fafc] rounded-lg border border-slate-200 overflow-hidden shadow-xs relative w-full h-[650px]">
-                  <iframe
-                    title="Google Maps Coverage Area"
-                    src="https://maps.google.com/maps?q=30.3935,-86.4958&z=11&output=embed"
-                    className="w-full h-full border-0"
-                    allowFullScreen
-                    loading="lazy"
-                  />
-
-                  {/* SVG Route Lines Connecting Stops Per Technician */}
-                  <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible">
-                    <defs>
-                      {techRoutes.map((route) => (
-                        <marker
-                          key={`arrow-${route.techId}`}
-                          id={`arrow-${route.techId}`}
-                          viewBox="0 0 10 10"
-                          refX="6"
-                          refY="5"
-                          markerWidth="6"
-                          markerHeight="6"
-                          orient="auto-start-reverse"
-                        >
-                          <path d="M 0 1 L 8 5 L 0 9 z" fill={route.colorHex} />
-                        </marker>
-                      ))}
-                    </defs>
-                    {techRoutes.map((route) => {
-                      if (route.stops.length < 2) return null;
-                      const pointsStr = route.stops.map((s) => `${s.lngPercent},${s.latPercent}`).join(' ');
-                      return (
-                        <g key={`route-${route.techId}`}>
-                          {/* Background Glow/Outline */}
-                          <polyline
-                            points={pointsStr}
-                            fill="none"
-                            stroke="#ffffff"
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="opacity-90"
-                          />
-                          {/* Colored Route Line */}
-                          <polyline
-                            points={pointsStr}
-                            fill="none"
-                            stroke={route.colorHex}
-                            strokeWidth="2.4"
-                            strokeDasharray="4 2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            markerEnd={`url(#arrow-${route.techId})`}
-                          />
-                        </g>
-                      );
-                    })}
-                  </svg>
-
-                  {/* Emerald Coast Technician Routes Legend */}
-                  <div className="absolute top-3 right-3 z-40 bg-white/95 backdrop-blur-xs border border-slate-200 rounded-lg shadow-md p-2.5 max-w-xs text-xs space-y-1.5 pointer-events-auto">
-                    <div className="font-bold text-slate-800 text-[11px] flex items-center justify-between pb-1 border-b border-slate-100">
-                      <span>Emerald Coast Routes</span>
-                      <span className="text-[10px] text-slate-500 font-normal">{liveMapMarkers.length} stops</span>
-                    </div>
-                    <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
-                      {techRoutes.map((tr) => (
-                        <div key={tr.techId} className="flex flex-col gap-0.5 text-[11px]">
-                          <div className="flex items-center justify-between font-semibold">
-                            <div className="flex items-center gap-1.5">
-                              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: tr.colorHex }} />
-                              <span className="text-slate-800">{tr.techName}</span>
-                            </div>
-                            <span className="text-slate-500 text-[10px]">{tr.stops.length} stop{tr.stops.length === 1 ? '' : 's'}</span>
-                          </div>
-                          <div className="pl-4 text-[10px] text-slate-500 truncate">
-                            {tr.stops.map((s) => `${s.stopNumber}. ${s.job.addressCityStateZip?.split(',')[0] || s.job.addressStreet || 'Stop'}`).join(' → ')}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Stop Markers */}
-                  {liveMapMarkers.map((marker) => {
-                    const isSelected = selectedMarkerId === marker.id;
-
-                    return (
-                      <div
-                        key={marker.id}
-                        style={{
-                          top: `${marker.latPercent}%`,
-                          left: `${marker.lngPercent}%`,
-                        }}
-                        className="absolute -translate-x-1/2 -translate-y-1/2 z-40 group cursor-pointer"
-                        onClick={() => setSelectedMarkerId(isSelected ? null : marker.id)}
-                      >
-                        <div className="flex flex-col items-center">
-                          <div
-                            style={{ backgroundColor: marker.colorHex }}
-                            className="relative w-8 h-8 rounded-full text-white font-bold text-xs flex items-center justify-center border-2 border-white shadow-xl transform transition-transform hover:scale-110"
-                          >
-                            {marker.techInitials}
-                            {/* Numbered Stop Badge */}
-                            <span className="absolute -top-1.5 -right-1.5 bg-slate-900 text-white border border-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
-                              {marker.stopNumber}
-                            </span>
-                          </div>
-                          <div
-                            style={{ backgroundColor: marker.colorHex }}
-                            className="w-2.5 h-2.5 transform rotate-45 -mt-1 shadow-md border border-white"
-                          />
-                        </div>
-
-                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 bg-white rounded-lg shadow-2xl border border-slate-200 p-2.5 w-60 text-[11px] z-50 animate-in fade-in zoom-in-95 duration-100">
-                          <div className="font-bold border-b border-slate-100 pb-1 flex justify-between items-center" style={{ color: marker.colorHex }}>
-                            <div className="flex items-center gap-1.5">
-                              <span className="bg-slate-900 text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">Stop {marker.stopNumber}</span>
-                              <Link href={`/jobs/${marker.jobNumber || marker.id.replace(/^appt-/, '')}`} className="flex items-center gap-1 hover:underline">
-                                <span>{marker.jobNumber}</span>
-                              </Link>
-                            </div>
-                            <span className="text-[10px] text-slate-500 font-semibold">{marker.techName}</span>
-                          </div>
-                          <div className="font-bold text-slate-900 mt-1">{marker.customer}</div>
-                          <div className="text-slate-600 text-[10px] font-medium">{marker.jobType} • {marker.timeRange}</div>
-                          <div className="text-slate-500 text-[10px] truncate">{marker.address}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                /* VIEW 3: NATIVE GOOGLE MAPS ROUTING (NO SVG OVERLAYS) */
+                <GoogleMapsRouteView
+                  techUsers={techUsers}
+                  selectedTechNames={selectedTechNames}
+                  selectedDate={currentDateObj}
+                />
               )}
             </div>
           </div>

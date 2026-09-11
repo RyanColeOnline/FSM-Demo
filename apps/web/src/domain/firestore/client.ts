@@ -29,6 +29,7 @@ import {
   CanonicalPaymentRecord,
   CanonicalAuthorizedPerson,
   cleanUserDisplayName,
+  formatCustomerDisplayName,
 } from '../types/index';
 import { extractTime12hFromIsoOrString, formatCalendarDateMdy } from '../timezone';
 
@@ -1405,8 +1406,11 @@ export class FirestoreDomainClient {
 
   public normalizeAppointment(raw: any): CanonicalAppointment {
     const dateTime = raw.dateTime || raw.appointmentDateTime || '';
-    const assignedTech = cleanUserDisplayName(raw.assignedTech || raw.technician || (Array.isArray(raw.technicians) ? raw.technicians[0] : null) || null);
-    const additionalTech = cleanUserDisplayName(raw.additionalTech || (Array.isArray(raw.technicians) && raw.technicians.length > 1 ? raw.technicians[1] : null) || null);
+    const cleanAssigned = cleanUserDisplayName(raw.assignedTech || raw.technician || (Array.isArray(raw.technicians) ? raw.technicians[0] : null) || null);
+    const assignedTech = cleanAssigned && cleanAssigned.toLowerCase() !== 'user' ? cleanAssigned : null;
+    const rawAdditional = raw.additionalTech || (Array.isArray(raw.technicians) && raw.technicians.length > 1 ? raw.technicians[1] : null) || null;
+    const cleanAdditional = cleanUserDisplayName(rawAdditional);
+    const additionalTech = cleanAdditional && cleanAdditional.toLowerCase() !== 'user' && cleanAdditional.toLowerCase() !== (assignedTech || '').toLowerCase() ? cleanAdditional : null;
     const serviceNotes = sanitizeDomainText(raw.serviceNotes || raw.callNotes || raw.note || raw.noteHtml) || null;
     const locationAddress = raw.locationAddress || raw.location || raw.locationStreet || null;
 
@@ -1420,7 +1424,7 @@ export class FirestoreDomainClient {
     const endTime = raw.endTime || null;
 
     const rawTechList: string[] = Array.isArray(raw.technicians) && raw.technicians.length > 0
-      ? raw.technicians.map((t: any) => cleanUserDisplayName(t)).filter(Boolean)
+      ? raw.technicians.map((t: any) => cleanUserDisplayName(t)).filter((t: any) => Boolean(t) && t.toLowerCase() !== 'user')
       : [];
     if (assignedTech && !rawTechList.some((t) => t.toLowerCase() === assignedTech.toLowerCase())) {
       if (rawTechList.length <= 1) {
@@ -1858,11 +1862,14 @@ export class FirestoreDomainClient {
 
   public normalizeJob(raw: any): CanonicalJob {
     if (!raw) return raw;
+    const cleanAssigned = cleanUserDisplayName(raw.assignedTech);
+    const cleanCreated = cleanUserDisplayName(raw.createdBy);
+    const custName = raw.customerName ? formatCustomerDisplayName(raw.customerName) : '';
     return {
       ...raw,
-      assignedTech: cleanUserDisplayName(raw.assignedTech),
-      createdBy: cleanUserDisplayName(raw.createdBy),
-      customerName: raw.customerName || 'Customer',
+      assignedTech: cleanAssigned && cleanAssigned.toLowerCase() !== 'user' ? cleanAssigned : (raw.assignedTech || ''),
+      createdBy: cleanCreated && cleanCreated.toLowerCase() !== 'user' ? cleanCreated : (raw.createdBy || ''),
+      customerName: custName || (raw.customerName || 'Customer'),
     };
   }
 

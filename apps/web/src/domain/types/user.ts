@@ -54,7 +54,7 @@ export interface CanonicalUser {
  * Strips role suffixes such as (Admin), (Dispatch), (Office), (Field), etc. site-wide.
  */
 export function cleanUserDisplayName(name?: string | null): string {
-  if (!name) return 'User';
+  if (!name || typeof name !== 'string') return '';
   return name
     .replace(/\s*\((admin|office|field|technician|dispatch|master|veteran|apprentice)[^)]*\)/gi, '')
     .replace(/\s*\(.*?\)\s*/g, '')

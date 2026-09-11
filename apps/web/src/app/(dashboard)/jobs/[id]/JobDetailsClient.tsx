@@ -737,8 +737,10 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
       ? `$${propTotal.toFixed(2)}`
       : '$0.00';
 
-    const rawCustName = (foundJob as any)?.customerName || cust?.name || relatedAppts[0]?.customerName || (databaseMode === 'mock' ? initialJob.customerName : 'Customer');
-    const formattedCustName = rawCustName && rawCustName !== 'Customer' ? formatCustomerDisplayName(rawCustName) : rawCustName;
+    const rawCustCandidate = (foundJob as any)?.customerName || (directJob as any)?.customerName || cust?.name || directCustomer?.name || relatedAppts[0]?.customerName;
+    const formattedCustName = rawCustCandidate && rawCustCandidate !== 'Customer'
+      ? formatCustomerDisplayName(rawCustCandidate)
+      : (cust ? formatCustomerDisplayName(cust) : (directCustomer ? formatCustomerDisplayName(directCustomer) : (databaseMode === 'mock' ? initialJob.customerName : 'Customer')));
 
     const baseJob: JobDetails = {
       id: foundJob?.id || `job-${jobIdParam}`,
@@ -1685,7 +1687,9 @@ Status: Verified & Archived
               href={customerProfileLink}
               className="text-[#be4646] hover:underline cursor-pointer"
             >
-              {job.customerName}
+              {job.customerName && job.customerName !== 'Customer'
+                ? job.customerName
+                : (directCustomer ? formatCustomerDisplayName(directCustomer) : (directJob?.customerName ? formatCustomerDisplayName(directJob.customerName) : (job.customerName || 'Customer')))}
             </Link>
           </div>
 
@@ -2579,7 +2583,10 @@ Status: Verified & Archived
                                 <td className="px-3 py-3 font-semibold text-[#be4646] whitespace-nowrap">{appt.techStatus || appt.status || 'Idle'}</td>
                                 <td className="px-3 py-3 text-slate-400 whitespace-nowrap">{appt.tags || ''}</td>
                               </tr>
-                              {appt.additionalTech && (
+                              {appt.additionalTech &&
+                                appt.additionalTech.trim() !== '' &&
+                                appt.additionalTech.toLowerCase() !== 'user' &&
+                                appt.additionalTech.toLowerCase() !== (appt.assignedTech || appt.primaryTech || appt.technician || '').toLowerCase() && (
                                 <tr className="bg-white hover:bg-slate-50 transition-colors">
                                   <td className="px-3 py-3 font-semibold text-[#be4646] whitespace-nowrap">
                                     <Link href="/schedule" className="hover:underline">

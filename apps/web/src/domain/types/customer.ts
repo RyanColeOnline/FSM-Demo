@@ -98,6 +98,17 @@ export interface CanonicalCustomer {
 
 export function formatCustomerDisplayName(c: any): string {
   if (!c) return 'Customer';
+  if (typeof c === 'string') {
+    const raw = c.trim();
+    if (!raw || raw.toLowerCase() === 'customer') return 'Customer';
+    if (raw.includes(',')) {
+      const parts = raw.split(',').map((s: string) => s.trim());
+      const last = parts[0] || '';
+      const first = parts[1] || '';
+      return first && last ? `${first} ${last}` : (first || last || raw);
+    }
+    return raw;
+  }
   const isCommercial = c.customerType === 'commercial' || c.custType === 'Commercial' || Boolean(c.businessName);
   if (isCommercial) {
     return (c.businessName || c.name || 'Commercial Customer').trim();
