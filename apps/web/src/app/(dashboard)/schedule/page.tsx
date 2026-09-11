@@ -200,7 +200,7 @@ import {
 import { AddCustomerModal } from '@/components/modals/AddCustomerModal';
 import { HierarchicalJobTypeSelector } from '@/components/ui';
 import { UpdateAppointmentModal, getTechsForJobType, formatCustomerDisplayName } from '@/components/modals/UpdateAppointmentModal';
-import GoogleMapsRouteView from './GoogleMapsRouteView';
+import GoogleMapsRouteView, { MapJobItem } from './GoogleMapsRouteView';
 
 export interface ScheduledJob {
   id: string;
@@ -533,9 +533,9 @@ function buildHoverDetailsFromJob(
     customerId: job.customerId,
     dateTimeRangeStr: `${dateStr} ${timeRange}`,
     customerName: job.customer,
-    addressLine1: job.addressStreet || '1420 Lakeview Drive',
-    addressLine2: job.addressCityStateZip || 'Winter Park, FL 32789',
-    phone: job.phone?.replace('(M):', '').trim() || '(407) 555-8121',
+    addressLine1: job.addressStreet || '400 Harbor Blvd',
+    addressLine2: job.addressCityStateZip || 'Destin, FL 32541',
+    phone: job.phone?.replace('(M):', '').trim() || '(850) 556-8402',
     jobNumberStr: formattedJobNumber,
     technicians: job.technicians && job.technicians.length > 0 ? job.technicians : ['Marcus Vance'],
     callNotes: job.callNotes || 'Scheduled appointment.',
@@ -851,6 +851,9 @@ export default function WexSchedulePage() {
   const [selectedTechNames, setSelectedTechNames] = useState<string[]>([]);
   const [showTechFilterPopover, setShowTechFilterPopover] = useState(false);
   
+  // Map View User Filter State (default 'all' = show all appointments)
+  const [selectedMapUser, setSelectedMapUser] = useState<string>('all');
+  
   // Scheduled vs Actual Time Filter State
   const [timeDisplayMode, setTimeDisplayMode] = useState<'scheduled' | 'actual'>('scheduled');
 
@@ -1079,14 +1082,14 @@ export default function WexSchedulePage() {
       resolvedCustomerId = match ? match.id : (job.customerId || `cust-${job.id}`);
     }
 
-    const rawLoc = (job as any).locationAddress || `${job.addressStreet || '1420 Lakeview Drive'}, ${job.addressCityStateZip || 'Winter Park, FL 32789'}`;
+    const rawLoc = (job as any).locationAddress || `${job.addressStreet || '400 Harbor Blvd'}, ${job.addressCityStateZip || 'Destin, FL 32541'}`;
     const cleanAddr = formatCleanLocationString(rawLoc);
     setBookingLocation(cleanAddr);
 
     setSelectedCustomerBooking({
       id: resolvedCustomerId,
       name: job.customer,
-      phone: job.phone || '(407) 555-8121',
+      phone: job.phone || '(850) 556-8402',
       email: 'eleanor.vance@example.com',
       address: cleanAddr,
     });
@@ -1524,6 +1527,44 @@ function formatInstallDate(rawDate?: string | null): string {
     return map;
   }, [appointments, currentDateObj, customers, databaseMode]);
 
+  // Active technicians with at least one scheduled appointment on the selected date
+  const activeDateUsers = useMemo(() => {
+    return techUsers
+      .filter((tech) => tech.scheduledJobs && tech.scheduledJobs.length > 0)
+      .map((tech) => tech.name)
+      .filter((name, idx, arr) => arr.indexOf(name) === idx)
+      .sort((a, b) => a.localeCompare(b));
+  }, [techUsers]);
+
+  // All unique scheduled jobs across all technicians for the selected date
+  const allDayScheduledJobs = useMemo(() => {
+    const jobMap = new Map<string, MapJobItem>();
+    techUsers.forEach((tech) => {
+      tech.scheduledJobs.forEach((job) => {
+        if (!jobMap.has(job.id)) {
+          jobMap.set(job.id, {
+            ...job,
+            techName: tech.name,
+            colorHex: tech.avatarColor || '#be4646',
+          });
+        } else {
+          const existing = jobMap.get(job.id)!;
+          if (existing.technicians && !existing.technicians.includes(tech.name)) {
+            existing.technicians.push(tech.name);
+          }
+        }
+      });
+    });
+    return Array.from(jobMap.values());
+  }, [techUsers]);
+
+  // Reset selectedMapUser to 'all' if the selected technician has no appointments on the new date
+  useEffect(() => {
+    if (selectedMapUser !== 'all' && !activeDateUsers.includes(selectedMapUser)) {
+      setSelectedMapUser('all');
+    }
+  }, [currentDateObj, activeDateUsers, selectedMapUser]);
+
   const matchesDispatchGroup = (
     userGroups: string[] | undefined,
     fallbackGroup: string | undefined,
@@ -1683,6 +1724,47 @@ function formatInstallDate(rawDate?: string | null): string {
     hoverGraceTimerRef.current = setTimeout(() => {
       setHoverDetails(null);
     }, 200);
+  };
+
+  // Map Marker Hover Handlers reusing the exact same hoverDetails popover card
+  const handleMapMarkerHover = (job: ScheduledJob, clientX: number, clientY: number) => {
+    if (hoverGraceTimerRef.current) {
+      clearTimeout(hoverGraceTimerRef.current);
+    }
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+    }
+
+    const cardWidth = 320;
+    const cardHeight = 260;
+    let posX = clientX - cardWidth / 2;
+    if (posX + cardWidth > window.innerWidth - 20) {
+      posX = window.innerWidth - cardWidth - 20;
+    }
+    if (posX < 20) {
+      posX = 20;
+    }
+
+    let posY = clientY - cardHeight - 15;
+    if (posY < 20) {
+      posY = clientY + 25;
+    }
+
+    const activeMonthYearStr = currentDateObj.toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' });
+    const formattedDateStr = `${activeMonthYearStr.split('/')[0]}/${String(currentDateObj.getDate()).padStart(2, '0')}/${currentDateObj.getFullYear()}`;
+
+    hoverTimerRef.current = setTimeout(() => {
+      setHoverDetails(buildHoverDetailsFromJob(job, formattedDateStr, posX, posY));
+    }, 100);
+  };
+
+  const handleMapMarkerLeave = () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+    }
+    hoverGraceTimerRef.current = setTimeout(() => {
+      setHoverDetails(null);
+    }, 250);
   };
 
   // Dynamic Date Navigation Handlers
@@ -2690,7 +2772,7 @@ function formatInstallDate(rawDate?: string | null): string {
                   )}
                 </div>
 
-                {topTab !== 'map' && (
+                {topTab !== 'map' ? (
                   <div className="flex items-center gap-2 relative ml-auto transition-all duration-200">
                     <input
                       ref={dateInputRef}
@@ -2747,6 +2829,54 @@ function formatInstallDate(rawDate?: string | null): string {
                       >
                         Monthly
                       </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 relative ml-auto transition-all duration-200">
+                    <button
+                      type="button"
+                      onClick={handleToday}
+                      className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 rounded border border-slate-300 transition-colors cursor-pointer select-none"
+                    >
+                      Today
+                    </button>
+
+                    <div className="flex items-center gap-1 select-none">
+                      <button
+                        type="button"
+                        onClick={handlePrevDate}
+                        onMouseDown={(e) => e.preventDefault()}
+                        className="p-1 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 transition-colors cursor-pointer select-none"
+                        title="Previous date"
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5 text-slate-700 pointer-events-none" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleNextDate}
+                        onMouseDown={(e) => e.preventDefault()}
+                        className="p-1 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 transition-colors cursor-pointer select-none"
+                        title="Next date"
+                      >
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-700 pointer-events-none" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 text-xs select-none">
+                      <span className="font-semibold text-slate-600 text-xs">User:</span>
+                      <select
+                        value={selectedMapUser}
+                        onChange={(e) => setSelectedMapUser(e.target.value)}
+                        className="h-7 px-2.5 bg-white border border-slate-300 rounded text-xs font-semibold text-slate-800 hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-[#be4646] cursor-pointer shadow-2xs"
+                      >
+                        <option value="all">All Users</option>
+                        {activeDateUsers.map((userName) => (
+                          <option key={userName} value={userName}>
+                            {userName}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 )}
@@ -3122,11 +3252,14 @@ function formatInstallDate(rawDate?: string | null): string {
                   </div>
                 )
               ) : (
-                /* VIEW 3: NATIVE GOOGLE MAPS ROUTING (NO SVG OVERLAYS) */
+                /* VIEW 3: GOOGLE MAPS APPOINTMENT POINTS */
                 <GoogleMapsRouteView
-                  techUsers={techUsers}
-                  selectedTechNames={selectedTechNames}
+                  jobs={allDayScheduledJobs}
+                  selectedUser={selectedMapUser}
                   selectedDate={currentDateObj}
+                  onHoverAppointment={handleMapMarkerHover}
+                  onLeaveAppointment={handleMapMarkerLeave}
+                  onSelectAppointment={(job) => setSelectedJobModal(job)}
                 />
               )}
             </div>
