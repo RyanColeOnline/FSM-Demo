@@ -1,5 +1,5 @@
 {
-  "name": "@murphys/migration",
+  "name": "@fsmdemo/migration",
   "version": "0.1.0",
   "private": true,
   "description": "Legacy WEX data parsers, transformers, and bulk migration scripts",
