@@ -52,29 +52,49 @@ export interface SessionContextType {
 
 const DEV_SANDBOX_STORAGE_KEY = 'fsm_demo_dev_sandbox_session';
 const PORTAL_CACHED_SESSION_KEY = 'fsm_portal_cached_session';
+export const EXPLICIT_SIGN_OUT_KEY = 'fsm_explicit_sign_out';
 const defaultOfficePermissions = getDefaultPermissions('office', 'office_staff');
 
+export function getDefaultDemoSession(): UserSession {
+  return {
+    id: 'demo-admin-uid',
+    uid: 'demo-admin-uid',
+    name: 'Alex Reynolds',
+    email: 'admin@apex.com',
+    accountType: 'admin',
+    dispatchGroup: 'office_staff',
+    permissions: getDefaultPermissions('admin', 'office_staff'),
+    isSandboxOverride: false,
+  };
+}
+
 function getInitialCachedSession(): { session: UserSession | null; isSandbox: boolean } {
-  if (typeof window === 'undefined') return { session: null, isSandbox: false };
+  if (typeof window === 'undefined') {
+    return { session: getDefaultDemoSession(), isSandbox: false };
+  }
   try {
-    if (process.env.NODE_ENV !== 'production') {
-      const savedDevSession = localStorage.getItem(DEV_SANDBOX_STORAGE_KEY);
-      if (savedDevSession) {
-        const parsed = JSON.parse(savedDevSession) as UserSession;
-        if (parsed && parsed.accountType) {
-          const cleanName = cleanUserDisplayName(parsed.name);
-          return {
-            session: {
-              ...parsed,
-              name: cleanName,
-              permissions: getDefaultPermissions(parsed.accountType, parsed.dispatchGroup),
-              isSandboxOverride: true,
-            },
-            isSandbox: true,
-          };
-        }
+    const hasExplicitlySignedOut = localStorage.getItem(EXPLICIT_SIGN_OUT_KEY) === 'true';
+    if (hasExplicitlySignedOut) {
+      return { session: null, isSandbox: false };
+    }
+
+    const savedDevSession = localStorage.getItem(DEV_SANDBOX_STORAGE_KEY);
+    if (savedDevSession) {
+      const parsed = JSON.parse(savedDevSession) as UserSession;
+      if (parsed && parsed.accountType) {
+        const cleanName = cleanUserDisplayName(parsed.name);
+        return {
+          session: {
+            ...parsed,
+            name: cleanName,
+            permissions: getDefaultPermissions(parsed.accountType, parsed.dispatchGroup),
+            isSandboxOverride: true,
+          },
+          isSandbox: true,
+        };
       }
     }
+
     const cached = localStorage.getItem(PORTAL_CACHED_SESSION_KEY);
     if (cached) {
       const parsed = JSON.parse(cached) as UserSession;
@@ -90,10 +110,13 @@ function getInitialCachedSession(): { session: UserSession | null; isSandbox: bo
         };
       }
     }
+
+    // Default to the Demo Admin session for seamless demo viewing
+    return { session: getDefaultDemoSession(), isSandbox: false };
   } catch (e) {
     console.warn('Failed to load cached session:', e);
   }
-  return { session: null, isSandbox: false };
+  return { session: getDefaultDemoSession(), isSandbox: false };
 }
 
 function persistCachedSession(session: UserSession | null) {
@@ -198,22 +221,26 @@ const SessionContext = createContext<SessionContextType>({
 });
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserSession | null>(() => getInitialCachedSession().session);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isSandboxOverride, setIsSandboxOverride] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSandboxOverride, setIsSandboxOverride] = useState<boolean>(() => getInitialCachedSession().isSandbox);
 
   // Initialize and listen to Firebase Auth + Firestore User document
   useEffect(() => {
     let unsubscribeSnapshot: (() => void) | null = null;
 
-    // Immediately hydrate cached session from localStorage on client mount
-    const cached = getInitialCachedSession();
-    if (cached.session) {
-      setCurrentUser(cached.session);
-      setIsSandboxOverride(cached.isSandbox);
+    // Check if user previously explicitly signed out on this browser
+    const hasExplicitlySignedOut = typeof window !== 'undefined' && localStorage.getItem(EXPLICIT_SIGN_OUT_KEY) === 'true';
+    if (hasExplicitlySignedOut) {
+      setCurrentUser(null);
       setIsLoading(false);
-      if (cached.isSandbox) return;
+    } else {
+      const cached = getInitialCachedSession();
+      if (cached.session) {
+        setCurrentUser(cached.session);
+        setIsSandboxOverride(cached.isSandbox);
+      }
     }
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
@@ -284,13 +311,23 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         }
       } else {
         // Unauthenticated
-        // Only clear if not in dev sandbox override
-        const devSession = process.env.NODE_ENV !== 'production' && typeof window !== 'undefined' ? localStorage.getItem(DEV_SANDBOX_STORAGE_KEY) : null;
-        if (!devSession) {
+        const isSignedOut = typeof window !== 'undefined' && localStorage.getItem(EXPLICIT_SIGN_OUT_KEY) === 'true';
+        if (isSignedOut) {
           setCurrentUser(null);
           persistCachedSession(null);
+          setIsLoading(false);
+        } else {
+          // If the visitor has not explicitly signed out, auto-authenticate with demo admin credentials
+          try {
+            await signInWithEmailAndPassword(auth, 'admin@apex.com', 'Fsmdemo2026!');
+          } catch (autoErr) {
+            console.warn('Demo background auto-signin fallback to mock demo session:', autoErr);
+            const fallbackSession = getDefaultDemoSession();
+            setCurrentUser(fallbackSession);
+            persistCachedSession(fallbackSession);
+            setIsLoading(false);
+          }
         }
-        setIsLoading(false);
       }
     });
 
@@ -327,6 +364,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   // Sign in with Email and Password
   const signInWithEmail = useCallback(async (email: string, pass: string) => {
     setIsLoading(true);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(EXPLICIT_SIGN_OUT_KEY);
+    }
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email.trim(), pass);
       const user = userCredential.user;
@@ -344,6 +384,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   // Sign in with Google Popup
   const signInWithGoogle = useCallback(async () => {
     setIsLoading(true);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(EXPLICIT_SIGN_OUT_KEY);
+    }
     try {
       const userCredential = await signInWithPopup(auth, googleAuthProvider);
       const user = userCredential.user;
@@ -366,6 +409,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   // Sign out method
   const signOut = useCallback(async () => {
     if (typeof window !== 'undefined') {
+      localStorage.setItem(EXPLICIT_SIGN_OUT_KEY, 'true');
       localStorage.removeItem(DEV_SANDBOX_STORAGE_KEY);
       localStorage.removeItem(PORTAL_CACHED_SESSION_KEY);
     }
@@ -379,16 +423,11 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setIsSandboxOverride(false);
   }, []);
 
-  // Dev Sandbox role switcher (active in non-production builds)
+  // Dev Sandbox role switcher (active for interactive demo preview)
   const switchRole = useCallback((accountType: AccountType, dispatchGroup: DispatchGroupCategory) => {
-    if (process.env.NODE_ENV === 'production') {
-      console.warn('switchRole is disabled in production builds.');
-      return;
-    }
-
     const updatedSession: UserSession = {
-      id: currentUser?.id || 'usr-sandbox',
-      uid: currentUser?.uid || 'usr-sandbox',
+      id: currentUser?.id || 'demo-admin-uid',
+      uid: currentUser?.uid || 'demo-admin-uid',
       name: currentUser?.name || 'Alex Reynolds',
       email: currentUser?.email || 'admin@apex.com',
       accountType,
@@ -428,7 +467,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         isSandboxOverride: false,
       });
     } else {
-      setCurrentUser(null);
+      setCurrentUser(getDefaultDemoSession());
     }
   }, [firebaseUser]);
 
