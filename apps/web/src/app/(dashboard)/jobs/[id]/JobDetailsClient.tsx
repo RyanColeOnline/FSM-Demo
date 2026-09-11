@@ -318,291 +318,151 @@ export function getJobTripTypeColorHex(jobType: string): string {
 }
 
 export const mockCustomerSavedLocations = [
-  '50 Hillcrest Dr, Shalimar, FL 32579',
-  '104 Magnolia Ave, Fort Walton Beach, FL 32548',
-  '3191 Scenic Hwy 98 #304, Destin, FL 32541',
-  '4232 Beachside 2, Miramar Beach, FL 32550',
+  '1420 Lakeview Drive, Winter Park, FL 32789',
+  '880 Park Avenue N, Winter Park, FL 32789',
+  '450 S Orange Ave, Orlando, FL 32801',
+  '1200 Lake Baldwin Ln, Orlando, FL 32814',
 ];
 
 const mockJobsDatabase: Record<string, JobDetails> = {
-  '134375': {
-    id: '134375',
-    jobNumber: '134375',
-    customerName: 'Pamela Witt',
-    customerId: 'cust-pamela',
+  '1001': {
+    id: 'job-1001',
+    jobNumber: '1001',
+    customerName: 'Eleanor Vance',
+    customerId: 'cust-res-01',
     isStarred: true,
     address: {
-      locationName: '50 Hillcrest Dr, Shalimar, FL 32579',
-      street: '50 Hillcrest Dr',
-      cityStateZip: 'Shalimar, FL 32579',
+      locationName: '1420 Lakeview Drive',
+      street: '1420 Lakeview Drive',
+      cityStateZip: 'Winter Park, FL 32789',
     },
-    phone: '(850) 555-0143',
-    email: 'pamela.witt@example.com',
+    phone: '(407) 555-8121',
+    email: 'eleanor.vance@example.com',
     status: 'Opened',
     jobType: 'Preventative Maintenance',
     jobPrice: 'Maintenance Plan Price',
     uncollected: '$0.00',
-    isFlagged: true,
+    isFlagged: false,
     followUpType: 'Need Quote/Autho',
-    assignee: 'Justin Dunlap',
+    assignee: 'Marcus Vance',
     dueDate: '2026-08-20',
     isFlagComplete: false,
     notes: [
       {
         id: 'note-1',
-        authorName: 'Justin Dunlap',
+        authorName: 'Marcus Vance',
         timestamp: '8/13/2026, 2:45 pm',
-        text: '8/13/26 ETA to Witt 2-3days-JD floor blower motor and capacitor required on-site.',
-      },
-    ],
-    stage: 'Appointment',
-    checklistsCount: 2,
-    equipmentCount: 3,
-  },
-  'job-1': {
-    id: 'job-1',
-    jobNumber: '134186',
-    customerName: 'Dom Villareal',
-    customerId: 'cust-1',
-    isStarred: true,
-    address: {
-      locationName: 'Dom Villareal',
-      street: '4232 Beachside 2',
-      cityStateZip: 'Miramar Beach, FL 32550',
-    },
-    phone: '(850) 555-0199',
-    email: 'dom.v@example.com',
-    status: 'Opened',
-    jobType: 'HVAC Service',
-    jobPrice: 'Flat Rate',
-    uncollected: '$0.00',
-    isFlagged: true,
-    followUpType: 'Need Quote/Autho',
-    assignee: 'Justin Dunlap',
-    dueDate: '2026-08-15',
-    isFlagComplete: false,
-    notes: [
-      {
-        id: 'n1',
-        authorName: 'Ethan Mitchell',
-        timestamp: '8/07/2026, 4:44 pm',
-        text: 'Need quote on new compressor unit and refrigerant recharge.',
+        text: 'Routine seasonal check completed. All system components operational.',
       },
     ],
     stage: 'Appointment',
     checklistsCount: 1,
     equipmentCount: 2,
   },
-  '134186': {
-    id: 'job-1',
-    jobNumber: '134186',
-    customerName: 'Dom Villareal',
-    customerId: 'cust-1',
+  'job-1001': {
+    id: 'job-1001',
+    jobNumber: '1001',
+    customerName: 'Eleanor Vance',
+    customerId: 'cust-res-01',
     isStarred: true,
     address: {
-      locationName: 'Dom Villareal',
-      street: '4232 Beachside 2',
-      cityStateZip: 'Miramar Beach, FL 32550',
+      locationName: '1420 Lakeview Drive',
+      street: '1420 Lakeview Drive',
+      cityStateZip: 'Winter Park, FL 32789',
     },
-    phone: '(850) 555-0199',
-    email: 'dom.v@example.com',
+    phone: '(407) 555-8121',
+    email: 'eleanor.vance@example.com',
+    status: 'Opened',
+    jobType: 'Preventative Maintenance',
+    jobPrice: 'Maintenance Plan Price',
+    uncollected: '$0.00',
+    isFlagged: false,
+    followUpType: 'Need Quote/Autho',
+    assignee: 'Marcus Vance',
+    dueDate: '2026-08-20',
+    isFlagComplete: false,
+    notes: [
+      {
+        id: 'note-1',
+        authorName: 'Marcus Vance',
+        timestamp: '8/13/2026, 2:45 pm',
+        text: 'Routine seasonal check completed. All system components operational.',
+      },
+    ],
+    stage: 'Appointment',
+    checklistsCount: 1,
+    equipmentCount: 2,
+  },
+  'job-1': {
+    id: 'job-1',
+    jobNumber: '1001',
+    customerName: 'Eleanor Vance',
+    customerId: 'cust-res-01',
+    isStarred: true,
+    address: {
+      locationName: '1420 Lakeview Drive',
+      street: '1420 Lakeview Drive',
+      cityStateZip: 'Winter Park, FL 32789',
+    },
+    phone: '(407) 555-8121',
+    email: 'eleanor.vance@example.com',
     status: 'Opened',
     jobType: 'HVAC Service',
     jobPrice: 'Flat Rate',
     uncollected: '$0.00',
-    isFlagged: true,
+    isFlagged: false,
     followUpType: 'Need Quote/Autho',
-    assignee: 'Justin Dunlap',
+    assignee: 'Marcus Vance',
     stage: 'Appointment',
     checklistsCount: 1,
     equipmentCount: 2,
   },
   'job-2': {
     id: 'job-2',
-    jobNumber: '134183',
-    customerName: '360 Blue, LLC',
-    customerId: 'cust-2',
+    jobNumber: '1002',
+    customerName: 'Magnolia Bay Bistro',
+    customerId: 'cust-com-01',
     isStarred: false,
     address: {
-      locationName: '360 Blue, LLC',
-      street: '69 Running Oak Cr',
-      cityStateZip: 'Santa Rosa Beach, FL 32459',
+      locationName: 'Magnolia Bay Bistro',
+      street: '450 S Orange Ave',
+      cityStateZip: 'Orlando, FL 32801',
     },
-    phone: '(850) 231-2350',
-    email: 'maintenance@360blue.com',
+    phone: '(407) 555-4321',
+    email: 'contact@magnoliabaybistro.com',
     status: 'Opened',
-    jobType: 'HVAC Service',
+    jobType: 'Commercial Refrigeration',
     jobPrice: 'Time & Materials',
     uncollected: '$0.00',
-    isFlagged: true,
+    isFlagged: false,
     followUpType: 'Need Quote/Autho',
-    assignee: 'Justin Dunlap',
-    stage: 'Proposal',
-    checklistsCount: 0,
-    equipmentCount: 1,
-  },
-  '134183': {
-    id: 'job-2',
-    jobNumber: '134183',
-    customerName: '360 Blue, LLC',
-    customerId: 'cust-2',
-    isStarred: false,
-    address: {
-      locationName: '360 Blue, LLC',
-      street: '69 Running Oak Cr',
-      cityStateZip: 'Santa Rosa Beach, FL 32459',
-    },
-    phone: '(850) 231-2350',
-    email: 'maintenance@360blue.com',
-    status: 'Opened',
-    jobType: 'HVAC Service',
-    jobPrice: 'Time & Materials',
-    uncollected: '$0.00',
-    isFlagged: true,
-    followUpType: 'Need Quote/Autho',
-    assignee: 'Justin Dunlap',
-    stage: 'Proposal',
-    checklistsCount: 0,
-    equipmentCount: 1,
+    assignee: 'Sarah Jenkins',
+    stage: 'Appointment',
+    checklistsCount: 1,
+    equipmentCount: 2,
   },
   'job-3': {
     id: 'job-3',
-    jobNumber: '134180',
-    customerName: 'Kurt Phillips',
-    customerId: 'cust-3',
+    jobNumber: '1003',
+    customerName: 'Dr. Aris Thorne',
+    customerId: 'cust-res-02',
     isStarred: false,
     address: {
-      locationName: 'Kurt Phillips',
-      street: '413 Maritime Ct',
-      cityStateZip: 'Destin, FL 32541',
+      locationName: 'Dr. Aris Thorne',
+      street: '1200 Lake Baldwin Ln',
+      cityStateZip: 'Orlando, FL 32814',
     },
-    phone: '(850) 499-1045',
-    email: 'kurt.phillips@example.com',
+    phone: '(407) 555-9204',
+    email: 'dr.thorne@winterparkclinic.com',
     status: 'Opened',
     jobType: 'HVAC Service',
     jobPrice: 'Maintenance Plan Price',
     uncollected: '$0.00',
-    isFlagged: true,
-    followUpType: 'Need Quote/Autho',
-    assignee: 'Justin Dunlap',
-    stage: 'Appointment',
-    checklistsCount: 1,
-    equipmentCount: 1,
-  },
-  'job-4': {
-    id: 'job-4',
-    jobNumber: '134177',
-    customerName: 'Destin Pointe Vacation Rentals',
-    customerId: 'cust-4',
-    isStarred: false,
-    address: {
-      locationName: 'Destin Pointe Vacation Rentals',
-      street: '480 Gulf Shore Dr #409',
-      cityStateZip: 'Destin, FL 32541',
-    },
-    phone: '(850) 837-9922',
-    email: 'rentals@destinpointe.com',
-    status: 'Opened',
-    jobType: 'Appliance Service',
-    jobPrice: 'Flat Rate',
-    uncollected: '$0.00',
-    isFlagged: true,
-    followUpType: 'Need Quote/Autho',
-    assignee: 'Danny Pardo',
-    stage: 'Appointment',
-    checklistsCount: 0,
-    equipmentCount: 1,
-  },
-  'job-5': {
-    id: 'job-5',
-    jobNumber: '134173',
-    customerName: 'Southern Vacation Rentals',
-    customerId: 'cust-5',
-    isStarred: false,
-    address: {
-      locationName: 'Southern Vacation Rentals',
-      street: '2003 Devmor Court 1A Sunset Cottages',
-      cityStateZip: 'Fort Walton Beach, FL 32548',
-    },
-    phone: '(850) 269-1234',
-    email: 'service@southernresorts.com',
-    status: 'Opened',
-    jobType: 'Appliance Service',
-    jobPrice: 'Flat Rate',
-    uncollected: '$0.00',
-    isFlagged: true,
+    isFlagged: false,
     followUpType: 'Need Quote/Autho',
     assignee: 'Alex Reynolds',
     stage: 'Appointment',
-    checklistsCount: 0,
-    equipmentCount: 1,
-  },
-  'job-6': {
-    id: 'job-6',
-    jobNumber: '134171',
-    customerName: 'Tom Berghoff',
-    customerId: 'cust-6',
-    isStarred: false,
-    address: {
-      locationName: 'Tom Berghoff',
-      street: '6027 Sterling River Way',
-      cityStateZip: 'Niceville, FL 32578',
-    },
-    phone: '(850) 897-1200',
-    email: 'tom.b@example.com',
-    status: 'Opened',
-    jobType: 'HW HVAC',
-    jobPrice: 'Warranty / Contract',
-    uncollected: '$0.00',
-    isFlagged: true,
-    followUpType: 'Need Quote/Autho',
-    assignee: 'Justin Dunlap',
-    stage: 'Appointment',
-    checklistsCount: 2,
-    equipmentCount: 2,
-  },
-  'job-7': {
-    id: 'job-7',
-    jobNumber: '134165',
-    customerName: 'American Home Shield',
-    customerId: 'cust-7',
-    isStarred: false,
-    address: {
-      locationName: 'American Home Shield',
-      street: '1557 Meadowbrook Ct',
-      cityStateZip: 'Niceville, FL 32578',
-    },
-    phone: '(800) 778-8000',
-    email: 'dispatch@ahs.com',
-    status: 'Closed',
-    jobType: 'Appliance Service',
-    jobPrice: 'Flat Rate',
-    uncollected: '$0.00',
-    isFlagged: false,
-    stage: 'Payment',
     checklistsCount: 1,
-    equipmentCount: 1,
-  },
-  'job-8': {
-    id: 'job-8',
-    jobNumber: '134159',
-    customerName: 'Newman Dailey',
-    customerId: 'cust-8',
-    isStarred: false,
-    address: {
-      locationName: 'Newman Dailey - Beachside Inn',
-      street: '2931 Scenic Hwy 98 #106 Beachside Inn',
-      cityStateZip: 'Destin, FL 32541',
-    },
-    phone: '(850) 837-1071',
-    email: 'service@newmandailey.com',
-    status: 'Opened',
-    jobType: 'HVAC Service',
-    jobPrice: 'Time & Materials',
-    uncollected: '$0.00',
-    isFlagged: false,
-    stage: 'Proposal',
-    checklistsCount: 0,
     equipmentCount: 1,
   },
 };
@@ -627,37 +487,37 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
   const defaultJobData: JobDetails = {
     id: jobIdParam,
-    jobNumber: jobIdParam.replace(/\D/g, '') || '134375',
-    customerName: 'Pamela Witt',
-    customerId: 'cust-pamela',
+    jobNumber: jobIdParam.replace(/\D/g, '') || '1001',
+    customerName: 'Eleanor Vance',
+    customerId: 'cust-res-01',
     isStarred: true,
     address: {
-      locationName: '50 Hillcrest Dr, Shalimar, FL 32579',
-      street: '50 Hillcrest Dr',
-      cityStateZip: 'Shalimar, FL 32579',
+      locationName: '1420 Lakeview Drive, Winter Park, FL 32789',
+      street: '1420 Lakeview Drive',
+      cityStateZip: 'Winter Park, FL 32789',
     },
-    phone: '(850) 555-0143',
-    email: 'pamela.witt@example.com',
+    phone: '(407) 555-8121',
+    email: 'eleanor.vance@example.com',
     status: 'Opened',
     jobType: 'Preventative Maintenance',
     jobPrice: 'Maintenance Plan Price',
     uncollected: '$0.00',
-    isFlagged: true,
+    isFlagged: false,
     followUpType: 'Need Quote/Autho',
-    assignee: 'Justin Dunlap',
+    assignee: 'Marcus Vance',
     dueDate: '2026-08-20',
     isFlagComplete: false,
     notes: [
       {
         id: 'note-1',
-        authorName: 'Justin Dunlap',
+        authorName: 'Marcus Vance',
         timestamp: '8/13/2026, 2:45 pm',
-        text: '8/13/26 ETA to Witt 2-3days-JD floor blower motor and capacitor required on-site.',
+        text: 'Routine seasonal check completed. All system components operational.',
       },
     ],
     stage: 'Appointment',
-    checklistsCount: 2,
-    equipmentCount: 3,
+    checklistsCount: 1,
+    equipmentCount: 2,
   };
 
   const { databaseMode, client } = useDatabaseMode();
@@ -808,16 +668,16 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
         fullCityStateZip = '';
       } else {
         fullStreet = locClean;
-        const city = (foundJob as any)?.locationCity || cust?.address?.city || 'Santa Rosa Beach';
+        const city = (foundJob as any)?.locationCity || cust?.address?.city || 'Winter Park';
         const state = (foundJob as any)?.locationState || cust?.address?.state || 'FL';
-        const zip = (foundJob as any)?.locationZip || cust?.address?.zipCode || '32459';
+        const zip = (foundJob as any)?.locationZip || cust?.address?.zipCode || '32789';
         fullCityStateZip = `${city}, ${state} ${zip}`.trim();
       }
     } else if (cust?.address?.street) {
       fullStreet = cust.address.street;
-      const city = cust.address.city || 'Santa Rosa Beach';
+      const city = cust.address.city || 'Winter Park';
       const state = cust.address.state || 'FL';
-      const zip = cust.address.zipCode || '32459';
+      const zip = cust.address.zipCode || '32789';
       fullCityStateZip = `${city}, ${state} ${zip}`.trim();
     } else if (databaseMode === 'mock') {
       fullStreet = initialJob.address?.street || '';
@@ -874,7 +734,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
       uncollected: computedUncollected,
       isFlagged,
       followUpType: isFlagged ? (foundJob?.followUpType || 'Need Quote/Autho') : undefined,
-      assignee: (foundJob as any)?.assignee || relatedAppts[0]?.assignedTech || (databaseMode === 'mock' ? initialJob.assignee : 'Justin Dunlap'),
+      assignee: (foundJob as any)?.assignee || relatedAppts[0]?.assignedTech || (databaseMode === 'mock' ? initialJob.assignee : 'Alex Reynolds'),
       dueDate: (foundJob as any)?.followUpDate || undefined,
       isFlagComplete: false,
       notes: (foundJob as any)?.serviceNotes ? [{ id: 'n-1', authorName: 'Technician', timestamp: 'Today', text: (foundJob as any).serviceNotes }] : (databaseMode === 'mock' ? (initialJob.notes || []) : []),
@@ -994,7 +854,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
   // Edit Location State
   const [selectedLocation, setSelectedLocation] = useState<string>(
-    initialJob.address ? `${initialJob.address.street}, ${initialJob.address.cityStateZip}` : '50 Hillcrest Dr, Shalimar, FL 32579'
+    initialJob.address ? `${initialJob.address.street}, ${initialJob.address.cityStateZip}` : '1420 Lakeview Drive, Winter Park, FL 32789'
   );
 
   useEffect(() => {
@@ -1438,7 +1298,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
         id: 'att-1',
         name: 'Inspection_Photos.jpg',
         size: '2.4 MB',
-        uploadedBy: 'Justin Dunlap',
+        uploadedBy: 'Marcus Vance',
         date: '8/13/2026',
         type: 'image',
         accentColor: 'from-blue-600 to-sky-400',
@@ -1448,7 +1308,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
         id: 'att-2',
         name: 'HVAC_Wiring_Diagram.png',
         size: '1.8 MB',
-        uploadedBy: 'Danny Pardo',
+        uploadedBy: 'Sarah Jenkins',
         date: '8/13/2026',
         type: 'image',
         accentColor: 'from-amber-600 to-orange-400',
@@ -1467,7 +1327,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
         id: 'att-4',
         name: 'Refrigerant_Pressure_Log.png',
         size: '1.2 MB',
-        uploadedBy: 'Justin Dunlap',
+        uploadedBy: 'Carlos Mendez',
         date: '8/11/2026',
         type: 'image',
         accentColor: 'from-emerald-600 to-teal-400',
@@ -1477,7 +1337,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
         id: 'att-5',
         name: 'Customer_Signoff.pdf',
         size: '420 KB',
-        uploadedBy: 'Justin Dunlap',
+        uploadedBy: 'David Ross',
         date: '8/10/2026',
         type: 'pdf',
         accentColor: 'from-indigo-600 to-blue-400',
@@ -1562,7 +1422,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
       return;
     }
 
-    const content = `Murphy's Home Services Attachment: ${att.name}\nJob: #${job.jobNumber}\nCustomer: ${job.customerName}\nUploaded: ${att.date} by ${att.uploadedBy}`;
+    const content = `Apex Field Solutions Attachment: ${att.name}\nJob: #${job.jobNumber}\nCustomer: ${job.customerName}\nUploaded: ${att.date} by ${att.uploadedBy}`;
     const blob = new Blob([content], { type: att.type === 'image' ? 'image/jpeg' : 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -1591,7 +1451,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
       const folder = zip.folder(folderName) || zip;
 
       attachments.forEach((att) => {
-        const content = `Murphy's Home Services - Attachment Document
+        const content = `Apex Field Solutions - Attachment Document
 =========================================
 File Name: ${att.name}
 Job Number: #${job.jobNumber}
@@ -1644,7 +1504,7 @@ Status: Verified & Archived
         id: `att-upload-${Date.now()}-${idx}`,
         name: file.name,
         size: sizeStr,
-        uploadedBy: 'Justin Dunlap',
+        uploadedBy: currentUser?.name || 'Alex Reynolds',
         date: new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
         type: isImg ? 'image' : isPdf ? 'pdf' : 'doc',
         accentColor: isImg ? 'from-blue-600 to-sky-400' : 'from-red-600 to-rose-400',
@@ -3082,7 +2942,7 @@ Status: Verified & Archived
             customerName: job.customerName || '',
             followUpType: (updatedData.followUpType as any) || 'Part Quote',
             reason: updatedData.notes?.[0]?.text || 'Follow up required',
-            assignedTo: updatedData.assignee || 'Justin Dunlap',
+            assignedTo: updatedData.assignee || 'Alex Reynolds',
             dueDate: updatedData.dueDate || '2026-08-20',
             isComplete: !!updatedData.isFlagComplete,
             notes: (updatedData.notes || []).map((n) => ({
@@ -3149,7 +3009,7 @@ Status: Verified & Archived
             customerName: job.customerName || '',
             followUpType: (job.followUpType as any) || 'Need Quote/Autho',
             reason: '',
-            assignedTo: job.assignee || 'Justin Dunlap',
+            assignedTo: job.assignee || 'Alex Reynolds',
             dueDate: job.dueDate || new Date().toISOString(),
             isComplete: true,
             completedAt: new Date().toISOString(),
@@ -3644,7 +3504,7 @@ Status: Verified & Archived
           amount={`$${(typeof viewingPdfProposal.total === 'number' ? viewingPdfProposal.total : parseFloat(viewingPdfProposal.total || viewingPdfProposal.amount || viewingPdfProposal.totalAmount || '0') || 0).toFixed(2)}`}
           jobNumber={String(viewingPdfProposal.jobNumber || job.jobNumber)}
           status={viewingPdfProposal.status}
-          technician={viewingPdfProposal.technician || job.assignee || 'Danny Pardo'}
+          technician={viewingPdfProposal.technician || job.assignee || 'Alex Reynolds'}
         />
       )}
     </div>

@@ -1,4 +1,5 @@
 import { CanonicalInvoice } from '../types/invoice';
-import invoicesJson from './invoices.json';
+import { DEMO_INVOICES } from './demo/invoices';
 
-export const CANONICAL_MOCK_INVOICES: CanonicalInvoice[] = invoicesJson as unknown as CanonicalInvoice[];
+export { DEMO_INVOICES };
+export const CANONICAL_MOCK_INVOICES: CanonicalInvoice[] = [...DEMO_INVOICES];

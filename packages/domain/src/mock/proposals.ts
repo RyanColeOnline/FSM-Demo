@@ -1,4 +1,5 @@
 import { CanonicalProposal } from "../types/proposal";
-import proposalsJson from "./proposals.json";
+import { DEMO_PROPOSALS } from "./demo/proposals";
 
-export const CANONICAL_MOCK_PROPOSALS: CanonicalProposal[] = proposalsJson as unknown as CanonicalProposal[];
+export { DEMO_PROPOSALS };
+export const CANONICAL_MOCK_PROPOSALS: CanonicalProposal[] = [...DEMO_PROPOSALS];

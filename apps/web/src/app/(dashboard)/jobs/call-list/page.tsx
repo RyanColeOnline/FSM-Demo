@@ -187,7 +187,7 @@ export default function WexCallListPage() {
             contactName: c.contactName || c.customerName,
             relatedLocation: resolvedLoc || c.relatedLocation || null,
             callType: c.callType || 'Inbound',
-            user: c.user || 'Ethan Mitchell',
+            user: c.user || 'Sarah Jenkins',
           };
         }));
       } else {
@@ -673,10 +673,12 @@ export default function WexCallListPage() {
                 className="h-8 px-3 bg-white border border-slate-300 rounded-md text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2d82b7]/15 focus:border-[#2d82b7] min-w-[140px] cursor-pointer shadow-2xs font-medium"
               >
                 <option value="All">All</option>
-                <option value="Ethan Mitchell">Ethan Mitchell</option>
-                <option value="Robert Hudson">Robert Hudson</option>
-                <option value="Amanda Hoover">Amanda Hoover</option>
-                <option value="Andrew (Jr) Murphy">Andrew (Jr) Murphy</option>
+                <option value="Alex Reynolds">Alex Reynolds</option>
+                <option value="Sarah Jenkins">Sarah Jenkins</option>
+                <option value="Marcus Vance">Marcus Vance</option>
+                <option value="Carlos Mendez">Carlos Mendez</option>
+                <option value="David Ross">David Ross</option>
+                <option value="Tyler Reed">Tyler Reed</option>
               </select>
             </div>
 

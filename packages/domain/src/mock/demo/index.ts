@@ -11,3 +11,6 @@ export * from './warranties';
 export * from './dispatchGroups';
 export * from './processingStatements';
 export * from './proposals';
+export * from './payments';
+export * from './maintenancePlans';
+export * from './notes';

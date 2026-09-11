@@ -49,7 +49,7 @@ export function ViewChecklistModal({
   const [comments, setComments] = useState<string>('');
   const [customerName, setCustomerName] = useState<string>('');
   const [customerSignature, setCustomerSignature] = useState<string>('');
-  const [completedBy, setCompletedBy] = useState<string>('Justin Dunlap');
+  const [completedBy, setCompletedBy] = useState<string>('Alex Reynolds');
 
   // Populate from checklist instance
   useEffect(() => {
@@ -70,9 +70,9 @@ export function ViewChecklistModal({
       setValuesMap(initialValues);
       setSkippedMap(initialSkipped);
       setComments(checklist.comments || 'System inspected and operational. Airflow and electrical readings tested within manufacturer specifications.');
-      setCustomerName(checklist.customerSignatureName || 'Pamela Witt');
-      setCustomerSignature(checklist.customerSignature || 'Pamela Witt');
-      setCompletedBy(checklist.completedBy || 'Justin Dunlap');
+      setCustomerName(checklist.customerSignatureName || 'Eleanor Vance');
+      setCustomerSignature(checklist.customerSignature || 'Eleanor Vance');
+      setCompletedBy(checklist.completedBy || 'Alex Reynolds');
     }
   }, [checklist, definition]);
 

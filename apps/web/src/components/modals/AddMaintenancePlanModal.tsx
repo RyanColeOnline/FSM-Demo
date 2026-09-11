@@ -211,7 +211,7 @@ export function AddMaintenancePlanModal({
     if (customer?.billingAddress) {
       return `${customer.billingAddress.street}, ${customer.billingAddress.city}, ${customer.billingAddress.state} ${customer.billingAddress.zipCode}`;
     }
-    return '639 Serenoa Rd, Santa Rosa Beach, FL 32459';
+    return '1420 Lakeview Drive, Winter Park, FL 32789';
   }, [customer, locationsList]);
 
   const [selectedLocation, setSelectedLocation] = useState(defaultLocation);

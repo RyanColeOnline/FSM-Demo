@@ -225,7 +225,7 @@ export interface ScheduledJob {
   colorHex?: string; // Canonical trip color hex
   dotColor: string; // Circle color (e.g. 'bg-[#be4646]', 'bg-amber-500', 'bg-emerald-500')
   jobType?: string; // e.g. "HVAC", "Appliance service"
-  technicians?: string[]; // e.g. ["*Ethan Mitchell", "Andrew ( Jr) Murphy"]
+  technicians?: string[]; // e.g. ["*Marcus Vance", "David Ross"]
   callNotes?: string; // e.g. "Install 3 ton carrier coastal system..."
   designationOverride?: string | null;
 }
@@ -438,11 +438,11 @@ export function buildHoverDetailsFromJob(
     customerId: job.customerId,
     dateTimeRangeStr: `${dateStr} ${timeRange}`,
     customerName: job.customer,
-    addressLine1: job.addressStreet || '196 Rue Martine',
-    addressLine2: job.addressCityStateZip || 'Miramar Beach, FL 32550',
-    phone: job.phone?.replace('(M):', '').trim() || '(334) 220-1447',
+    addressLine1: job.addressStreet || '1420 Lakeview Drive',
+    addressLine2: job.addressCityStateZip || 'Winter Park, FL 32789',
+    phone: job.phone?.replace('(M):', '').trim() || '(407) 555-8121',
     jobNumberStr: formattedJobNumber,
-    technicians: job.technicians && job.technicians.length > 0 ? job.technicians : ['Ethan Mitchell'],
+    technicians: job.technicians && job.technicians.length > 0 ? job.technicians : ['Marcus Vance'],
     callNotes: job.callNotes || 'Scheduled appointment.',
     posX,
     posY,
@@ -981,15 +981,15 @@ export default function WexSchedulePage() {
       resolvedCustomerId = match ? match.id : (job.customerId || `cust-${job.id}`);
     }
 
-    const rawLoc = (job as any).locationAddress || `${job.addressStreet || '940 Santa Rosa Boulevard'}, ${job.addressCityStateZip || 'Fort Walton Beach, FL 32548'}`;
+    const rawLoc = (job as any).locationAddress || `${job.addressStreet || '1420 Lakeview Drive'}, ${job.addressCityStateZip || 'Winter Park, FL 32789'}`;
     const cleanAddr = formatCleanLocationString(rawLoc);
     setBookingLocation(cleanAddr);
 
     setSelectedCustomerBooking({
       id: resolvedCustomerId,
       name: job.customer,
-      phone: job.phone || '(850) 556-8402',
-      email: 'ryancole464@gmail.com',
+      phone: job.phone || '(407) 555-8121',
+      email: 'eleanor.vance@example.com',
       address: cleanAddr,
     });
     setBookingNewCallContact(job.customer);

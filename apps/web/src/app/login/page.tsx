@@ -1,14 +1,14 @@
 'use client';
 
 /**
- * Clean & Elegant Login Screen for Murphy's Field Portal.
+ * Clean & Elegant Login Screen for Demo FSM Field Portal.
  * Supports Email/Password and Google Sign-In via Firebase Auth.
  */
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, EXPLICIT_SIGN_OUT_KEY } from '@/auth/sessionStore';
-import { Mail, Lock, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, Shield } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui';
 
 function LoginFormContent() {
@@ -21,26 +21,6 @@ function LoginFormContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const handleDemoAdminSignIn = async () => {
-    setErrorMessage(null);
-    setIsSubmitting(true);
-    try {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem(EXPLICIT_SIGN_OUT_KEY);
-      }
-      await signInWithEmail('admin@apex.com', 'Fsmdemo2026!');
-      router.replace('/schedule');
-    } catch (err: any) {
-      console.warn('Demo admin sign-in fallback:', err);
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem(EXPLICIT_SIGN_OUT_KEY);
-      }
-      router.replace('/schedule');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   // Forgot Password modal/view state
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -200,25 +180,6 @@ function LoginFormContent() {
               )}
             </Button>
           </form>
-
-          {/* Quick 1-Click Demo Admin Access */}
-          <div className="pt-1">
-            <button
-              type="button"
-              onClick={handleDemoAdminSignIn}
-              disabled={isSubmitting || isGoogleSubmitting}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-amber-900/20 transition-all cursor-pointer disabled:opacity-50 text-sm"
-            >
-              {isSubmitting ? (
-                <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
-              ) : (
-                <>
-                  <Shield className="w-4 h-4 text-slate-950" />
-                  <span>1-Click Sign In as Demo Admin</span>
-                </>
-              )}
-            </button>
-          </div>
 
           {/* Divider */}
           <div className="relative flex items-center justify-center">

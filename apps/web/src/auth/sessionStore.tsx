@@ -70,7 +70,7 @@ export function getDefaultDemoSession(): UserSession {
 
 function getInitialCachedSession(): { session: UserSession | null; isSandbox: boolean } {
   if (typeof window === 'undefined') {
-    return { session: getDefaultDemoSession(), isSandbox: false };
+    return { session: null, isSandbox: false };
   }
   try {
     const hasExplicitlySignedOut = localStorage.getItem(EXPLICIT_SIGN_OUT_KEY) === 'true';
@@ -111,12 +111,11 @@ function getInitialCachedSession(): { session: UserSession | null; isSandbox: bo
       }
     }
 
-    // Default to the Demo Admin session for seamless demo viewing
-    return { session: getDefaultDemoSession(), isSandbox: false };
+    return { session: null, isSandbox: false };
   } catch (e) {
     console.warn('Failed to load cached session:', e);
   }
-  return { session: getDefaultDemoSession(), isSandbox: false };
+  return { session: null, isSandbox: false };
 }
 
 function persistCachedSession(session: UserSession | null) {
@@ -223,7 +222,10 @@ const SessionContext = createContext<SessionContextType>({
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<UserSession | null>(() => getInitialCachedSession().session);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    return !getInitialCachedSession().session;
+  });
   const [isSandboxOverride, setIsSandboxOverride] = useState<boolean>(() => getInitialCachedSession().isSandbox);
 
   // Initialize and listen to Firebase Auth + Firestore User document
@@ -310,24 +312,10 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
           setIsLoading(false);
         }
       } else {
-        // Unauthenticated
-        const isSignedOut = typeof window !== 'undefined' && localStorage.getItem(EXPLICIT_SIGN_OUT_KEY) === 'true';
-        if (isSignedOut) {
-          setCurrentUser(null);
-          persistCachedSession(null);
-          setIsLoading(false);
-        } else {
-          // If the visitor has not explicitly signed out, auto-authenticate with demo admin credentials
-          try {
-            await signInWithEmailAndPassword(auth, 'admin@apex.com', 'Fsmdemo2026!');
-          } catch (autoErr) {
-            console.warn('Demo background auto-signin fallback to mock demo session:', autoErr);
-            const fallbackSession = getDefaultDemoSession();
-            setCurrentUser(fallbackSession);
-            persistCachedSession(fallbackSession);
-            setIsLoading(false);
-          }
-        }
+        // Unauthenticated visitor
+        setCurrentUser(null);
+        persistCachedSession(null);
+        setIsLoading(false);
       }
     });
 

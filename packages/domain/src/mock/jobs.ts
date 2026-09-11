@@ -1,8 +1,7 @@
 import { CanonicalJob } from "../types/appointment";
-import jobsJson from "./jobs.json";
-import { DEMO_JOBS_SEPT_2026 } from "./demo/demo-appointments-dataset";
+import { DEMO_JOBS } from "./demo/jobs";
 
+export { DEMO_JOBS };
 export const CANONICAL_MOCK_JOBS: CanonicalJob[] = [
-  ...DEMO_JOBS_SEPT_2026,
-  ...(jobsJson as unknown as CanonicalJob[]),
+  ...DEMO_JOBS,
 ];

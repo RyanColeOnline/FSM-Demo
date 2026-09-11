@@ -1,4 +1,5 @@
 import { CanonicalMaintenancePlan } from "../types/maintenancePlan";
-import maintenancePlansJson from "./maintenance_plans.json";
+import { DEMO_MAINTENANCE_PLANS } from "./demo/maintenancePlans";
 
-export const CANONICAL_MOCK_MAINTENANCE_PLANS: CanonicalMaintenancePlan[] = maintenancePlansJson as unknown as CanonicalMaintenancePlan[];
+export { DEMO_MAINTENANCE_PLANS };
+export const CANONICAL_MOCK_MAINTENANCE_PLANS: CanonicalMaintenancePlan[] = [...DEMO_MAINTENANCE_PLANS];

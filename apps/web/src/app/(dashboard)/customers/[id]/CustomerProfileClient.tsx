@@ -307,33 +307,32 @@ export interface CustomerProfileMock {
   }>;
 }
 
-const TAMMY_COHEN_MOCK: CustomerProfileMock = {
+const ELEANOR_VANCE_MOCK: CustomerProfileMock = {
     equipment: [
-      { id: 'eq-tammy-1', name: 'Under counter fridge', mfg: 'Whirlpool', serialNo: 'HR24305472', modelNo: 'WSF26C3EXF01', installDate: '5/10/2024', warranty: 'Active', manufacturerWarrantyStatus: 'Active', status: 'Active', locationStreet: '71 Coquina Pl', locationAddress: '71 Coquina Pl, Santa Rosa Beach, FL 32459' },
-      { id: 'eq-tammy-2', name: 'AHU 3-Ton', mfg: 'Carrier', serialNo: '4124F43670', modelNo: 'FJ4DNXB36', installDate: '1/15/2025', warranty: 'Active', manufacturerWarrantyStatus: 'Active', status: 'Active', locationStreet: '71 Coquina Pl', locationAddress: '71 Coquina Pl, Santa Rosa Beach, FL 32459' },
-      { id: 'eq-tammy-3', name: 'Condenser 3-Ton', mfg: 'Carrier Coastal', serialNo: '1524E06765', modelNo: '25SC536300', installDate: '1/15/2025', warranty: 'Active', manufacturerWarrantyStatus: 'Active', status: 'Active', locationStreet: '71 Coquina Pl', locationAddress: '71 Coquina Pl, Santa Rosa Beach, FL 32459' }
+      { id: 'eq-eleanor-1', name: 'Under counter fridge', mfg: 'Whirlpool', serialNo: 'HR24305472', modelNo: 'WSF26C3EXF01', installDate: '5/10/2024', warranty: 'Active', manufacturerWarrantyStatus: 'Active', status: 'Active', locationStreet: '1420 Lakeview Drive', locationAddress: '1420 Lakeview Drive, Winter Park, FL 32789' },
+      { id: 'eq-eleanor-2', name: 'AHU 3-Ton', mfg: 'Carrier', serialNo: '4124F43670', modelNo: 'FJ4DNXB36', installDate: '1/15/2025', warranty: 'Active', manufacturerWarrantyStatus: 'Active', status: 'Active', locationStreet: '1420 Lakeview Drive', locationAddress: '1420 Lakeview Drive, Winter Park, FL 32789' },
+      { id: 'eq-eleanor-3', name: 'Condenser 3-Ton', mfg: 'Carrier Coastal', serialNo: '1524E06765', modelNo: '25SC536300', installDate: '1/15/2025', warranty: 'Active', manufacturerWarrantyStatus: 'Active', status: 'Active', locationStreet: '1420 Lakeview Drive', locationAddress: '1420 Lakeview Drive, Winter Park, FL 32789' }
     ],
     custType: 'Residential',
     businessName: '',
-    firstName: 'Tammy',
-    lastName: 'Cohen',
-    qbName: 'Cohen, Tammy',
-    mobilePhone: '(205) 335-8038',
+    firstName: 'Eleanor',
+    lastName: 'Vance',
+    qbName: 'Vance, Eleanor',
+    mobilePhone: '(407) 555-8121',
     homePhone: '',
-    email: 'tammy@ccrarchitecture.com',
-    customerNumber: '49106',
+    email: 'eleanor.vance@example.com',
+    customerNumber: 'C-1001',
     stripeCustomerId: 'cus_P873199',
     storedPaymentMethods: [
       { id: 'pm_1Ox94242', brand: 'Visa', last4: '4242', expMonth: 12, expYear: 2028, provider: 'Stripe / Card', stripeCustomerId: 'cus_P873199', isDefault: true },
       { id: 'pm_1Ox98812', brand: 'Mastercard', last4: '8812', expMonth: 8, expYear: 2027, provider: 'Stripe / Card', stripeCustomerId: 'cus_P873199', isDefault: false }
     ],
     locationsList: [
-      { id: 'loc-1', addr1: '71 Coquina Pl', addr2: '', city: 'Santa Rosa Beach', state: 'FL', zip: '32459', description: 'Primary Residence', isDefault: true },
-      { id: 'loc-2', addr1: '395 Tumblehome Way', addr2: '', city: 'Santa Rosa Beach', state: 'FL', zip: '32459', description: 'Vacation Rental', isDefault: false },
-      { id: 'loc-3', addr1: '44 Seacrest Dr', addr2: '', city: 'Panama City', state: 'FL', zip: '32461', description: '', isDefault: false },
+      { id: 'loc-1', addr1: '1420 Lakeview Drive', addr2: '', city: 'Winter Park', state: 'FL', zip: '32789', description: 'Primary Residence', isDefault: true },
+      { id: 'loc-2', addr1: '880 Park Avenue N', addr2: '', city: 'Winter Park', state: 'FL', zip: '32789', description: 'Guest House', isDefault: false },
     ],
     notes: [
-      { id: 'note-1', title: 'Customer Note', meta: 'Wes Ryleskey - 8/8/2026 - 9:54am', content: 'Real cool dude', isPinned: false, location: undefined as string | undefined }
+      { id: 'note-1', title: 'Customer Note', meta: 'Marcus Vance - 8/8/2026 - 9:54am', content: 'Preferred contact via text message.', isPinned: false, location: undefined as string | undefined }
     ],
     invoices: [
       {
@@ -342,9 +341,9 @@ const TAMMY_COHEN_MOCK: CustomerProfileMock = {
         amount: '$160.00',
         issued: '5/28/2026',
         status: 'Presented',
-        billTo: '30A Escapes',
-        location: '395 Tumblehome Way, Santa Rosa Beach, FL 32459',
-        note: 'Service call and FSIM cleaning'
+        billTo: 'Eleanor Vance',
+        location: '1420 Lakeview Drive, Winter Park, FL 32789',
+        note: 'Seasonal maintenance and coil cleaning'
       },
       {
         id: 'inv-131781',
@@ -352,29 +351,9 @@ const TAMMY_COHEN_MOCK: CustomerProfileMock = {
         amount: '$220.00',
         issued: '6/19/2026',
         status: 'Open - Draft',
-        billTo: 'Tammy Cohen',
-        location: '71 Coquina Pl, Santa Rosa Beach, FL 32459',
+        billTo: 'Eleanor Vance',
+        location: '1420 Lakeview Drive, Winter Park, FL 32789',
         note: 'HVAC maintenance checkup'
-      },
-      {
-        id: 'inv-124536',
-        number: '#I-124536',
-        amount: '$307.92',
-        issued: '9/25/2023',
-        status: 'Closed',
-        billTo: '30A VACAY',
-        location: '395 Tumblehome Way, Santa Rosa Beach, FL 32459',
-        note: 'Dryer - The drum is knocking and I believe it needs to be adjusted again. Replaced thermister and installed new speed queen replacement element 9/6/2023. Service call $90.00 + Labor $142.50 + Material $55.28 + Tax $20.15. Installed belt and pulley ATG. Bill out LTD.'
-      },
-      {
-        id: 'inv-116602',
-        number: '#I-116602',
-        amount: '$303.63',
-        issued: '5/01/2023',
-        status: 'Closed',
-        billTo: '30A VACAY',
-        location: '44 Seacrest Dr, Panama City, FL 32461',
-        note: 'Install heating element provided by John. Call Brittany in route 850-687-6270 for access. Replaced thermistor and tested. Invoice in parts ordered folder. Bill out LTD.'
       }
     ],
     proposals: [
@@ -384,8 +363,8 @@ const TAMMY_COHEN_MOCK: CustomerProfileMock = {
         amount: '$1,450.00',
         issued: '5/20/2026',
         status: 'Presented',
-        billTo: '30A Escapes',
-        location: '395 Tumblehome Way, Santa Rosa Beach, FL 32459',
+        billTo: 'Eleanor Vance',
+        location: '1420 Lakeview Drive, Winter Park, FL 32789',
         note: 'Complete HVAC condenser replacement proposal with 5-year warranty included.'
       }
     ],
@@ -393,86 +372,60 @@ const TAMMY_COHEN_MOCK: CustomerProfileMock = {
       {
         id: 'job-130255',
         jobNumber: '#130255',
-        name: 'W- FSIM Cleaning',
+        name: 'Seasonal HVAC Maintenance',
         status: 'Closed',
-        location: '30A Escapes - 395 Tumblehome Way, Santa Rosa Beach, FL 32459',
-        jobType: 'Appliance service',
+        location: '1420 Lakeview Drive, Winter Park, FL 32789',
+        jobType: 'HVAC Maintenance',
         jobTypeColor: 'bg-[#2d82b7]',
-        createdBy: 'Amanda Hoover • 5/28/2026 - 12:05pm',
+        createdBy: 'Sarah Jenkins • 5/28/2026 - 12:05pm',
         payment: { date: '5/30/2026', amount: '$150.00' },
-        invoice: { number: '130255-1', issued: '5/28/2026', amount: '$150.00', status: 'Closed', billTo: '30A Escapes' },
-        proposal: { number: '121074-1', issued: '5/20/2026', amount: '$1,450.00', status: 'Presented', billTo: '30A Escapes', note: 'Complete HVAC condenser replacement proposal with 5-year warranty included.' },
-        note: { date: '5/28/2026 - 12:15pm', body: 'Unit cleaned and tested thoroughly. Operational ATG Wes', author: 'Wes Ryleskey' },
+        invoice: { number: '130255-1', issued: '5/28/2026', amount: '$150.00', status: 'Closed', billTo: 'Eleanor Vance' },
+        proposal: { number: '121074-1', issued: '5/20/2026', amount: '$1,450.00', status: 'Presented', billTo: 'Eleanor Vance', note: 'Complete HVAC condenser replacement proposal with 5-year warranty included.' },
+        note: { date: '5/28/2026 - 12:15pm', body: 'Unit cleaned and tested thoroughly. Operational ATG.', author: 'Marcus Vance' },
         notesList: [
-          { authorDate: 'Wes Ryleskey • 5/28/2026 - 12:15pm', body: 'Unit cleaned and tested thoroughly. Operational ATG Wes' },
+          { authorDate: 'Marcus Vance • 5/28/2026 - 12:15pm', body: 'Unit cleaned and tested thoroughly. Operational ATG.' },
           { authorDate: 'Alex Reynolds • 5/28/2026 - 2:30pm', body: 'Followed up with customer regarding maintenance schedule. All clear.' }
         ],
-        appointment: { date: '5/28/2026, 1:00 pm - 3:00 pm', status: 'Complete', tech: 'Wes Ryleskey' },
+        appointment: { date: '5/28/2026, 1:00 pm - 3:00 pm', status: 'Complete', tech: 'Marcus Vance' },
         call: {
           title: 'Initial Call',
           callType: 'Inbound',
           dateTime: '5/28/2026 - 12:05pm',
-          contact: 'Amanda Hoover (850-555-0192)',
-          location: '395 Tumblehome Way, Santa Rosa Beach, FL 32459',
-          callWith: 'Amanda Hoover',
-          authorDate: 'Amanda Hoover • 5/28/2026 - 12:05pm',
-          note: 'Gate code 4021. Perform FSIM cleaning.'
-        }
-      },
-      {
-        id: 'job-128240',
-        jobNumber: '#128240',
-        name: 'W/FSIM loud noises',
-        status: 'Closed',
-        location: '44 Seacrest Dr, Panama City, FL 32461',
-        jobType: 'Appliance service',
-        jobTypeColor: 'bg-[#2d82b7]',
-        createdBy: 'Nancy Murphy • 4/27/2026 - 10:28am',
-        payment: { date: '4/29/2026', amount: '$180.00' },
-        invoice: { number: '128240-1', issued: '4/27/2026', amount: '$180.00', status: 'Closed', billTo: 'Tammy Cohen' },
-        note: { date: '4/27/2026 - 11:00am', body: 'Adjusted motor mount brackets and cleared noise source.', author: 'Ethan Mitchell' },
-        notesList: [
-          { authorDate: 'Ethan Mitchell • 4/27/2026 - 11:00am', body: 'Adjusted motor mount brackets and cleared noise source.' },
-          { authorDate: 'Nancy Murphy • 4/27/2026 - 1:15pm', body: 'Customer confirmed noise has stopped completely during cycle.' }
-        ],
-        appointment: { date: '4/27/2026, 11:30 am - 1:30 pm', status: 'Complete', tech: 'Ethan Mitchell' },
-        call: {
-          title: 'Initial Call',
-          callType: 'Inbound',
-          dateTime: '4/27/2026 - 10:28am',
-          contact: 'Tammy Cohen (205-335-8038)',
-          location: '44 Seacrest Dr, Panama City, FL 32461',
-          callWith: 'Tammy Cohen',
-          authorDate: 'Nancy Murphy • 4/27/2026 - 10:28am',
-          note: 'Loud noise during wash cycle.'
+          contact: 'Eleanor Vance (407-555-8121)',
+          location: '1420 Lakeview Drive, Winter Park, FL 32789',
+          callWith: 'Eleanor Vance',
+          authorDate: 'Sarah Jenkins • 5/28/2026 - 12:05pm',
+          note: 'Gate code 4021. Perform seasonal HVAC maintenance.'
         }
       }
     ]
 };
 
 const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
-  'cust-1': TAMMY_COHEN_MOCK,
-  '49106': TAMMY_COHEN_MOCK,
-  'tammy-cohen': TAMMY_COHEN_MOCK,
-  'cust-tammy-cohen': TAMMY_COHEN_MOCK,
+  'cust-1': ELEANOR_VANCE_MOCK,
+  'cust-res-01': ELEANOR_VANCE_MOCK,
+  '49106': ELEANOR_VANCE_MOCK,
+  'C-1001': ELEANOR_VANCE_MOCK,
+  'eleanor-vance': ELEANOR_VANCE_MOCK,
+  'cust-eleanor-vance': ELEANOR_VANCE_MOCK,
   'cust-2': {
     custType: 'Commercial',
-    businessName: '179 Enchanted Way LLC',
-    firstName: 'Sarah',
-    lastName: 'Jenkins',
-    qbName: '179 Enchanted Way LLC',
-    mobilePhone: '(855) 026-0161',
-    homePhone: '(850) 231-9000',
-    email: 'contact@enchantedway.com',
-    customerNumber: '50219',
+    businessName: 'Magnolia Bay Bistro',
+    firstName: 'Marcus',
+    lastName: 'Vance',
+    qbName: 'Magnolia Bay Bistro',
+    mobilePhone: '(407) 555-4321',
+    homePhone: '(407) 555-4320',
+    email: 'contact@magnoliabaybistro.com',
+    customerNumber: 'C-2001',
     locationsList: [
-      { id: 'loc-21', addr1: '179 Enchanted Way', city: 'Santa Rosa Beach', state: 'FL', zip: '32459', description: 'Commercial Facility', isDefault: true }
+      { id: 'loc-com-01-a', addr1: '450 S Orange Ave', city: 'Orlando', state: 'FL', zip: '32801', description: 'Main Restaurant', isDefault: true }
     ],
     notes: [
-      { id: 'note-21', title: 'Customer Note', meta: 'Amanda Hoover - Jan 14, 2026 10:15am', content: 'Commercial property manager requires gate code before dispatching.' }
+      { id: 'note-21', title: 'Customer Note', meta: 'Sarah Jenkins - Jan 14, 2026 10:15am', content: 'Kitchen entrance at rear alley. Call manager prior to arrival.' }
     ],
     invoices: [
-      { id: 'inv-131400', number: '#I-131400', amount: '$350.00', issued: '1/14/2026', status: 'Closed', billTo: '179 Enchanted Way LLC', location: '179 Enchanted Way, Santa Rosa Beach, FL 32459' }
+      { id: 'inv-131400', number: '#I-131400', amount: '$350.00', issued: '1/14/2026', status: 'Closed', billTo: 'Magnolia Bay Bistro', location: '450 S Orange Ave, Orlando, FL 32801' }
     ],
     proposals: [
       {
@@ -481,61 +434,61 @@ const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
         amount: '$2,800.00',
         issued: '1/10/2026',
         status: 'Signed',
-        billTo: '179 Enchanted Way LLC',
-        location: '179 Enchanted Way, Santa Rosa Beach, FL 32459',
-        note: 'Commercial rooftop air handling unit retrofit proposal.'
+        billTo: 'Magnolia Bay Bistro',
+        location: '450 S Orange Ave, Orlando, FL 32801',
+        note: 'Walk-in freezer condenser retrofit proposal.'
       }
     ],
     jobs: [
       {
         id: 'job-131400',
         jobNumber: '#131400',
-        name: 'Commercial HVAC Tuneup',
+        name: 'Commercial Refrigeration Tuneup',
         status: 'Closed',
-        location: '179 Enchanted Way, Santa Rosa Beach, FL 32459',
+        location: '450 S Orange Ave, Orlando, FL 32801',
         jobType: 'HVAC Maintenance',
         jobTypeColor: 'bg-[#38a169]',
-        createdBy: 'Ethan Mitchell - Jan 14, 2026 9:00am',
+        createdBy: 'Sarah Jenkins - Jan 14, 2026 9:00am',
         payment: { date: '1/15/2026', amount: '$350.00' },
-        invoice: { number: '131400-1', issued: '1/14/2026', amount: '$350.00', status: 'Closed', billTo: '179 Enchanted Way LLC' },
-        proposal: { number: '119840-1', issued: '1/10/2026', amount: '$2,800.00', status: 'Signed', billTo: '179 Enchanted Way LLC', note: 'Commercial rooftop air handling unit retrofit proposal.' },
+        invoice: { number: '131400-1', issued: '1/14/2026', amount: '$350.00', status: 'Closed', billTo: 'Magnolia Bay Bistro' },
+        proposal: { number: '119840-1', issued: '1/10/2026', amount: '$2,800.00', status: 'Signed', billTo: 'Magnolia Bay Bistro', note: 'Walk-in freezer condenser retrofit proposal.' },
         note: { date: '1/14/2026, 10:30am EST', body: 'Replaced air filters and inspected dual compressors. All clear.' },
         notesList: [
-          { authorDate: 'Ethan Mitchell - Jan 14, 2026 10:30am', body: 'Replaced air filters and inspected dual compressors. All clear.' },
-          { authorDate: 'Amanda Hoover - Jan 14, 2026 3:45pm', body: 'Digital checklist uploaded to commercial account portal.' }
+          { authorDate: 'Sarah Jenkins - Jan 14, 2026 10:30am', body: 'Replaced air filters and inspected dual compressors. All clear.' },
+          { authorDate: 'Alex Reynolds - Jan 14, 2026 3:45pm', body: 'Digital checklist uploaded to commercial account portal.' }
         ],
-        appointment: { date: '1/14/2026, 9:00 am - 11:00 am EST', status: 'Complete', tech: 'Ethan Mitchell' },
+        appointment: { date: '1/14/2026, 9:00 am - 11:00 am EST', status: 'Complete', tech: 'Sarah Jenkins' },
         call: {
           title: 'Initial Call',
           callType: 'Inbound',
           dateTime: 'Jan 14, 2026 8:30am',
-          contact: 'Sarah Jenkins (855-026-0161)',
-          location: '179 Enchanted Way, Santa Rosa Beach, FL 32459',
-          callWith: 'Sarah Jenkins',
-          authorDate: 'Ethan Mitchell - Jan 14, 2026 8:30am',
-          note: 'Perform bi-annual commercial HVAC maintenance.'
+          contact: 'Marcus Vance (407-555-4321)',
+          location: '450 S Orange Ave, Orlando, FL 32801',
+          callWith: 'Marcus Vance',
+          authorDate: 'Sarah Jenkins - Jan 14, 2026 8:30am',
+          note: 'Perform bi-annual commercial refrigeration maintenance.'
         }
       }
     ]
   },
   'cust-3': {
-    custType: 'Commercial',
-    businessName: '21 First Mortgage',
-    firstName: 'Marcus',
-    lastName: 'Vance',
-    qbName: '21 First Mortgage',
-    mobilePhone: '(850) 582-7446',
+    custType: 'Residential',
+    businessName: '',
+    firstName: 'Aris',
+    lastName: 'Thorne',
+    qbName: 'Thorne, Aris',
+    mobilePhone: '(407) 555-9204',
     homePhone: '',
-    email: 'm.vance@firstmortgage21.com',
-    customerNumber: '51042',
+    email: 'dr.thorne@winterparkclinic.com',
+    customerNumber: 'C-1002',
     locationsList: [
-      { id: 'loc-31', addr1: '4000 Gulf Terrace 294', city: 'Destin', state: 'FL', zip: '32541', description: 'Headquarters', isDefault: true }
+      { id: 'loc-31', addr1: '1200 Lake Baldwin Ln', city: 'Orlando', state: 'FL', zip: '32814', description: 'Primary Residence', isDefault: true }
     ],
     notes: [
-      { id: 'note-31', title: 'Customer Note', meta: 'Wes Ryleskey - Nov 05, 2025 2:20pm', content: 'Prefers afternoon appointments after 1:00 PM.' }
+      { id: 'note-31', title: 'Customer Note', meta: 'Alex Reynolds - Nov 05, 2025 2:20pm', content: 'Prefers afternoon appointments after 1:00 PM.' }
     ],
     invoices: [
-      { id: 'inv-129980', number: '#I-129980', amount: '$225.00', issued: '11/05/2025', status: 'Closed', billTo: '21 First Mortgage', location: '4000 Gulf Terrace 294, Destin, FL 32541' }
+      { id: 'inv-129980', number: '#I-129980', amount: '$225.00', issued: '11/05/2025', status: 'Closed', billTo: 'Dr. Aris Thorne', location: '1200 Lake Baldwin Ln, Orlando, FL 32814' }
     ],
     jobs: [
       {
@@ -543,26 +496,25 @@ const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
         jobNumber: '#129980',
         name: 'Plumbing Leak Inspection',
         status: 'Closed',
-        location: '4000 Gulf Terrace 294, Destin, FL 32541',
+        location: '1200 Lake Baldwin Ln, Orlando, FL 32814',
         jobType: 'Plumbing Service',
         jobTypeColor: 'bg-[#d69e2e]',
-        createdBy: 'Wes Ryleskey - Nov 05, 2025 1:15pm',
+        createdBy: 'Alex Reynolds - Nov 05, 2025 1:15pm',
         payment: { date: '11/06/2025', amount: '$225.00' },
-        invoice: { number: '129980-1', issued: '11/05/2025', amount: '$225.00', status: 'Closed', billTo: '21 First Mortgage' },
+        invoice: { number: '129980-1', issued: '11/05/2025', amount: '$225.00', status: 'Closed', billTo: 'Dr. Aris Thorne' },
         note: { date: '11/05/2025, 3:00pm EST', body: 'Tightened shutoff valve under breakroom sink and pressure tested.' },
         notesList: [
-          { authorDate: 'Wes Ryleskey - Nov 05, 2025 3:00pm', body: 'Tightened shutoff valve under breakroom sink and pressure tested.' },
-          { authorDate: 'Alex Reynolds - Nov 05, 2025 4:10pm', body: 'Cleaned work site and verified no further moisture under cabinet.' }
+          { authorDate: 'Alex Reynolds - Nov 05, 2025 3:00pm', body: 'Tightened shutoff valve under breakroom sink and pressure tested.' }
         ],
-        appointment: { date: '11/05/2025, 2:00 pm - 4:00 pm EST', status: 'Complete', tech: 'Wes Ryleskey' },
+        appointment: { date: '11/05/2025, 2:00 pm - 4:00 pm EST', status: 'Complete', tech: 'Alex Reynolds' },
         call: {
           title: 'Initial Call',
           callType: 'Inbound',
           dateTime: 'Nov 05, 2025 1:15pm',
-          contact: 'Marcus Vance (850-582-7446)',
-          location: '4000 Gulf Terrace 294, Destin, FL 32541',
-          callWith: 'Marcus Vance',
-          authorDate: 'Wes Ryleskey - Nov 05, 2025 1:15pm',
+          contact: 'Dr. Aris Thorne (407-555-9204)',
+          location: '1200 Lake Baldwin Ln, Orlando, FL 32814',
+          callWith: 'Dr. Aris Thorne',
+          authorDate: 'Alex Reynolds - Nov 05, 2025 1:15pm',
           note: 'Water pooling under breakroom sink.'
         }
       }
@@ -570,22 +522,22 @@ const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
   },
   'cust-4': {
     custType: 'Commercial',
-    businessName: '229 Holdings LLC',
-    firstName: 'Andy',
-    lastName: 'Boyett',
-    qbName: '229 Holdings LLC',
-    mobilePhone: '(229) 435-0911',
+    businessName: 'Highland Park Center',
+    firstName: 'Samantha',
+    lastName: 'Hayes',
+    qbName: 'Highland Park Center',
+    mobilePhone: '(407) 555-9012',
     homePhone: '',
-    email: 'andy.boyett@metropower.com',
-    customerNumber: '52891',
+    email: 'contact@highlandparkcenter.com',
+    customerNumber: 'C-2002',
     locationsList: [
-      { id: 'loc-41', addr1: 'P.O. Box 71207', city: 'Albany', state: 'GA', zip: '31708', description: 'Corporate Office', isDefault: true }
+      { id: 'loc-41', addr1: '880 Park Avenue N', city: 'Winter Park', state: 'FL', zip: '32789', description: 'Main Office', isDefault: true }
     ],
     notes: [
-      { id: 'note-41', title: 'Customer Note', meta: 'Amanda Hoover - Oct 20, 2025 11:40am', content: 'Send digital invoices to accounting department.' }
+      { id: 'note-41', title: 'Customer Note', meta: 'Carlos Mendez - Oct 20, 2025 11:40am', content: 'Send digital invoices to accounting department.' }
     ],
     invoices: [
-      { id: 'inv-127500', number: '#I-127500', amount: '$410.00', issued: '10/20/2025', status: 'Closed', billTo: '229 Holdings LLC', location: 'P.O. Box 71207, Albany, GA 31708' }
+      { id: 'inv-127500', number: '#I-127500', amount: '$410.00', issued: '10/20/2025', status: 'Closed', billTo: 'Highland Park Center', location: '880 Park Avenue N, Winter Park, FL 32789' }
     ],
     jobs: [
       {
@@ -593,26 +545,25 @@ const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
         jobNumber: '#127500',
         name: 'Electrical Panel Inspection',
         status: 'Closed',
-        location: 'P.O. Box 71207, Albany, GA 31708',
+        location: '880 Park Avenue N, Winter Park, FL 32789',
         jobType: 'Electrical Service',
         jobTypeColor: 'bg-[#805ad5]',
-        createdBy: 'Alex Reynolds - Oct 20, 2025 10:00am',
+        createdBy: 'Carlos Mendez - Oct 20, 2025 10:00am',
         payment: { date: '10/22/2025', amount: '$410.00' },
-        invoice: { number: '127500-1', issued: '10/20/2025', amount: '$410.00', status: 'Closed', billTo: '229 Holdings LLC' },
+        invoice: { number: '127500-1', issued: '10/20/2025', amount: '$410.00', status: 'Closed', billTo: 'Highland Park Center' },
         note: { date: '10/20/2025, 11:30am EST', body: 'Re-torqued main breaker connections and balanced load.' },
         notesList: [
-          { authorDate: 'Alex Reynolds - Oct 20, 2025 11:30am', body: 'Re-torqued main breaker connections and balanced load.' },
-          { authorDate: 'Amanda Hoover - Oct 20, 2025 2:00pm', body: 'Panel inspection report emailed to accounting department.' }
+          { authorDate: 'Carlos Mendez - Oct 20, 2025 11:30am', body: 'Re-torqued main breaker connections and balanced load.' }
         ],
-        appointment: { date: '10/20/2025, 10:00 am - 12:00 pm EST', status: 'Complete', tech: 'Alex Reynolds' },
+        appointment: { date: '10/20/2025, 10:00 am - 12:00 pm EST', status: 'Complete', tech: 'Carlos Mendez' },
         call: {
           title: 'Initial Call',
           callType: 'Inbound',
           dateTime: 'Oct 20, 2025 9:30am',
-          contact: 'Andy Boyett (229-435-0911)',
-          location: 'P.O. Box 71207, Albany, GA 31708',
-          callWith: 'Andy Boyett',
-          authorDate: 'Alex Reynolds - Oct 20, 2025 9:30am',
+          contact: 'Samantha Hayes (407-555-9012)',
+          location: '880 Park Avenue N, Winter Park, FL 32789',
+          callWith: 'Samantha Hayes',
+          authorDate: 'Carlos Mendez - Oct 20, 2025 9:30am',
           note: 'Breaker trip inquiry and panel inspection.'
         }
       }
@@ -696,7 +647,7 @@ function StripeProcessPaymentForm({
           className="mt-0.5 rounded border-slate-300 text-[#be4646] focus:ring-[#be4646] cursor-pointer shrink-0"
         />
         <label htmlFor="processAuthCheckModal" className="text-xs text-slate-700 leading-snug cursor-pointer font-medium">
-          The account holder has authorized Murphy's Home Services, Inc to debit their account for the amount above using the payment method provided.
+          The account holder has authorized Apex Field Solutions, Inc to debit their account for the amount above using the payment method provided.
         </label>
       </div>
 
@@ -2199,11 +2150,11 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
   // Add New Card Modal State (Stripe Elements Style)
   const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
   const [setupIntentClientSecret, setSetupIntentClientSecret] = useState<string | null>(null);
-  const [stripeCardName, setStripeCardName] = useState(currentMockData.name || 'Tammy Cohen');
+  const [stripeCardName, setStripeCardName] = useState(currentMockData.name || 'Eleanor Vance');
   const [stripeCardNumber, setStripeCardNumber] = useState('');
   const [stripeCardExp, setStripeCardExp] = useState('');
   const [stripeCardCvv, setStripeCardCvv] = useState('');
-  const [stripeCardZip, setStripeCardZip] = useState('32459');
+  const [stripeCardZip, setStripeCardZip] = useState('32789');
   const [stripeIsDefault, setStripeIsDefault] = useState(true);
 
   // State Reset Helpers (Requirement 7: Reset state entirely when closed and reopened)
@@ -2232,11 +2183,11 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
   };
 
   const resetAddCardState = () => {
-    setStripeCardName(currentMockData.name || 'Tammy Cohen');
+    setStripeCardName(currentMockData.name || 'Eleanor Vance');
     setStripeCardNumber('');
     setStripeCardExp('');
     setStripeCardCvv('');
-    setStripeCardZip('32459');
+    setStripeCardZip('32789');
     setStripeIsDefault(true);
   };
 
@@ -2426,11 +2377,11 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
         type: custType === 'Commercial' ? 'commercial' : 'residential',
         isDefault: true,
       } : (currentDbCustomer?.address || {
-        street: '71 Coquina Pl',
+        street: '1420 Lakeview Drive',
         addressLine2: '',
-        city: 'Santa Rosa Beach',
+        city: 'Winter Park',
         state: 'FL',
-        zipCode: '32459',
+        zipCode: '32789',
         type: custType === 'Commercial' ? 'commercial' : 'residential',
         isDefault: true,
       }),
@@ -2504,11 +2455,11 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
   >([
     {
       id: 'b-1',
-      addr1: currentMockData.locationsList[0]?.addr1 || '71 Coquina Pl',
+      addr1: currentMockData.locationsList[0]?.addr1 || '1420 Lakeview Drive',
       addr2: '',
-      city: currentMockData.locationsList[0]?.city || 'Santa Rosa Beach',
+      city: currentMockData.locationsList[0]?.city || 'Winter Park',
       state: currentMockData.locationsList[0]?.state || 'FL',
-      zip: currentMockData.locationsList[0]?.zip || '32459',
+      zip: currentMockData.locationsList[0]?.zip || '32789',
       description: '',
       isDefault: true,
     },
@@ -2910,14 +2861,14 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
   const [bookingSubTab, setBookingSubTab] = useState<'appointment' | 'notes' | 'balance' | 'maintenance' | 'equipment'>('appointment');
   const [bookingSelectedJob, setBookingSelectedJob] = useState('New Job');
   const [bookingJobType, setBookingJobType] = useState('Appliance service');
-  const [bookingPhoneNumber, setBookingPhoneNumber] = useState('(205) 335-8038');
+  const [bookingPhoneNumber, setBookingPhoneNumber] = useState('(407) 555-8121');
   const [bookingCallNotes, setBookingCallNotes] = useState('');
   const [showQuickEditLocations, setShowQuickEditLocations] = useState(false);
   // Full Appointment Form State (Identical to schedule/page.tsx)
   const [bookingDate, setBookingDate] = useState('2026-08-12');
   const [bookingFrequency, setBookingFrequency] = useState('one time');
   const [bookingAssignLater, setBookingAssignLater] = useState(false);
-  const [bookingPrimaryTech, setBookingPrimaryTech] = useState('Wes Ryleskey');
+  const [bookingPrimaryTech, setBookingPrimaryTech] = useState('Marcus Vance');
   const [bookingAdditionalTech, setBookingAdditionalTech] = useState('');
   const [bookingStartHour, setBookingStartHour] = useState('9');
   const [bookingStartMin, setBookingStartMin] = useState('00');
@@ -2929,13 +2880,13 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
   const [reqDurationHour, setReqDurationHour] = useState('1 hour');
   const [reqDurationMin, setReqDurationMin] = useState('00 min');
   const [reqMinTechLevel, setReqMinTechLevel] = useState('Level 1');
-  const [allTechNamesList] = useState(['Wes Ryleskey', 'Ethan Mitchell', 'Marcus Vance', 'Amanda Hoover', 'Alex Reynolds']);
+  const [allTechNamesList] = useState(['Alex Reynolds', 'Sarah Jenkins', 'Marcus Vance', 'Carlos Mendez', 'David Ross', 'Tyler Reed']);
 
   // Primary Appointment Contact Inline State (Matching schedule/page.tsx)
   const [showPrimaryApptContact, setShowPrimaryApptContact] = useState(false);
-  const [primaryApptContactPerson, setPrimaryApptContactPerson] = useState('Tammy Cohen');
+  const [primaryApptContactPerson, setPrimaryApptContactPerson] = useState('Eleanor Vance');
   const [primaryApptContactType, setPrimaryApptContactType] = useState('SMS');
-  const [primaryApptContactValue, setPrimaryApptContactValue] = useState('(205) 335-8038');
+  const [primaryApptContactValue, setPrimaryApptContactValue] = useState('(407) 555-8121');
 
   // Appointment Notifications Toggles (Matching schedule/page.tsx)
   const [notifyScheduled, setNotifyScheduled] = useState(true);
@@ -3004,7 +2955,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
 
   const openEditNoteModal = (noteItem: any) => {
     setEditingNote(noteItem);
-    setEditNoteLocation(noteItem.location || '71 Coquina Pl, Santa Rosa Beach, FL 32459');
+    setEditNoteLocation(noteItem.location || '1420 Lakeview Drive, Winter Park, FL 32789');
     setEditNoteText(noteItem.content || '');
   };
 
@@ -6230,8 +6181,8 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
                 <div className="flex justify-between items-start border-b border-slate-200 pb-6">
                   <div>
                     <h2 className="text-2xl font-bold text-[#be4646]">INVOICE</h2>
-                    <p className="text-xs text-slate-500 font-semibold mt-1">Murphy's Home Services</p>
-                    <p className="text-xs text-slate-500">Santa Rosa Beach, FL 32459</p>
+                    <p className="text-xs text-slate-500 font-semibold mt-1">Apex Field Solutions</p>
+                    <p className="text-xs text-slate-500">Winter Park, FL 32789</p>
                   </div>
                   <div className="text-right text-xs text-slate-600 space-y-1">
                     <div><span className="font-semibold text-slate-800">Invoice #:</span> {selectedPdfInvoice.number}</div>

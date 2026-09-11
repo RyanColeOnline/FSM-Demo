@@ -76,6 +76,10 @@ export interface CanonicalInvoice {
   signatureUrl?: string | null;
   signatureName?: string | null;
   signatureDate?: string | null;
+  stripePaymentIntentId?: string | null;
+  stripeCustomerId?: string | null;
+  qbInvoiceId?: string | null;
+  wexLegacyId?: string | null;
   isArchived?: boolean;
   archivedAt?: string | null;
   createdAt: string;

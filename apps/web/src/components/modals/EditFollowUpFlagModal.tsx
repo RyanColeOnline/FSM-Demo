@@ -102,7 +102,7 @@ export function EditFollowUpFlagModal({
   useEffect(() => {
     if (job) {
       setModalFollowUpType(job.followUpType || 'Need Quote/Autho');
-      setModalAssignee(job.assignee || 'Justin Dunlap');
+      setModalAssignee(job.assignee || 'Alex Reynolds');
       setModalDueDate(job.dueDate || '');
       setModalFlagComplete(job.isFlagComplete || false);
       setModalNotes(job.notes ? job.notes.map((n) => ({ ...n, isEditing: false })) : []);

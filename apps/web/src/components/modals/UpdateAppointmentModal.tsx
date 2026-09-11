@@ -404,17 +404,17 @@ export function UpdateAppointmentModal({
 
   const currentCustomer = useMemo(() => {
     const raw = liveCustomer || customer || {
-      id: 'cust-pamela',
-      name: 'Pamela Witt',
-      phone: '(850) 555-0143',
-      email: 'pamela.witt@example.com',
-      address: '50 Hillcrest Dr, Shalimar, FL 32579',
+      id: 'cust-res-01',
+      name: 'Eleanor Vance',
+      phone: '(407) 555-8121',
+      email: 'eleanor.vance@example.com',
+      address: '1420 Lakeview Drive, Winter Park, FL 32789',
       balance: '$0.00',
     };
     return {
       ...raw,
       address: formatAddrString(raw.address) || '',
-      phone: typeof raw.phone === 'string' ? raw.phone : '(850) 555-0100',
+      phone: typeof raw.phone === 'string' ? raw.phone : '(407) 555-8121',
       balance: typeof raw.balance === 'string' ? raw.balance : '$0.00',
     };
   }, [liveCustomer, customer]);
@@ -1190,7 +1190,7 @@ function formatInstallDate(rawDate?: string | null): string {
             jobNumber: jNum || undefined,
             authorId: 'usr-staff',
             authorRole: 'Staff',
-            authorName: 'Ethan Mitchell',
+            authorName: 'Sarah Jenkins',
             title: 'Appointment Call Note',
             content: bookingCallNotes.trim(),
             isPinned: false,
@@ -1316,7 +1316,7 @@ function formatInstallDate(rawDate?: string | null): string {
                   <div className="text-[11px] text-slate-600 space-x-3">
                     <span>H: N/A</span>
                     <span>M: {currentCustomer.phone.replace(/[^0-9()-]/g, '')}</span>
-                    <span>Email: {currentCustomer.email || 'pamela.witt@example.com'}</span>
+                    <span>Email: {currentCustomer.email || 'eleanor.vance@example.com'}</span>
                   </div>
                 </div>
 

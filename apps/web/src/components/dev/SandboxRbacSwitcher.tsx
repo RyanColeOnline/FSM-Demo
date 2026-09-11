@@ -2,7 +2,7 @@
 
 /**
  * SandboxRbacSwitcher: Developer & Admin preview widget for instant RBAC & Database Mode routing.
- * Strictly gated: Only visible to authorized administrator Justin Lung in production/staging builds.
+ * Strictly gated: Only visible to authorized administrators in production/staging builds.
  * Hidden completely for external testers.
  */
 
@@ -24,7 +24,7 @@ export function SandboxRbacSwitcher() {
   const isAuthorizedAdmin =
     userEmail === 'admin@apex.com' ||
     currentUser?.accountType === 'admin' ||
-    userEmail === 'justinlung@murphyshomeservices.com' ||
+    currentUser?.id === 'demo-admin-uid' ||
     currentUser?.id === 'usr-admin';
 
   if (!isAuthorizedAdmin) {

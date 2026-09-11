@@ -1,4 +1,5 @@
 import { CanonicalNote } from '../types/note';
-import notesJson from './notes.json';
+import { DEMO_NOTES } from './demo/notes';
 
-export const CANONICAL_MOCK_NOTES: CanonicalNote[] = notesJson as unknown as CanonicalNote[];
+export { DEMO_NOTES };
+export const CANONICAL_MOCK_NOTES: CanonicalNote[] = [...DEMO_NOTES];

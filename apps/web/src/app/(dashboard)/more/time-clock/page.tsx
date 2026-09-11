@@ -38,103 +38,80 @@ export interface EmployeeTimesheet {
 
 const mockTimesheets: EmployeeTimesheet[] = [
   {
-    employeeId: 'emp-1',
-    employeeName: 'Andrew (Jr) Murphy',
+    employeeId: 'demo-tech-hvac-1',
+    employeeName: 'Marcus Vance',
     hasManualEntries: true,
-    totalPeriodSeconds: 102358, // 28h 25m
+    totalPeriodSeconds: 144000, // 40h
     entries: [
       {
         id: 'entry-101',
-        date: '2026-08-03',
-        clockIn: '11:31 AM',
-        clockOut: '11:59 PM',
-        durationSeconds: 44911,
+        date: '2026-09-07',
+        clockIn: '08:00 AM',
+        clockOut: '05:00 PM',
+        durationSeconds: 32400,
       },
       {
         id: 'entry-102',
-        date: '2026-08-07',
-        clockIn: '08:02 AM',
-        clockOut: '11:59 PM',
-        durationSeconds: 57448,
+        date: '2026-09-08',
+        clockIn: '07:45 AM',
+        clockOut: '04:30 PM',
+        durationSeconds: 31500,
       },
     ],
   },
   {
-    employeeId: 'emp-2',
-    employeeName: 'Justin Lung',
+    employeeId: 'demo-tech-appliance-1',
+    employeeName: 'David Ross',
     hasManualEntries: true,
-    totalPeriodSeconds: 188995, // 52h 29m
+    totalPeriodSeconds: 151200, // 42h
     entries: [
       {
         id: 'entry-201',
-        date: '2026-08-03',
-        clockIn: '08:37 AM',
-        clockOut: '05:35 PM',
-        durationSeconds: 32239,
+        date: '2026-09-07',
+        clockIn: '08:15 AM',
+        clockOut: '05:15 PM',
+        durationSeconds: 32400,
       },
       {
         id: 'entry-202',
-        date: '2026-08-04',
-        clockIn: '08:03 AM',
-        clockOut: '06:12 PM',
-        durationSeconds: 36545,
-      },
-      {
-        id: 'entry-203',
-        date: '2026-08-05',
-        clockIn: '08:37 AM',
-        clockOut: '11:59 PM',
-        durationSeconds: 55329,
-      },
-      {
-        id: 'entry-204',
-        date: '2026-08-06',
-        clockIn: '07:58 AM',
-        clockOut: '06:19 PM',
-        durationSeconds: 37270,
-      },
-      {
-        id: 'entry-205',
-        date: '2026-08-07',
-        clockIn: '08:13 AM',
-        clockOut: '03:54 PM',
-        durationSeconds: 27612,
+        date: '2026-09-08',
+        clockIn: '08:00 AM',
+        clockOut: '05:00 PM',
+        durationSeconds: 32400,
       },
     ],
   },
   {
-    employeeId: 'emp-3',
-    employeeName: 'Justin Dunlap',
-    hasManualEntries: true,
-    totalPeriodSeconds: 58562, // 16h 16m
+    employeeId: 'demo-tech-hvac-2',
+    employeeName: 'Carlos Mendez',
+    hasManualEntries: false,
+    totalPeriodSeconds: 136800, // 38h
     entries: [
       {
         id: 'entry-301',
-        date: '2026-08-03',
-        clockIn: '06:57 AM',
-        clockOut: '02:23 PM',
-        durationSeconds: 26764,
+        date: '2026-09-07',
+        clockIn: '08:00 AM',
+        clockOut: '04:30 PM',
+        durationSeconds: 30600,
       },
       {
         id: 'entry-302',
-        date: '2026-08-04',
-        clockIn: '07:02 AM',
-        clockOut: '03:53 PM',
-        durationSeconds: 31798,
+        date: '2026-09-08',
+        clockIn: '08:00 AM',
+        clockOut: '04:30 PM',
+        durationSeconds: 30600,
       },
     ],
   },
 ];
 
 const mockStaffDirectory = [
-  'Andrew Murphy',
-  'Justin Lung',
-  'Justin Dunlap',
-  'Sarah Miller',
-  'David Smith',
-  'Jessica Vance',
-  'Robert Davis',
-  'Emily Wilson',
+  'Alex Reynolds',
+  'Sarah Jenkins',
+  'Marcus Vance',
+  'Carlos Mendez',
+  'David Ross',
+  'Tyler Reed',
 ];
 
 const hoursList = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];

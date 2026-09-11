@@ -1,4 +1,5 @@
 import { CanonicalCustomer } from '../types/customer';
-import customersJson from './customers.json';
+import { DEMO_CUSTOMERS } from './demo/customers';
 
-export const CANONICAL_MOCK_CUSTOMERS: CanonicalCustomer[] = customersJson as unknown as CanonicalCustomer[];
+export { DEMO_CUSTOMERS };
+export const CANONICAL_MOCK_CUSTOMERS: CanonicalCustomer[] = [...DEMO_CUSTOMERS];

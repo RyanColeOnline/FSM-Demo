@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/ensure-standalone.js",
+    "build": "next build --webpack && node scripts/ensure-standalone.js",
     "start": "next start",
-    "pre-push": "tsc --noEmit && next build",
+    "pre-push": "tsc --noEmit && next build --webpack",
     "lint": "next lint"
   },
   "dependencies": {

@@ -1,4 +1,5 @@
-import { CanonicalEquipment } from "../types/equipment";
-import equipmentJson from "./equipment.json";
+import { CanonicalEquipment } from '../types/equipment';
+import { DEMO_EQUIPMENT } from './demo/equipment';
 
-export const CANONICAL_MOCK_EQUIPMENT: CanonicalEquipment[] = (equipmentJson as unknown) as CanonicalEquipment[];
+export { DEMO_EQUIPMENT };
+export const CANONICAL_MOCK_EQUIPMENT: CanonicalEquipment[] = [...DEMO_EQUIPMENT];

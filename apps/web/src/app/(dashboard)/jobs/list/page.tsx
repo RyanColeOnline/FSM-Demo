@@ -154,173 +154,7 @@ interface JobRecord {
   notes?: FlagNoteEntry[];
 }
 
-const initialJobs: JobRecord[] = [
-  {
-    id: 'job-1',
-    dateCreated: '8/09/2026',
-    jobNumber: '134186',
-    customerName: 'Dom Villareal',
-    locationAddress: {
-      name: 'Dom Villareal',
-      street: '4232 Beachside 2',
-      cityStateZip: 'Miramar Beach, FL 32550',
-    },
-    jobTypeBadge: 'HVAC SERVICE',
-    status: 'Opened',
-    isFlagged: true,
-    followUpType: 'Need Quote/Autho',
-    assignee: 'Justin Dunlap',
-    dueDate: '2026-08-15',
-    isFlagComplete: false,
-    notes: [
-      {
-        id: 'note-1',
-        authorName: 'Ethan Mitchell',
-        timestamp: '8/07/2026, 4:44 pm',
-        text: 'Need quote on new compressor unit and refrigerant recharge.',
-        isEditing: false,
-      },
-      {
-        id: 'note-2',
-        authorName: 'Sarah Miller',
-        timestamp: '8/08/2026, 9:15 am',
-        text: 'Customer requested written authorization before proceeding.',
-        isEditing: false,
-      },
-    ],
-  },
-  {
-    id: 'job-2',
-    dateCreated: '8/08/2026',
-    jobNumber: '134183',
-    customerName: '360 Blue, LLC',
-    locationAddress: {
-      name: '360 Blue, LLC',
-      street: '69 Running Oak Cr',
-      cityStateZip: 'Santa Rosa Beach, FL 32459',
-    },
-    jobTypeBadge: 'HVAC SERVICE',
-    status: 'Opened',
-    isFlagged: true,
-    followUpType: 'Need Quote/Autho',
-    assignee: 'Justin Dunlap',
-    notes: [
-      {
-        id: 'note-3',
-        authorName: 'David Smith',
-        timestamp: '8/08/2026, 11:30 am',
-        text: 'Awaiting landlord approval for unit replacement.',
-        isEditing: false,
-      },
-    ],
-  },
-  {
-    id: 'job-3',
-    dateCreated: '8/07/2026',
-    jobNumber: '134180',
-    customerName: 'Kurt Phillips',
-    locationAddress: {
-      name: 'Kurt Phillips',
-      street: '413 Maritime Ct',
-      cityStateZip: 'Destin, FL 32541',
-    },
-    jobTypeBadge: 'HVAC SERVICE',
-    status: 'Opened',
-    isFlagged: true,
-    followUpType: 'Need Quote/Autho',
-    assignee: 'Justin Dunlap',
-    notes: [
-      {
-        id: 'note-4',
-        authorName: 'Ethan Mitchell',
-        timestamp: '8/07/2026, 2:10 pm',
-        text: 'Initial appointment created. Follow up needed for quote.',
-        isEditing: false,
-      },
-    ],
-  },
-  {
-    id: 'job-4',
-    dateCreated: '8/07/2026',
-    jobNumber: '134177',
-    customerName: 'Destin Pointe Vacation Rentals',
-    locationAddress: {
-      name: 'Destin Pointe Vacation Rentals',
-      street: '480 Gulf Shore Dr #409',
-      cityStateZip: 'Destin, FL 32541',
-    },
-    jobTypeBadge: 'APPLIANCE SERVICE',
-    status: 'Opened',
-    isFlagged: true,
-    followUpType: 'Need Quote/Autho',
-    assignee: 'Danny Pardo',
-    notes: [],
-  },
-  {
-    id: 'job-5',
-    dateCreated: '8/07/2026',
-    jobNumber: '134173',
-    customerName: 'Southern Vacation Rentals',
-    locationAddress: {
-      name: 'Southern Vacation Rentals',
-      street: '2003 Devmor Court 1A Sunset Cottages',
-      cityStateZip: 'Fort Walton Beach, FL 32548',
-    },
-    jobTypeBadge: 'APPLIANCE SERVICE',
-    status: 'Opened',
-    isFlagged: true,
-    followUpType: 'Need Quote/Autho',
-    assignee: 'Alex Reynolds',
-    notes: [],
-  },
-  {
-    id: 'job-6',
-    dateCreated: '8/07/2026',
-    jobNumber: '134171',
-    customerName: 'Tom Berghoff',
-    locationAddress: {
-      name: 'Tom Berghoff',
-      street: '6027 Sterling River Way',
-      cityStateZip: 'Niceville, FL 32578',
-    },
-    jobTypeBadge: 'HW HVAC',
-    status: 'Opened',
-    isFlagged: true,
-    followUpType: 'Need Quote/Autho',
-    assignee: 'Justin Dunlap',
-    notes: [],
-  },
-  {
-    id: 'job-7',
-    dateCreated: '8/06/2026',
-    jobNumber: '134165',
-    customerName: 'American Home Shield',
-    locationAddress: {
-      name: 'American Home Shield',
-      street: '1557 Meadowbrook Ct',
-      cityStateZip: 'Niceville, FL 32578',
-    },
-    jobTypeBadge: 'APPLIANCE SERVICE',
-    status: 'Closed',
-    isFlagged: false,
-    notes: [],
-  },
-  {
-    id: 'job-8',
-    dateCreated: '8/05/2026',
-    jobNumber: '134159',
-    customerName: 'Newman Dailey',
-    locationAddress: {
-      name: 'Newman Dailey - Beachside Inn',
-      street: '2931 Scenic Hwy 98 #106 Beachside Inn',
-      cityStateZip: 'Destin, FL 32541',
-    },
-    jobTypeBadge: 'HVAC SERVICE',
-    status: 'Opened',
-    isFlagged: false,
-    notes: [],
-  },
-];
+const initialJobs: JobRecord[] = [];
 
 const availableJobTypes = [
   'All',
@@ -533,7 +367,7 @@ function JobListContent() {
   const handleOpenFlagModal = (job: JobRecord) => {
     setEditingFlagJob(job);
     setModalFollowUpType(job.followUpType || 'Need Quote/Autho');
-    setModalAssignee(job.assignee || 'Justin Dunlap');
+    setModalAssignee(job.assignee || 'Alex Reynolds');
     setModalDueDate(job.dueDate || '');
     setModalFlagComplete(job.isFlagComplete || false);
     setModalNotes(job.notes ? job.notes.map((n) => ({ ...n, isEditing: false })) : []);
@@ -854,7 +688,7 @@ function JobListContent() {
                           {job.followUpType || 'Need Quote/Autho'}
                         </td>
                         <td className="p-3 text-center font-semibold text-slate-800 whitespace-nowrap bg-slate-50/50 min-w-[140px]">
-                          {job.assignee || 'Justin Dunlap'}
+                          {job.assignee || 'Alex Reynolds'}
                         </td>
                       </>
                     )}
@@ -931,7 +765,7 @@ function JobListContent() {
             customerName: editingFlagJob.customerName || '',
             followUpType: (updatedData.followUpType as any) || 'Need Quote/Autho',
             reason: updatedData.notes?.[0]?.text || '',
-            assignedTo: updatedData.assignee || 'Justin Dunlap',
+            assignedTo: updatedData.assignee || 'Alex Reynolds',
             dueDate: updatedData.dueDate || new Date().toISOString(),
             isComplete: isCompleted,
             completedAt: isCompleted ? new Date().toISOString() : null,
@@ -972,7 +806,7 @@ function JobListContent() {
             customerName: editingFlagJob.customerName || '',
             followUpType: (editingFlagJob.followUpType as any) || 'Need Quote/Autho',
             reason: '',
-            assignedTo: editingFlagJob.assignee || 'Justin Dunlap',
+            assignedTo: editingFlagJob.assignee || 'Alex Reynolds',
             dueDate: editingFlagJob.dueDate || new Date().toISOString(),
             isComplete: true,
             completedAt: new Date().toISOString(),

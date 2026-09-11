@@ -234,7 +234,7 @@ export const defaultChecklistDefinitions: ChecklistDefinition[] = [
         id: 'g-19',
         label: 'Did you make sure all equipment is stickered?',
         inputType: 'Short Answer',
-        defaultValue: 'Yes, Murphy\'s maintenance tag applied to indoor and outdoor units.',
+        defaultValue: 'Yes, Apex maintenance tag applied to indoor and outdoor units.',
       },
       {
         id: 'g-20',

@@ -1,5 +1,6 @@
 import { CanonicalPaymentRecord } from "../types/payment";
-import paymentsJson from "./payments.json";
+import { DEMO_PAYMENTS } from "./demo/payments";
 
-export const CANONICAL_MOCK_PAYMENT_RECORDS: CanonicalPaymentRecord[] = paymentsJson as unknown as CanonicalPaymentRecord[];
+export { DEMO_PAYMENTS };
+export const CANONICAL_MOCK_PAYMENT_RECORDS: CanonicalPaymentRecord[] = [...DEMO_PAYMENTS];
 export const MOCK_PAYMENTS_DATA: CanonicalPaymentRecord[] = CANONICAL_MOCK_PAYMENT_RECORDS;

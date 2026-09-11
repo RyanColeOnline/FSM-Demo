@@ -170,7 +170,7 @@ export default function WexProposalListPage() {
       selectedOptionId: 'opt-a',
       notes: updatedData.notes || null,
       billToCustomer: updatedData.billToCustomer,
-      jobLocation: rawProp?.jobLocation || '71 Coquina Pl, Santa Rosa Beach, FL 32459',
+      jobLocation: rawProp?.jobLocation || '1420 Lakeview Drive, Winter Park, FL 32789',
       technician: rawProp?.technician || 'Unassigned',
       createdAt: rawProp?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -446,7 +446,7 @@ export default function WexProposalListPage() {
             amount={viewingPdfProposal.proposalAmount}
             jobNumber={viewingPdfProposal.jobNumber}
             status={viewingPdfProposal.status}
-            technician={rawProp?.technician || 'Danny Pardo'}
+            technician={rawProp?.technician || 'Alex Reynolds'}
           />
         );
       })()}
