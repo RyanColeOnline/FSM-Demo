@@ -1831,6 +1831,9 @@ function formatInstallDate(rawDate?: string | null): string {
 
   // Active hover job id tracker to prevent repeated re-trigger flicker
   const activeHoverJobIdRef = useRef<string | null>(null);
+  const [isHoverCardPinned, setIsHoverCardPinned] = useState(false);
+  const isHoverCardPinnedRef = useRef(false);
+  isHoverCardPinnedRef.current = isHoverCardPinned;
 
   // Hover 1.5s Delay Handlers with Mouse Travel Grace Period
   const handleTileMouseEnter = (
@@ -1877,15 +1880,14 @@ function formatInstallDate(rawDate?: string | null): string {
   // Map Marker Hover Handlers reusing the exact same hoverDetails popover card with live Firestore data
   const handleMapMarkerHover = useCallback(
     (job: ScheduledJob, clientX: number, clientY: number) => {
+      // If a card is pinned by click, do not replace or dismiss on hover
+      if (isHoverCardPinnedRef.current) return;
+
       if (activeHoverJobIdRef.current === job.id) return;
       activeHoverJobIdRef.current = job.id;
 
-      if (hoverGraceTimerRef.current) {
-        clearTimeout(hoverGraceTimerRef.current);
-      }
-      if (hoverTimerRef.current) {
-        clearTimeout(hoverTimerRef.current);
-      }
+      if (hoverGraceTimerRef.current) clearTimeout(hoverGraceTimerRef.current);
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
 
       const cardWidth = 320;
       const cardHeight = 260;
@@ -1897,7 +1899,6 @@ function formatInstallDate(rawDate?: string | null): string {
         posX = 20;
       }
 
-      // Position above marker with clearance, or below if near top
       let posY = clientY - cardHeight - 20;
       if (posY < 20) {
         posY = clientY + 30;
@@ -1906,7 +1907,6 @@ function formatInstallDate(rawDate?: string | null): string {
       const activeMonthYearStr = currentDateObj.toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' });
       const formattedDateStr = `${activeMonthYearStr.split('/')[0]}/${String(currentDateObj.getDate()).padStart(2, '0')}/${currentDateObj.getFullYear()}`;
 
-      // Fast display (80ms) for high responsiveness on map
       hoverTimerRef.current = setTimeout(() => {
         setHoverDetails(buildHoverDetailsFromJob(job, formattedDateStr, posX, posY, appointments, customers, jobs));
       }, 80);
@@ -1915,6 +1915,9 @@ function formatInstallDate(rawDate?: string | null): string {
   );
 
   const handleMapMarkerLeave = useCallback(() => {
+    // If pinned by click, keep card toggled even when mouse leaves point
+    if (isHoverCardPinnedRef.current) return;
+
     if (hoverTimerRef.current) {
       clearTimeout(hoverTimerRef.current);
     }
@@ -1924,12 +1927,60 @@ function formatInstallDate(rawDate?: string | null): string {
     }, 250);
   }, []);
 
-  const handleSelectAppointment = useCallback((job: ScheduledJob) => {
-    setSelectedJobModal(job);
+  // Map Marker Click Handler: Toggles and keeps hover card pinned without opening modal
+  const handleMapMarkerClick = useCallback(
+    (job: ScheduledJob, clientX: number, clientY: number) => {
+      // If already pinned to this exact job, toggle it off!
+      if (isHoverCardPinnedRef.current && activeHoverJobIdRef.current === job.id) {
+        setIsHoverCardPinned(false);
+        isHoverCardPinnedRef.current = false;
+        activeHoverJobIdRef.current = null;
+        setHoverDetails(null);
+        return;
+      }
+
+      if (hoverGraceTimerRef.current) clearTimeout(hoverGraceTimerRef.current);
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+
+      activeHoverJobIdRef.current = job.id;
+      setIsHoverCardPinned(true);
+      isHoverCardPinnedRef.current = true;
+
+      const cardWidth = 320;
+      const cardHeight = 260;
+      let posX = clientX - cardWidth / 2;
+      if (posX + cardWidth > window.innerWidth - 20) {
+        posX = window.innerWidth - cardWidth - 20;
+      }
+      if (posX < 20) {
+        posX = 20;
+      }
+
+      let posY = clientY - cardHeight - 20;
+      if (posY < 20) {
+        posY = clientY + 30;
+      }
+
+      const activeMonthYearStr = currentDateObj.toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' });
+      const formattedDateStr = `${activeMonthYearStr.split('/')[0]}/${String(currentDateObj.getDate()).padStart(2, '0')}/${currentDateObj.getFullYear()}`;
+
+      setHoverDetails(buildHoverDetailsFromJob(job, formattedDateStr, posX, posY, appointments, customers, jobs));
+    },
+    [currentDateObj, appointments, customers, jobs]
+  );
+
+  // Map Background Click Handler: dismisses pinned card
+  const handleMapBackgroundClick = useCallback(() => {
+    setIsHoverCardPinned(false);
+    isHoverCardPinnedRef.current = false;
+    activeHoverJobIdRef.current = null;
+    setHoverDetails(null);
   }, []);
 
   // Dynamic Date Navigation Handlers
   const handlePrevDate = () => {
+    setIsHoverCardPinned(false);
+    isHoverCardPinnedRef.current = false;
     setActiveExpandedDayPos(null);
     setHoverDetails(null);
     setCurrentDateObj((prev) => {
@@ -1942,6 +1993,8 @@ function formatInstallDate(rawDate?: string | null): string {
   };
 
   const handleNextDate = () => {
+    setIsHoverCardPinned(false);
+    isHoverCardPinnedRef.current = false;
     setActiveExpandedDayPos(null);
     setHoverDetails(null);
     setCurrentDateObj((prev) => {
@@ -1954,6 +2007,8 @@ function formatInstallDate(rawDate?: string | null): string {
   };
 
   const handleToday = () => {
+    setIsHoverCardPinned(false);
+    isHoverCardPinnedRef.current = false;
     setActiveExpandedDayPos(null);
     setHoverDetails(null);
     setCurrentDateObj(new Date());
@@ -3420,7 +3475,8 @@ function formatInstallDate(rawDate?: string | null): string {
                   selectedDate={currentDateObj}
                   onHoverAppointment={handleMapMarkerHover}
                   onLeaveAppointment={handleMapMarkerLeave}
-                  onSelectAppointment={handleSelectAppointment}
+                  onSelectAppointment={handleMapMarkerClick}
+                  onBackgroundClick={handleMapBackgroundClick}
                 />
               )}
             </div>
@@ -3440,14 +3496,29 @@ function formatInstallDate(rawDate?: string | null): string {
             if (hoverGraceTimerRef.current) clearTimeout(hoverGraceTimerRef.current);
           }}
           onMouseLeave={() => {
-            activeHoverJobIdRef.current = null;
-            setHoverDetails(null);
+            if (!isHoverCardPinnedRef.current) {
+              activeHoverJobIdRef.current = null;
+              setHoverDetails(null);
+            }
           }}
           className="z-50 bg-white rounded-lg shadow-2xl border border-slate-300 w-80 p-3.5 text-xs text-slate-700 font-sans animate-in fade-in zoom-in-95 duration-150 space-y-2 pointer-events-auto cursor-default"
         >
-          {/* Date & Time Header */}
-          <div className="font-bold text-slate-900 text-xs">
-            {hoverDetails.dateTimeRangeStr}
+          {/* Date & Time Header with Close Button */}
+          <div className="flex items-center justify-between font-bold text-slate-900 text-xs">
+            <span>{hoverDetails.dateTimeRangeStr}</span>
+            <button
+              type="button"
+              onClick={() => {
+                setIsHoverCardPinned(false);
+                isHoverCardPinnedRef.current = false;
+                activeHoverJobIdRef.current = null;
+                setHoverDetails(null);
+              }}
+              className="p-0.5 -mr-1 -mt-1 text-slate-400 hover:text-slate-700 rounded hover:bg-slate-100 transition-colors cursor-pointer"
+              title="Close"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           {/* Customer Name */}

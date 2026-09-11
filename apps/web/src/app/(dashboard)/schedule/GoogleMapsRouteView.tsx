@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useState } from 'react';
 import type { ScheduledJob } from './page';
 
 export interface MapJobItem extends ScheduledJob {
@@ -14,7 +14,8 @@ interface GoogleMapsRouteViewProps {
   selectedDate: Date;
   onHoverAppointment: (job: ScheduledJob, clientX: number, clientY: number) => void;
   onLeaveAppointment: () => void;
-  onSelectAppointment?: (job: ScheduledJob) => void;
+  onSelectAppointment?: (job: ScheduledJob, clientX: number, clientY: number) => void;
+  onBackgroundClick?: () => void;
 }
 
 const EMERALD_COAST_COORDS: Array<{ match: RegExp; lat: number; lng: number }> = [
@@ -115,9 +116,10 @@ export default function GoogleMapsRouteView({
   onHoverAppointment,
   onLeaveAppointment,
   onSelectAppointment,
+  onBackgroundClick,
 }: GoogleMapsRouteViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
+  const [mapInstance, setMapInstance] = useState<any>(null);
   const markersMapRef = useRef<Map<string, { marker: any; job: MapJobItem }>>(new Map());
   const lastBoundsKeyRef = useRef<string>('');
 
@@ -126,6 +128,7 @@ export default function GoogleMapsRouteView({
     onHoverAppointment,
     onLeaveAppointment,
     onSelectAppointment,
+    onBackgroundClick,
   });
 
   useEffect(() => {
@@ -133,6 +136,7 @@ export default function GoogleMapsRouteView({
       onHoverAppointment,
       onLeaveAppointment,
       onSelectAppointment,
+      onBackgroundClick,
     };
   });
 
@@ -152,7 +156,7 @@ export default function GoogleMapsRouteView({
     });
   }, [jobs, selectedUser]);
 
-  // Initialize Map once
+  // Initialize Map immediately on mount
   useEffect(() => {
     if (!apiKey || !mapRef.current) return;
 
@@ -164,6 +168,10 @@ export default function GoogleMapsRouteView({
           await new Promise<void>((resolve, reject) => {
             const existing = document.getElementById('gmp-script');
             if (existing) {
+              if ((window as any).google?.maps) {
+                resolve();
+                return;
+              }
               existing.addEventListener('load', () => resolve());
               existing.addEventListener('error', (e) => reject(e));
               return;
@@ -182,8 +190,8 @@ export default function GoogleMapsRouteView({
         if (isCancelled || !mapRef.current) return;
         const google = (window as any).google;
 
-        if (!mapInstanceRef.current) {
-          mapInstanceRef.current = new google.maps.Map(mapRef.current, {
+        if (!mapInstance) {
+          const newMap = new google.maps.Map(mapRef.current, {
             center: { lat: 30.3935, lng: -86.4958 }, // Emerald Coast (Destin, FL)
             zoom: 11,
             mapTypeControl: false,
@@ -191,6 +199,13 @@ export default function GoogleMapsRouteView({
             fullscreenControl: true,
             zoomControl: true,
           });
+
+          // Clicking map background dismisses any pinned hover card
+          newMap.addListener('click', () => {
+            callbacksRef.current.onBackgroundClick?.();
+          });
+
+          setMapInstance(newMap);
         }
       } catch (err) {
         console.error('[Google Maps Init Error]:', err);
@@ -204,11 +219,14 @@ export default function GoogleMapsRouteView({
     };
   }, [apiKey]);
 
-  // Reconcile Markers stably without destroying them on hover
+  // Reconcile Markers stably immediately once mapInstance and displayJobs are ready
   useEffect(() => {
     const google = (window as any).google;
-    const map = mapInstanceRef.current;
+    const map = mapInstance;
     if (!google || !map) return;
+
+    // Trigger resize once map is ready so viewport renders crisp without clipping
+    google.maps.event.trigger(map, 'resize');
 
     const currentMap = markersMapRef.current;
     const activeIds = new Set(displayJobs.map((j) => j.id));
@@ -254,8 +272,11 @@ export default function GoogleMapsRouteView({
           callbacksRef.current.onLeaveAppointment();
         });
 
-        marker.addListener('click', () => {
-          callbacksRef.current.onSelectAppointment?.(job);
+        marker.addListener('click', (e: any) => {
+          const domEvent = e?.domEvent as MouseEvent | undefined;
+          const clientX = domEvent?.clientX ?? 300;
+          const clientY = domEvent?.clientY ?? 200;
+          callbacksRef.current.onSelectAppointment?.(job, clientX, clientY);
         });
 
         currentMap.set(job.id, { marker, job });
@@ -278,7 +299,7 @@ export default function GoogleMapsRouteView({
         });
       }
     }
-  }, [displayJobs, selectedUser]);
+  }, [mapInstance, displayJobs, selectedUser]);
 
   // Cleanup all markers on unmount
   useEffect(() => {
