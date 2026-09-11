@@ -7,6 +7,7 @@ export const DISPATCH_GROUPS = [
   'HVAC Techs',
   'Appliance Techs',
   'Installer',
+  'Office Staff',
 ] as const;
 
 export const REFERRAL_LIST = [

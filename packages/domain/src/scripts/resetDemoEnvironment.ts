@@ -257,7 +257,7 @@ export async function runDemoReset() {
     phone: '(800) 555-2739',
     email: 'support@apex.com',
     billingEmail: 'billing@apex.com',
-    address: '100 Innovation Parkway, Suite 400, Orlando, FL 32801',
+    address: '100 Innovation Parkway, Suite 400, Fort Walton Beach, FL 32547',
     defaultTaxRate: 7.0,
     invoicePrefix: 'INV-',
     startingInvoiceNumber: 10045,

@@ -142,9 +142,9 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredTechnician": "Carlos Mendez",
     "address": {
       "street": "312 E Robinson Street",
-      "city": "Orlando",
+      "city": "Destin",
       "state": "FL",
-      "zipCode": "32801",
+      "zipCode": "32541",
       "type": "residential",
       "isDefault": true
     },
@@ -152,9 +152,9 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
       {
         "id": "loc-res-03-a",
         "street": "312 E Robinson Street",
-        "city": "Orlando",
+        "city": "Destin",
         "state": "FL",
-        "zipCode": "32801",
+        "zipCode": "32541",
         "type": "residential",
         "isDefault": true
       }
@@ -688,9 +688,9 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "id": "cust-com-02",
     "customerNumber": "C-2002",
     "accountNumber": "ACC-2002",
-    "name": "Orlando Spine & Rehabilitation",
-    "businessName": "Orlando Spine LLC",
-    "qbName": "Orlando Spine & Rehabilitation",
+    "name": "Emerald Coast Spine & Rehabilitation",
+    "businessName": "Emerald Coast Spine LLC",
+    "qbName": "Emerald Coast Spine & Rehabilitation",
     "phone": "(407) 555-7342",
     "mobilePhone": "(407) 555-7342",
     "email": "admin@orlandospineclinic.com",
@@ -702,7 +702,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredTechnician": "Marcus Vance",
     "address": {
       "street": "1200 S Orange Avenue, Suite 300",
-      "city": "Orlando",
+      "city": "Destin",
       "state": "FL",
       "zipCode": "32806",
       "type": "commercial",
@@ -712,7 +712,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
       {
         "id": "loc-com-02-a",
         "street": "1200 S Orange Avenue, Suite 300",
-        "city": "Orlando",
+        "city": "Destin",
         "state": "FL",
         "zipCode": "32806",
         "type": "commercial",
@@ -760,9 +760,9 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredTechnician": "Carlos Mendez",
     "address": {
       "street": "201 E Pine Street, Floor 8",
-      "city": "Orlando",
+      "city": "Destin",
       "state": "FL",
-      "zipCode": "32801",
+      "zipCode": "32541",
       "type": "commercial",
       "isDefault": true
     },
@@ -770,9 +770,9 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
       {
         "id": "loc-com-03-a",
         "street": "201 E Pine Street, Floor 8",
-        "city": "Orlando",
+        "city": "Destin",
         "state": "FL",
-        "zipCode": "32801",
+        "zipCode": "32541",
         "type": "commercial",
         "isDefault": true
       }
@@ -875,9 +875,9 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredTechnician": "David Ross",
     "address": {
       "street": "424 Central Avenue",
-      "city": "Orlando",
+      "city": "Destin",
       "state": "FL",
-      "zipCode": "32801",
+      "zipCode": "32541",
       "type": "commercial",
       "isDefault": true
     },
@@ -885,9 +885,9 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
       {
         "id": "loc-com-05-a",
         "street": "424 Central Avenue",
-        "city": "Orlando",
+        "city": "Destin",
         "state": "FL",
-        "zipCode": "32801",
+        "zipCode": "32541",
         "type": "commercial",
         "isDefault": true
       }

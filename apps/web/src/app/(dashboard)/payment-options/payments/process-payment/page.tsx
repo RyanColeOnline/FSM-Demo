@@ -127,7 +127,7 @@ const mockCustomerResults: CustomerResult[] = [
     location: {
       name: 'Commercial Facility',
       street: '1200 Innovation Parkway, Suite 400',
-      cityStateZip: 'Chicago, IL 60601',
+      cityStateZip: 'Destin, FL 32541',
     },
     email: 'operations@apexplaza.com',
     phone: '(312) 555-0199',

@@ -322,8 +322,8 @@ export function getJobTripTypeColorHex(jobType: string): string {
 export const mockCustomerSavedLocations = [
   '184 Eglin Pkwy NE, Fort Walton Beach, FL 32547',
   '880 Park Avenue N, Winter Park, FL 32789',
-  '400 Harbor Blvd, Orlando, FL 32801',
-  '1200 Lake Baldwin Ln, Orlando, FL 32814',
+  '400 Harbor Blvd, Destin, FL 32541',
+  '10400 US Highway 98 W, Miramar Beach, FL 32550',
 ];
 
 const mockJobsDatabase: Record<string, JobDetails> = {
@@ -428,7 +428,7 @@ const mockJobsDatabase: Record<string, JobDetails> = {
     address: {
       locationName: 'Magnolia Bay Bistro',
       street: '400 Harbor Blvd',
-      cityStateZip: 'Orlando, FL 32801',
+      cityStateZip: 'Destin, FL 32541',
     },
     phone: '(850) 555-4321',
     email: 'contact@magnoliabaybistro.com',
@@ -452,7 +452,7 @@ const mockJobsDatabase: Record<string, JobDetails> = {
     address: {
       locationName: 'Dr. Aris Thorne',
       street: '1200 Lake Baldwin Ln',
-      cityStateZip: 'Orlando, FL 32814',
+      cityStateZip: 'Miramar Beach, FL 32550',
     },
     phone: '(850) 555-9204',
     email: 'dr.thorne@winterparkclinic.com',

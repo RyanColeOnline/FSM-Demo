@@ -12,7 +12,7 @@ export const DEMO_PROPOSALS: CanonicalProposal[] = [
     issueDate: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
     expirationDate: new Date(Date.now() + 28 * 86400000).toISOString().split('T')[0],
     billToCustomer: 'Eleanor Vance',
-    jobLocation: '742 Evergreen Terrace, Orlando, FL 32801',
+    jobLocation: '742 Scenic Highway 98, Destin, FL 32541',
     technician: 'Marcus Vance',
     notes: 'Tiered replacement proposal for primary 4-ton split system.',
     options: [
@@ -98,7 +98,7 @@ export const DEMO_PROPOSALS: CanonicalProposal[] = [
     issueDate: new Date().toISOString().split('T')[0],
     expirationDate: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
     billToCustomer: 'Grandview Corporate Center',
-    jobLocation: '1000 Corporate Center Way, Suite 100, Orlando, FL 32801',
+    jobLocation: '1000 Highway 98 E, Suite 100, Destin, FL 32541',
     technician: 'Marcus Vance',
     notes: 'Annual commercial HVAC preventative maintenance agreement covering 4 rooftop package units.',
     options: [

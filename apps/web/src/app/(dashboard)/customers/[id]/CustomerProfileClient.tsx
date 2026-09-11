@@ -419,13 +419,13 @@ const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
     email: 'contact@magnoliabaybistro.com',
     customerNumber: 'C-2001',
     locationsList: [
-      { id: 'loc-com-01-a', addr1: '450 S Orange Ave', city: 'Orlando', state: 'FL', zip: '32801', description: 'Main Restaurant', isDefault: true }
+      { id: 'loc-com-01-a', addr1: '400 Harbor Blvd', city: 'Destin', state: 'FL', zip: '32541', description: 'Main Restaurant', isDefault: true }
     ],
     notes: [
       { id: 'note-21', title: 'Customer Note', meta: 'Sarah Jenkins - Jan 14, 2026 10:15am', content: 'Kitchen entrance at rear alley. Call manager prior to arrival.' }
     ],
     invoices: [
-      { id: 'inv-131400', number: '#I-131400', amount: '$350.00', issued: '1/14/2026', status: 'Closed', billTo: 'Magnolia Bay Bistro', location: '450 S Orange Ave, Orlando, FL 32801' }
+      { id: 'inv-131400', number: '#I-131400', amount: '$350.00', issued: '1/14/2026', status: 'Closed', billTo: 'Magnolia Bay Bistro', location: '400 Harbor Blvd, Destin, FL 32541' }
     ],
     proposals: [
       {
@@ -435,7 +435,7 @@ const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
         issued: '1/10/2026',
         status: 'Signed',
         billTo: 'Magnolia Bay Bistro',
-        location: '450 S Orange Ave, Orlando, FL 32801',
+        location: '400 Harbor Blvd, Destin, FL 32541',
         note: 'Walk-in freezer condenser retrofit proposal.'
       }
     ],
@@ -445,7 +445,7 @@ const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
         jobNumber: '#131400',
         name: 'Commercial Refrigeration Tuneup',
         status: 'Closed',
-        location: '450 S Orange Ave, Orlando, FL 32801',
+        location: '400 Harbor Blvd, Destin, FL 32541',
         jobType: 'HVAC Maintenance',
         jobTypeColor: 'bg-[#38a169]',
         createdBy: 'Sarah Jenkins - Jan 14, 2026 9:00am',
@@ -463,7 +463,7 @@ const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
           callType: 'Inbound',
           dateTime: 'Jan 14, 2026 8:30am',
           contact: 'Marcus Vance (407-555-4321)',
-          location: '450 S Orange Ave, Orlando, FL 32801',
+          location: '400 Harbor Blvd, Destin, FL 32541',
           callWith: 'Marcus Vance',
           authorDate: 'Sarah Jenkins - Jan 14, 2026 8:30am',
           note: 'Perform bi-annual commercial refrigeration maintenance.'
@@ -482,13 +482,13 @@ const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
     email: 'dr.thorne@winterparkclinic.com',
     customerNumber: 'C-1002',
     locationsList: [
-      { id: 'loc-31', addr1: '1200 Lake Baldwin Ln', city: 'Orlando', state: 'FL', zip: '32814', description: 'Primary Residence', isDefault: true }
+      { id: 'loc-31', addr1: '4550 E Highway 20', city: 'Niceville', state: 'FL', zip: '32578', description: 'Primary Residence', isDefault: true }
     ],
     notes: [
       { id: 'note-31', title: 'Customer Note', meta: 'Alex Reynolds - Nov 05, 2025 2:20pm', content: 'Prefers afternoon appointments after 1:00 PM.' }
     ],
     invoices: [
-      { id: 'inv-129980', number: '#I-129980', amount: '$225.00', issued: '11/05/2025', status: 'Closed', billTo: 'Dr. Aris Thorne', location: '1200 Lake Baldwin Ln, Orlando, FL 32814' }
+      { id: 'inv-129980', number: '#I-129980', amount: '$225.00', issued: '11/05/2025', status: 'Closed', billTo: 'Dr. Aris Thorne', location: '10400 US Highway 98 W, Miramar Beach, FL 32550' }
     ],
     jobs: [
       {
@@ -496,7 +496,7 @@ const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
         jobNumber: '#129980',
         name: 'Plumbing Leak Inspection',
         status: 'Closed',
-        location: '1200 Lake Baldwin Ln, Orlando, FL 32814',
+        location: '10400 US Highway 98 W, Miramar Beach, FL 32550',
         jobType: 'Plumbing Service',
         jobTypeColor: 'bg-[#d69e2e]',
         createdBy: 'Alex Reynolds - Nov 05, 2025 1:15pm',
@@ -512,7 +512,7 @@ const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
           callType: 'Inbound',
           dateTime: 'Nov 05, 2025 1:15pm',
           contact: 'Dr. Aris Thorne (407-555-9204)',
-          location: '1200 Lake Baldwin Ln, Orlando, FL 32814',
+          location: '10400 US Highway 98 W, Miramar Beach, FL 32550',
           callWith: 'Dr. Aris Thorne',
           authorDate: 'Alex Reynolds - Nov 05, 2025 1:15pm',
           note: 'Water pooling under breakroom sink.'

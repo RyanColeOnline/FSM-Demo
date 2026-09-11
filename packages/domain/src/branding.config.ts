@@ -56,9 +56,9 @@ export const BRAND_CONFIG: BrandConfiguration = {
     website: "https://apexfieldsolutions.com",
     address: {
       street: "100 Innovation Parkway, Suite 400",
-      city: "Orlando",
+      city: "Fort Walton Beach",
       state: "FL",
-      zip: "32801",
+      zip: "32547",
     },
   },
   portal: {
