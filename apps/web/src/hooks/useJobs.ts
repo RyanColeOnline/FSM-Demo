@@ -64,6 +64,16 @@ export function useJobs(
     },
   });
 
+  const deleteJobMutation = useMutation({
+    mutationFn: async (jobId: string) => {
+      return client.deleteJob(jobId, databaseMode);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['paginated-jobs'] });
+    },
+  });
+
   const getJobById = (id: string): CanonicalJob | undefined => {
     return jobs.find((j) => j.id === id || j.jobNumber === id);
   };
@@ -75,6 +85,8 @@ export function useJobs(
     refresh,
     saveJob: saveJobMutation.mutateAsync,
     isSaving: saveJobMutation.isPending,
+    deleteJob: deleteJobMutation.mutateAsync,
+    isDeleting: deleteJobMutation.isPending,
     getJobById,
   };
 }

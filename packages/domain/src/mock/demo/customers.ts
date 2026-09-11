@@ -9,8 +9,8 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "firstName": "Eleanor",
     "lastName": "Vance",
     "qbName": "Vance, Eleanor",
-    "phone": "(407) 555-8121",
-    "mobilePhone": "(407) 555-8121",
+    "phone": "(850) 555-8121",
+    "mobilePhone": "(850) 555-8121",
     "email": "eleanor.vance@example.com",
     "customerType": "residential",
     "taxGroup": "FL (7%)",
@@ -18,20 +18,20 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredCommunicationMethod": "Text",
     "preferredTechnician": "Marcus Vance",
     "address": {
-      "street": "1420 Lakeview Drive",
-      "city": "Winter Park",
+      "street": "184 Eglin Pkwy NE",
+      "city": "Fort Walton Beach",
       "state": "FL",
-      "zipCode": "32789",
+      "zipCode": "32547",
       "type": "residential",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-res-01-a",
-        "street": "1420 Lakeview Drive",
-        "city": "Winter Park",
+        "street": "184 Eglin Pkwy NE",
+        "city": "Fort Walton Beach",
         "state": "FL",
-        "zipCode": "32789",
+        "zipCode": "32547",
         "type": "residential",
         "isDefault": true
       }
@@ -42,7 +42,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Eleanor",
         "lastName": "Vance",
         "positionLabel": "Homeowner",
-        "phone": "(407) 555-8121",
+        "phone": "(850) 555-8121",
         "email": "eleanor.vance@example.com",
         "isPrimary": true
       },
@@ -51,7 +51,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "James",
         "lastName": "Vance",
         "positionLabel": "Spouse",
-        "phone": "(407) 555-8122",
+        "phone": "(850) 555-8122",
         "email": "james.vance@example.com",
         "isPrimary": false
       }
@@ -75,8 +75,8 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "firstName": "Aris",
     "lastName": "Thorne",
     "qbName": "Thorne, Aris",
-    "phone": "(407) 555-9204",
-    "mobilePhone": "(407) 555-9204",
+    "phone": "(850) 555-9204",
+    "mobilePhone": "(850) 555-9204",
     "email": "dr.thorne@winterparkclinic.com",
     "customerType": "residential",
     "taxGroup": "FL (7%)",
@@ -84,20 +84,20 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredCommunicationMethod": "Email",
     "preferredTechnician": "Alex Reynolds",
     "address": {
-      "street": "884 Palmer Avenue",
-      "city": "Winter Park",
+      "street": "4550 E Highway 20",
+      "city": "Niceville",
       "state": "FL",
-      "zipCode": "32789",
+      "zipCode": "32578",
       "type": "residential",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-res-02-a",
-        "street": "884 Palmer Avenue",
-        "city": "Winter Park",
+        "street": "4550 E Highway 20",
+        "city": "Niceville",
         "state": "FL",
-        "zipCode": "32789",
+        "zipCode": "32578",
         "type": "residential",
         "isDefault": true
       }
@@ -108,7 +108,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Aris",
         "lastName": "Thorne",
         "positionLabel": "Homeowner",
-        "phone": "(407) 555-9204",
+        "phone": "(850) 555-9204",
         "email": "dr.thorne@winterparkclinic.com",
         "isPrimary": true
       }
@@ -132,8 +132,8 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "firstName": "Sophia",
     "lastName": "Rodriguez",
     "qbName": "Rodriguez, Sophia",
-    "phone": "(407) 555-3391",
-    "mobilePhone": "(407) 555-3391",
+    "phone": "(850) 555-3391",
+    "mobilePhone": "(850) 555-3391",
     "email": "sophia.rodriguez@designstudio.org",
     "customerType": "residential",
     "taxGroup": "FL (7%)",
@@ -141,20 +141,20 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredCommunicationMethod": "Text",
     "preferredTechnician": "Carlos Mendez",
     "address": {
-      "street": "312 E Robinson Street",
-      "city": "Orlando",
+      "street": "10400 US Highway 98 W",
+      "city": "Miramar Beach",
       "state": "FL",
-      "zipCode": "32801",
+      "zipCode": "32550",
       "type": "residential",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-res-03-a",
-        "street": "312 E Robinson Street",
-        "city": "Orlando",
+        "street": "10400 US Highway 98 W",
+        "city": "Miramar Beach",
         "state": "FL",
-        "zipCode": "32801",
+        "zipCode": "32550",
         "type": "residential",
         "isDefault": true
       }
@@ -165,7 +165,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Sophia",
         "lastName": "Rodriguez",
         "positionLabel": "Homeowner",
-        "phone": "(407) 555-3391",
+        "phone": "(850) 555-3391",
         "email": "sophia.rodriguez@designstudio.org",
         "isPrimary": true
       }
@@ -189,8 +189,8 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "firstName": "Robert",
     "lastName": "Chen",
     "qbName": "Chen, Robert",
-    "phone": "(407) 555-7740",
-    "mobilePhone": "(407) 555-7740",
+    "phone": "(850) 555-7740",
+    "mobilePhone": "(850) 555-7740",
     "email": "rchen@chenfamilyfl.com",
     "customerType": "residential",
     "taxGroup": "FL (7%)",
@@ -198,30 +198,30 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredCommunicationMethod": "Email",
     "preferredTechnician": "Marcus Vance",
     "address": {
-      "street": "6104 Isleworth Country Club Drive",
-      "city": "Windermere",
+      "street": "25 Seaside Ave",
+      "city": "Santa Rosa Beach",
       "state": "FL",
-      "zipCode": "34786",
+      "zipCode": "32459",
       "type": "residential",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-res-04-a",
-        "street": "6104 Isleworth Country Club Drive",
-        "city": "Windermere",
+        "street": "25 Seaside Ave",
+        "city": "Santa Rosa Beach",
         "state": "FL",
-        "zipCode": "34786",
+        "zipCode": "32459",
         "type": "residential",
         "isDefault": true,
         "description": "Primary Residence"
       },
       {
         "id": "loc-res-04-b",
-        "street": "6108 Isleworth Country Club Drive (Guest House)",
-        "city": "Windermere",
+        "street": "25 Seaside Ave",
+        "city": "Santa Rosa Beach",
         "state": "FL",
-        "zipCode": "34786",
+        "zipCode": "32459",
         "type": "residential",
         "isDefault": false,
         "description": "Guest House & Pool Pavilion"
@@ -233,7 +233,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Robert",
         "lastName": "Chen",
         "positionLabel": "Homeowner",
-        "phone": "(407) 555-7740",
+        "phone": "(850) 555-7740",
         "email": "rchen@chenfamilyfl.com",
         "isPrimary": true
       },
@@ -242,7 +242,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Evelyn",
         "lastName": "Chen",
         "positionLabel": "Spouse",
-        "phone": "(407) 555-7741",
+        "phone": "(850) 555-7741",
         "email": "evelyn@chenfamilyfl.com",
         "isPrimary": false
       }
@@ -266,8 +266,8 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "firstName": "Bradley",
     "lastName": "Jenkins",
     "qbName": "Jenkins, Bradley",
-    "phone": "(407) 555-2248",
-    "mobilePhone": "(407) 555-2248",
+    "phone": "(850) 555-2248",
+    "mobilePhone": "(850) 555-2248",
     "email": "bjenkins48@cfl.rr.com",
     "customerType": "residential",
     "taxGroup": "FL (7%)",
@@ -275,20 +275,20 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredCommunicationMethod": "Text",
     "preferredTechnician": "Carlos Mendez",
     "address": {
-      "street": "512 Packwood Avenue",
-      "city": "Maitland",
+      "street": "318 Miracle Strip Pkwy SE",
+      "city": "Fort Walton Beach",
       "state": "FL",
-      "zipCode": "32751",
+      "zipCode": "32548",
       "type": "residential",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-res-05-a",
-        "street": "512 Packwood Avenue",
-        "city": "Maitland",
+        "street": "318 Miracle Strip Pkwy SE",
+        "city": "Fort Walton Beach",
         "state": "FL",
-        "zipCode": "32751",
+        "zipCode": "32548",
         "type": "residential",
         "isDefault": true
       }
@@ -299,7 +299,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Bradley",
         "lastName": "Jenkins",
         "positionLabel": "Homeowner",
-        "phone": "(407) 555-2248",
+        "phone": "(850) 555-2248",
         "email": "bjenkins48@cfl.rr.com",
         "isPrimary": true
       }
@@ -323,8 +323,8 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "firstName": "Tyler",
     "lastName": "Brooks",
     "qbName": "Brooks, Tyler",
-    "phone": "(321) 555-6682",
-    "mobilePhone": "(321) 555-6682",
+    "phone": "(850) 555-6682",
+    "mobilePhone": "(850) 555-6682",
     "email": "brooksfamily@gmail.com",
     "customerType": "residential",
     "taxGroup": "FL (7%)",
@@ -332,20 +332,20 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredCommunicationMethod": "Text",
     "preferredTechnician": "Tyler Reed",
     "address": {
-      "street": "409 Windmill Court",
-      "city": "Lake Mary",
+      "street": "600 Grand Blvd",
+      "city": "Miramar Beach",
       "state": "FL",
-      "zipCode": "32746",
+      "zipCode": "32550",
       "type": "residential",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-res-06-a",
-        "street": "409 Windmill Court",
-        "city": "Lake Mary",
+        "street": "600 Grand Blvd",
+        "city": "Miramar Beach",
         "state": "FL",
-        "zipCode": "32746",
+        "zipCode": "32550",
         "type": "residential",
         "isDefault": true
       }
@@ -356,7 +356,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Tyler",
         "lastName": "Brooks",
         "positionLabel": "Homeowner",
-        "phone": "(321) 555-6682",
+        "phone": "(850) 555-6682",
         "email": "brooksfamily@gmail.com",
         "isPrimary": true
       },
@@ -365,7 +365,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Chloe",
         "lastName": "Brooks",
         "positionLabel": "Spouse",
-        "phone": "(321) 555-6683",
+        "phone": "(850) 555-6683",
         "email": "chloebrooks88@gmail.com",
         "isPrimary": false
       }
@@ -389,8 +389,8 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "firstName": "Sarah",
     "lastName": "O'Connor",
     "qbName": "O'Connor, Sarah",
-    "phone": "(407) 555-4419",
-    "mobilePhone": "(407) 555-4419",
+    "phone": "(850) 555-4419",
+    "mobilePhone": "(850) 555-4419",
     "email": "sarah.oconnor@orlandomedia.com",
     "customerType": "residential",
     "taxGroup": "FL (7%)",
@@ -398,20 +398,20 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredCommunicationMethod": "Email",
     "preferredTechnician": "Marcus Vance",
     "address": {
-      "street": "725 Spring Valley Road",
-      "city": "Altamonte Springs",
+      "street": "1200 E John Sims Pkwy",
+      "city": "Niceville",
       "state": "FL",
-      "zipCode": "32714",
+      "zipCode": "32578",
       "type": "residential",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-res-07-a",
-        "street": "725 Spring Valley Road",
-        "city": "Altamonte Springs",
+        "street": "1200 E John Sims Pkwy",
+        "city": "Niceville",
         "state": "FL",
-        "zipCode": "32714",
+        "zipCode": "32578",
         "type": "residential",
         "isDefault": true
       }
@@ -422,7 +422,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Sarah",
         "lastName": "O'Connor",
         "positionLabel": "Homeowner",
-        "phone": "(407) 555-4419",
+        "phone": "(850) 555-4419",
         "email": "sarah.oconnor@orlandomedia.com",
         "isPrimary": true
       },
@@ -431,7 +431,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Michael",
         "lastName": "O'Connor",
         "positionLabel": "Spouse",
-        "phone": "(407) 555-4420",
+        "phone": "(850) 555-4420",
         "email": "m.oconnor@orlandomedia.com",
         "isPrimary": false
       }
@@ -455,8 +455,8 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "firstName": "Patricia",
     "lastName": "Gallagher",
     "qbName": "Gallagher, Patricia",
-    "phone": "(407) 555-9012",
-    "mobilePhone": "(407) 555-9012",
+    "phone": "(850) 555-9012",
+    "mobilePhone": "(850) 555-9012",
     "email": "patricia.gallagher@outlook.com",
     "customerType": "residential",
     "taxGroup": "FL (7%)",
@@ -464,20 +464,20 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredCommunicationMethod": "Text",
     "preferredTechnician": "Carlos Mendez",
     "address": {
-      "street": "2300 Osceola Parkway",
-      "city": "Kissimmee",
+      "street": "4201 Indian Bayou Trail",
+      "city": "Destin",
       "state": "FL",
-      "zipCode": "34744",
+      "zipCode": "32541",
       "type": "residential",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-res-08-a",
-        "street": "2300 Osceola Parkway",
-        "city": "Kissimmee",
+        "street": "4201 Indian Bayou Trail",
+        "city": "Destin",
         "state": "FL",
-        "zipCode": "34744",
+        "zipCode": "32541",
         "type": "residential",
         "isDefault": true
       }
@@ -488,7 +488,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Patricia",
         "lastName": "Gallagher",
         "positionLabel": "Homeowner",
-        "phone": "(407) 555-9012",
+        "phone": "(850) 555-9012",
         "email": "patricia.gallagher@outlook.com",
         "isPrimary": true
       }
@@ -512,8 +512,8 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "firstName": "David",
     "lastName": "Alvarez",
     "qbName": "Alvarez, David",
-    "phone": "(407) 555-1178",
-    "mobilePhone": "(407) 555-1178",
+    "phone": "(850) 555-1178",
+    "mobilePhone": "(850) 555-1178",
     "email": "dalvarez@alvarezarch.com",
     "customerType": "residential",
     "taxGroup": "FL (7%)",
@@ -521,20 +521,20 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredCommunicationMethod": "Email",
     "preferredTechnician": "Marcus Vance",
     "address": {
-      "street": "155 Plant Street",
-      "city": "Winter Garden",
+      "street": "4368 W County Hwy 30A",
+      "city": "Santa Rosa Beach",
       "state": "FL",
-      "zipCode": "34787",
+      "zipCode": "32459",
       "type": "residential",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-res-09-a",
-        "street": "155 Plant Street",
-        "city": "Winter Garden",
+        "street": "4368 W County Hwy 30A",
+        "city": "Santa Rosa Beach",
         "state": "FL",
-        "zipCode": "34787",
+        "zipCode": "32459",
         "type": "residential",
         "isDefault": true
       }
@@ -545,7 +545,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "David",
         "lastName": "Alvarez",
         "positionLabel": "Homeowner",
-        "phone": "(407) 555-1178",
+        "phone": "(850) 555-1178",
         "email": "dalvarez@alvarezarch.com",
         "isPrimary": true
       }
@@ -569,28 +569,28 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "firstName": "Jonathan",
     "lastName": "Myers",
     "qbName": "Myers, Jonathan",
-    "phone": "(407) 555-5801",
-    "mobilePhone": "(407) 555-5801",
+    "phone": "(850) 555-5801",
+    "mobilePhone": "(850) 555-5801",
     "email": "jmyers.celebration@gmail.com",
     "customerType": "residential",
     "taxGroup": "FL (7%)",
     "acceptedPaymentMethods": "Credit Card",
     "preferredCommunicationMethod": "Text",
     "address": {
-      "street": "810 Celebration Avenue",
-      "city": "Celebration",
+      "street": "102 Hollywood Blvd SW",
+      "city": "Fort Walton Beach",
       "state": "FL",
-      "zipCode": "34747",
+      "zipCode": "32548",
       "type": "residential",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-res-10-a",
-        "street": "810 Celebration Avenue",
-        "city": "Celebration",
+        "street": "102 Hollywood Blvd SW",
+        "city": "Fort Walton Beach",
         "state": "FL",
-        "zipCode": "34747",
+        "zipCode": "32548",
         "type": "residential",
         "isDefault": true
       }
@@ -601,7 +601,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Jonathan",
         "lastName": "Myers",
         "positionLabel": "Homeowner",
-        "phone": "(407) 555-5801",
+        "phone": "(850) 555-5801",
         "email": "jmyers.celebration@gmail.com",
         "isPrimary": true
       }
@@ -624,8 +624,8 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "name": "Magnolia Bay Bistro",
     "businessName": "Magnolia Bay Hospitality LLC",
     "qbName": "Magnolia Bay Bistro",
-    "phone": "(407) 555-9800",
-    "mobilePhone": "(407) 555-9800",
+    "phone": "(850) 555-9800",
+    "mobilePhone": "(850) 555-9800",
     "email": "catering@magnoliabaybistro.com",
     "customerType": "commercial",
     "taxGroup": "FL (7%)",
@@ -634,20 +634,20 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredCommunicationMethod": "Email",
     "preferredTechnician": "David Ross",
     "address": {
-      "street": "450 S New York Avenue",
-      "city": "Winter Park",
+      "street": "400 Harbor Blvd",
+      "city": "Destin",
       "state": "FL",
-      "zipCode": "32789",
+      "zipCode": "32541",
       "type": "commercial",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-com-01-a",
-        "street": "450 S New York Avenue",
-        "city": "Winter Park",
+        "street": "400 Harbor Blvd",
+        "city": "Destin",
         "state": "FL",
-        "zipCode": "32789",
+        "zipCode": "32541",
         "type": "commercial",
         "isDefault": true,
         "description": "Main Dining & Commercial Kitchen"
@@ -659,7 +659,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Chef Antonio",
         "lastName": "Rossi",
         "positionLabel": "Executive Chef / General Manager",
-        "phone": "(407) 555-9801",
+        "phone": "(850) 555-9801",
         "email": "antonio@magnoliabaybistro.com",
         "isPrimary": true
       },
@@ -668,7 +668,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Maria",
         "lastName": "Santos",
         "positionLabel": "Kitchen Manager",
-        "phone": "(407) 555-9802",
+        "phone": "(850) 555-9802",
         "email": "maria@magnoliabaybistro.com",
         "isPrimary": false
       }
@@ -691,8 +691,8 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "name": "Orlando Spine & Rehabilitation",
     "businessName": "Orlando Spine LLC",
     "qbName": "Orlando Spine & Rehabilitation",
-    "phone": "(407) 555-7342",
-    "mobilePhone": "(407) 555-7342",
+    "phone": "(850) 555-7342",
+    "mobilePhone": "(850) 555-7342",
     "email": "admin@orlandospineclinic.com",
     "customerType": "commercial",
     "taxGroup": "FL (7%)",
@@ -701,20 +701,20 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredCommunicationMethod": "Email",
     "preferredTechnician": "Marcus Vance",
     "address": {
-      "street": "1200 S Orange Avenue, Suite 300",
-      "city": "Orlando",
+      "street": "100 College Blvd E, Suite 200",
+      "city": "Niceville",
       "state": "FL",
-      "zipCode": "32806",
+      "zipCode": "32578",
       "type": "commercial",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-com-02-a",
-        "street": "1200 S Orange Avenue, Suite 300",
-        "city": "Orlando",
+        "street": "100 College Blvd E, Suite 200",
+        "city": "Niceville",
         "state": "FL",
-        "zipCode": "32806",
+        "zipCode": "32578",
         "type": "commercial",
         "isDefault": true,
         "description": "Suite 300 - Physical Therapy Wing"
@@ -726,7 +726,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Karen",
         "lastName": "Holt",
         "positionLabel": "Practice Administrator",
-        "phone": "(407) 555-7342",
+        "phone": "(850) 555-7342",
         "email": "karen.holt@orlandospineclinic.com",
         "isPrimary": true
       }
@@ -749,8 +749,8 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "name": "Lake Eola Law Group",
     "businessName": "Lake Eola Legal Partners PA",
     "qbName": "Lake Eola Law Group",
-    "phone": "(407) 555-8990",
-    "mobilePhone": "(407) 555-8990",
+    "phone": "(850) 555-8990",
+    "mobilePhone": "(850) 555-8990",
     "email": "facilities@lakeeolalaw.com",
     "customerType": "commercial",
     "taxGroup": "FL (7%)",
@@ -759,20 +759,20 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredCommunicationMethod": "Email",
     "preferredTechnician": "Carlos Mendez",
     "address": {
-      "street": "201 E Pine Street, Floor 8",
-      "city": "Orlando",
+      "street": "102 Gulf Shore Dr, Suite 300",
+      "city": "Destin",
       "state": "FL",
-      "zipCode": "32801",
+      "zipCode": "32541",
       "type": "commercial",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-com-03-a",
-        "street": "201 E Pine Street, Floor 8",
-        "city": "Orlando",
+        "street": "102 Gulf Shore Dr, Suite 300",
+        "city": "Destin",
         "state": "FL",
-        "zipCode": "32801",
+        "zipCode": "32541",
         "type": "commercial",
         "isDefault": true
       }
@@ -783,7 +783,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Gregory",
         "lastName": "Stone",
         "positionLabel": "Managing Partner",
-        "phone": "(407) 555-8991",
+        "phone": "(850) 555-8991",
         "email": "gstone@lakeeolalaw.com",
         "isPrimary": true
       }
@@ -806,8 +806,8 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "name": "Winter Park Boutique Hotel",
     "businessName": "Park Avenue Lodging LLC",
     "qbName": "Winter Park Boutique Hotel",
-    "phone": "(407) 555-6200",
-    "mobilePhone": "(407) 555-6200",
+    "phone": "(850) 555-6200",
+    "mobilePhone": "(850) 555-6200",
     "email": "maintenance@wpboutiquehotel.com",
     "customerType": "commercial",
     "taxGroup": "FL (7%)",
@@ -816,20 +816,20 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredCommunicationMethod": "Text",
     "preferredTechnician": "Marcus Vance",
     "address": {
-      "street": "556 N Park Avenue",
-      "city": "Winter Park",
+      "street": "210 Harbor Blvd",
+      "city": "Destin",
       "state": "FL",
-      "zipCode": "32789",
+      "zipCode": "32541",
       "type": "commercial",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-com-04-a",
-        "street": "556 N Park Avenue",
-        "city": "Winter Park",
+        "street": "210 Harbor Blvd",
+        "city": "Destin",
         "state": "FL",
-        "zipCode": "32789",
+        "zipCode": "32541",
         "type": "commercial",
         "isDefault": true,
         "description": "Main Hotel & Executive Suites"
@@ -841,7 +841,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Julian",
         "lastName": "Mercer",
         "positionLabel": "Chief Engineer / Facilities Director",
-        "phone": "(407) 555-6205",
+        "phone": "(850) 555-6205",
         "email": "jmercer@wpboutiquehotel.com",
         "isPrimary": true
       }
@@ -864,8 +864,8 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "name": "Bayside Bakery & Cafe",
     "businessName": "Bayside Bakery LLC",
     "qbName": "Bayside Bakery & Cafe",
-    "phone": "(407) 555-6110",
-    "mobilePhone": "(407) 555-6110",
+    "phone": "(850) 555-6110",
+    "mobilePhone": "(850) 555-6110",
     "email": "info@baysidebakeryfl.com",
     "customerType": "commercial",
     "taxGroup": "FL (7%)",
@@ -874,20 +874,20 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "preferredCommunicationMethod": "Email",
     "preferredTechnician": "David Ross",
     "address": {
-      "street": "424 Central Avenue",
-      "city": "Orlando",
+      "street": "105 Highway 393 S",
+      "city": "Santa Rosa Beach",
       "state": "FL",
-      "zipCode": "32801",
+      "zipCode": "32459",
       "type": "commercial",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-com-05-a",
-        "street": "424 Central Avenue",
-        "city": "Orlando",
+        "street": "105 Highway 393 S",
+        "city": "Santa Rosa Beach",
         "state": "FL",
-        "zipCode": "32801",
+        "zipCode": "32459",
         "type": "commercial",
         "isDefault": true
       }
@@ -898,7 +898,7 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
         "firstName": "Claire",
         "lastName": "Dupont",
         "positionLabel": "Head Baker / Owner",
-        "phone": "(407) 555-6110",
+        "phone": "(850) 555-6110",
         "email": "claire@baysidebakeryfl.com",
         "isPrimary": true
       }
@@ -930,20 +930,20 @@ export const DEMO_CUSTOMERS: CanonicalCustomer[] = [
     "acceptedPaymentMethods": "Credit Card, Check",
     "preferredCommunicationMethod": "Email",
     "address": {
-      "street": "141 N US Highway 27",
-      "city": "Clermont",
+      "street": "11225 Emerald Coast Pkwy",
+      "city": "Miramar Beach",
       "state": "FL",
-      "zipCode": "34711",
+      "zipCode": "32550",
       "type": "commercial",
       "isDefault": true
     },
     "locations": [
       {
         "id": "loc-com-06-a",
-        "street": "141 N US Highway 27",
-        "city": "Clermont",
+        "street": "11225 Emerald Coast Pkwy",
+        "city": "Miramar Beach",
         "state": "FL",
-        "zipCode": "34711",
+        "zipCode": "32550",
         "type": "commercial",
         "isDefault": true
       }

@@ -1459,6 +1459,20 @@ export class FirestoreDomainClient {
     return list;
   }
 
+  public async fetchAppointmentById(appointmentId: string, mode: DatabaseMode = 'sandbox'): Promise<CanonicalAppointment | null> {
+    const col = this.getCollectionName(FIRESTORE_COLLECTIONS.APPOINTMENTS, mode);
+    try {
+      const docUrl = this.buildUrl(`${col}/${encodeURIComponent(appointmentId)}`);
+      const res = await fetch(docUrl);
+      if (res.ok) {
+        const raw = await res.json();
+        const doc = this.parseFirestoreDocument<CanonicalAppointment>(raw);
+        if (doc && doc.id) return this.normalizeAppointment(doc);
+      }
+    } catch (e) {}
+    return null;
+  }
+
   public async saveAppointment(appointment: CanonicalAppointment, mode: DatabaseMode = 'sandbox'): Promise<boolean> {
     const col = this.getCollectionName(FIRESTORE_COLLECTIONS.APPOINTMENTS, mode);
     return this.writeDocument(col, appointment.id, appointment);
@@ -1748,6 +1762,22 @@ export class FirestoreDomainClient {
   }
 
   public async fetchJobById(jobId: string, mode: DatabaseMode = 'sandbox'): Promise<CanonicalJob | null> {
+    if (jobId.startsWith('appt-')) {
+      try {
+        const apptCol = this.getCollectionName(FIRESTORE_COLLECTIONS.APPOINTMENTS, mode);
+        const apptDocUrl = this.buildUrl(`${apptCol}/${encodeURIComponent(jobId)}`);
+        const apptRes = await fetch(apptDocUrl);
+        if (apptRes.ok) {
+          const apptRaw = await apptRes.json();
+          const appt = this.parseFirestoreDocument<any>(apptRaw);
+          if (appt && (appt.jobId || appt.jobNumber)) {
+            const resolvedJobId = appt.jobId || String(appt.jobNumber);
+            return this.fetchJobById(resolvedJobId, mode);
+          }
+        }
+      } catch (e) {}
+    }
+
     const rawJobId = jobId.replace(/^job-/, '').replace(/^#/, '');
     const col = this.getCollectionName(FIRESTORE_COLLECTIONS.JOBS, mode);
 
@@ -1778,6 +1808,14 @@ export class FirestoreDomainClient {
       if (q && q.length > 0) return q[0];
     } catch (e) {}
 
+    const parsedNum = parseInt(rawJobId, 10);
+    if (!isNaN(parsedNum)) {
+      try {
+        const qNum = await this.runStructuredQuery<CanonicalJob>(col, 'jobNumber', parsedNum);
+        if (qNum && qNum.length > 0) return qNum[0];
+      } catch (e) {}
+    }
+
     // Fallback to mock jobs
     const match = this.mockJobs.find(
       (j) => j.id === jobId || j.id === `job-${jobId}` || j.id === `job-${rawJobId}` || String(j.jobNumber) === jobId || String(j.jobNumber) === rawJobId
@@ -1790,6 +1828,19 @@ export class FirestoreDomainClient {
   public async saveJob(job: CanonicalJob, mode: DatabaseMode = 'sandbox'): Promise<boolean> {
     const col = this.getCollectionName(FIRESTORE_COLLECTIONS.JOBS, mode);
     return this.writeDocument(col, job.id, job);
+  }
+
+  public async deleteJob(jobId: string, mode: DatabaseMode = 'sandbox'): Promise<boolean> {
+    const rawJobId = jobId.replace(/^job-/, '').replace(/^#/, '');
+    const idx = this.mockJobs.findIndex((j) => j.id === jobId || j.id === `job-${jobId}` || j.id === `job-${rawJobId}` || String(j.jobNumber) === rawJobId);
+    if (idx >= 0) this.mockJobs.splice(idx, 1);
+
+    const col = this.getCollectionName(FIRESTORE_COLLECTIONS.JOBS, mode);
+    await this.deleteDocument(col, jobId);
+    if (!jobId.startsWith('job-')) {
+      await this.deleteDocument(col, `job-${jobId}`);
+    }
+    return true;
   }
 
   // --- Payments ---

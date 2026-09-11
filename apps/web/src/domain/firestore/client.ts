@@ -1518,7 +1518,19 @@ export class FirestoreDomainClient {
       q3.forEach((a) => resultsMap.set(a.id, this.normalizeAppointment(a)));
     }
     if (jobNumber) {
-      const rawJNum = jobNumber.replace(/^job-/, '').replace(/^#/, '');
+      if (jobNumber.startsWith('appt-')) {
+        try {
+          const apptDocUrl = this.buildUrl(`${col}/${encodeURIComponent(jobNumber)}`);
+          const apptRes = await fetch(apptDocUrl);
+          if (apptRes.ok) {
+            const rawAppt = await apptRes.json();
+            const parsed = this.normalizeAppointment(this.parseFirestoreDocument<any>(rawAppt));
+            if (parsed && parsed.id) resultsMap.set(parsed.id, parsed);
+          }
+        } catch (e) {}
+      }
+
+      const rawJNum = jobNumber.replace(/^job-/, '').replace(/^#/, '').replace(/^appt-/, '');
       const parsedNum = parseInt(rawJNum, 10);
       const q4 = await this.runStructuredQuery<any>(col, 'jobNumber', rawJNum);
       q4.forEach((a) => resultsMap.set(a.id, this.normalizeAppointment(a)));
@@ -1528,6 +1540,8 @@ export class FirestoreDomainClient {
       }
       const q5 = await this.runStructuredQuery<any>(col, 'jobId', `job-${rawJNum}`);
       q5.forEach((a) => resultsMap.set(a.id, this.normalizeAppointment(a)));
+      const q5Raw = await this.runStructuredQuery<any>(col, 'jobId', rawJNum);
+      q5Raw.forEach((a) => resultsMap.set(a.id, this.normalizeAppointment(a)));
     }
     if (customerName && resultsMap.size === 0) {
       const q6 = await this.runStructuredQuery<any>(col, 'customerName', customerName);
@@ -1602,6 +1616,24 @@ export class FirestoreDomainClient {
     }
 
     return Array.from(resultsMap.values());
+  }
+
+  public async fetchAppointmentById(appointmentId: string, mode: DatabaseMode = 'mock'): Promise<CanonicalAppointment | null> {
+    if (mode === 'mock') {
+      const appt = this.mockAppointments.find((a) => a.id === appointmentId);
+      return appt ? this.normalizeAppointment(appt) : null;
+    }
+    const col = this.getCollectionName(FIRESTORE_COLLECTIONS.APPOINTMENTS, mode);
+    try {
+      const docUrl = this.buildUrl(`${col}/${encodeURIComponent(appointmentId)}`);
+      const res = await fetch(docUrl);
+      if (res.ok) {
+        const raw = await res.json();
+        const doc = this.parseFirestoreDocument<CanonicalAppointment>(raw);
+        if (doc && doc.id) return this.normalizeAppointment(doc);
+      }
+    } catch (e) {}
+    return null;
   }
 
   public async saveAppointment(appointment: CanonicalAppointment, mode: DatabaseMode = 'mock'): Promise<boolean> {
@@ -1942,6 +1974,22 @@ export class FirestoreDomainClient {
   }
 
   public async fetchJobById(jobId: string, mode: DatabaseMode = 'mock'): Promise<CanonicalJob | null> {
+    if (jobId.startsWith('appt-')) {
+      try {
+        const apptCol = this.getCollectionName(FIRESTORE_COLLECTIONS.APPOINTMENTS, mode);
+        const apptDocUrl = this.buildUrl(`${apptCol}/${encodeURIComponent(jobId)}`);
+        const apptRes = await fetch(apptDocUrl);
+        if (apptRes.ok) {
+          const apptRaw = await apptRes.json();
+          const appt = this.parseFirestoreDocument<any>(apptRaw);
+          if (appt && (appt.jobId || appt.jobNumber)) {
+            const resolvedJobId = appt.jobId || String(appt.jobNumber);
+            return this.fetchJobById(resolvedJobId, mode);
+          }
+        }
+      } catch (e) {}
+    }
+
     const rawJobId = jobId.replace(/^job-/, '').replace(/^#/, '');
     if (mode === 'mock') {
       const match = this.mockJobs.find(
@@ -1979,6 +2027,14 @@ export class FirestoreDomainClient {
       if (q && q.length > 0) return this.normalizeJob(q[0]);
     } catch (e) {}
 
+    const parsedNum = parseInt(rawJobId, 10);
+    if (!isNaN(parsedNum)) {
+      try {
+        const qNum = await this.runStructuredQuery<CanonicalJob>(col, 'jobNumber', parsedNum);
+        if (qNum && qNum.length > 0) return this.normalizeJob(qNum[0]);
+      } catch (e) {}
+    }
+
     // Fallback to mock jobs
     const match = this.mockJobs.find(
       (j) => j.id === jobId || j.id === `job-${jobId}` || j.id === `job-${rawJobId}` || String(j.jobNumber) === jobId || String(j.jobNumber) === rawJobId
@@ -1996,6 +2052,20 @@ export class FirestoreDomainClient {
     if (mode === 'mock') return true;
     const col = this.getCollectionName(FIRESTORE_COLLECTIONS.JOBS, mode);
     return this.writeDocument(col, job.id, job);
+  }
+
+  public async deleteJob(jobId: string, mode: DatabaseMode = 'mock'): Promise<boolean> {
+    const rawJobId = jobId.replace(/^job-/, '').replace(/^#/, '');
+    const idx = this.mockJobs.findIndex((j) => j.id === jobId || j.id === `job-${jobId}` || j.id === `job-${rawJobId}` || String(j.jobNumber) === rawJobId);
+    if (idx >= 0) this.mockJobs.splice(idx, 1);
+
+    if (mode === 'mock') return true;
+    const col = this.getCollectionName(FIRESTORE_COLLECTIONS.JOBS, mode);
+    await this.deleteDocument(col, jobId);
+    if (!jobId.startsWith('job-')) {
+      await this.deleteDocument(col, `job-${jobId}`);
+    }
+    return true;
   }
 
   // --- Payments ---

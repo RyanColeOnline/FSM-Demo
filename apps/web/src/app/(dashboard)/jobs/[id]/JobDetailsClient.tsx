@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, use, useMemo, useCallback, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { 
   Star, 
   MapPin, 
@@ -52,7 +54,7 @@ import {
   defaultChecklistDefinitions 
 } from '@/data/checklistsData';
 import { ViewChecklistModal } from '@/components/modals/ViewChecklistModal';
-import { UpdateAppointmentModal } from '@/components/modals/UpdateAppointmentModal';
+import { UpdateAppointmentModal, formatCustomerDisplayName } from '@/components/modals/UpdateAppointmentModal';
 import { AddEquipmentModal } from '@/components/modals/AddEquipmentModal';
 import { NewNoteModal } from '@/components/modals/NewNoteModal';
 import { AdobePdfIcon, PdfDocumentViewerModal } from '@/components/modals/PdfDocumentViewerModal';
@@ -318,9 +320,9 @@ export function getJobTripTypeColorHex(jobType: string): string {
 }
 
 export const mockCustomerSavedLocations = [
-  '1420 Lakeview Drive, Winter Park, FL 32789',
+  '184 Eglin Pkwy NE, Fort Walton Beach, FL 32547',
   '880 Park Avenue N, Winter Park, FL 32789',
-  '450 S Orange Ave, Orlando, FL 32801',
+  '400 Harbor Blvd, Orlando, FL 32801',
   '1200 Lake Baldwin Ln, Orlando, FL 32814',
 ];
 
@@ -332,11 +334,11 @@ const mockJobsDatabase: Record<string, JobDetails> = {
     customerId: 'cust-res-01',
     isStarred: true,
     address: {
-      locationName: '1420 Lakeview Drive',
-      street: '1420 Lakeview Drive',
+      locationName: '184 Eglin Pkwy NE',
+      street: '184 Eglin Pkwy NE',
       cityStateZip: 'Winter Park, FL 32789',
     },
-    phone: '(407) 555-8121',
+    phone: '(850) 555-8121',
     email: 'eleanor.vance@example.com',
     status: 'Opened',
     jobType: 'Preventative Maintenance',
@@ -366,11 +368,11 @@ const mockJobsDatabase: Record<string, JobDetails> = {
     customerId: 'cust-res-01',
     isStarred: true,
     address: {
-      locationName: '1420 Lakeview Drive',
-      street: '1420 Lakeview Drive',
+      locationName: '184 Eglin Pkwy NE',
+      street: '184 Eglin Pkwy NE',
       cityStateZip: 'Winter Park, FL 32789',
     },
-    phone: '(407) 555-8121',
+    phone: '(850) 555-8121',
     email: 'eleanor.vance@example.com',
     status: 'Opened',
     jobType: 'Preventative Maintenance',
@@ -400,11 +402,11 @@ const mockJobsDatabase: Record<string, JobDetails> = {
     customerId: 'cust-res-01',
     isStarred: true,
     address: {
-      locationName: '1420 Lakeview Drive',
-      street: '1420 Lakeview Drive',
+      locationName: '184 Eglin Pkwy NE',
+      street: '184 Eglin Pkwy NE',
       cityStateZip: 'Winter Park, FL 32789',
     },
-    phone: '(407) 555-8121',
+    phone: '(850) 555-8121',
     email: 'eleanor.vance@example.com',
     status: 'Opened',
     jobType: 'HVAC Service',
@@ -425,10 +427,10 @@ const mockJobsDatabase: Record<string, JobDetails> = {
     isStarred: false,
     address: {
       locationName: 'Magnolia Bay Bistro',
-      street: '450 S Orange Ave',
+      street: '400 Harbor Blvd',
       cityStateZip: 'Orlando, FL 32801',
     },
-    phone: '(407) 555-4321',
+    phone: '(850) 555-4321',
     email: 'contact@magnoliabaybistro.com',
     status: 'Opened',
     jobType: 'Commercial Refrigeration',
@@ -452,7 +454,7 @@ const mockJobsDatabase: Record<string, JobDetails> = {
       street: '1200 Lake Baldwin Ln',
       cityStateZip: 'Orlando, FL 32814',
     },
-    phone: '(407) 555-9204',
+    phone: '(850) 555-9204',
     email: 'dr.thorne@winterparkclinic.com',
     status: 'Opened',
     jobType: 'HVAC Service',
@@ -492,11 +494,11 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
     customerId: 'cust-res-01',
     isStarred: true,
     address: {
-      locationName: '1420 Lakeview Drive, Winter Park, FL 32789',
-      street: '1420 Lakeview Drive',
+      locationName: '184 Eglin Pkwy NE, Fort Walton Beach, FL 32547',
+      street: '184 Eglin Pkwy NE',
       cityStateZip: 'Winter Park, FL 32789',
     },
-    phone: '(407) 555-8121',
+    phone: '(850) 555-8121',
     email: 'eleanor.vance@example.com',
     status: 'Opened',
     jobType: 'Preventative Maintenance',
@@ -549,14 +551,11 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
   const initialJob = databaseMode === 'mock' ? (mockJobsDatabase[jobIdParam] || defaultJobData) : emptyJobData;
 
-  const { jobs: allJobs = [], saveJob: persistCanonicalJob } = useJobs();
-  const { appointments = [], saveAppointment, deleteAppointment } = useAppointments(undefined, jobIdParam);
-  const { customers = [] } = useCustomers();
-  const { invoices: allInvoices = [] } = useInvoices(undefined, jobIdParam);
-  const { proposals: allProposals = [] } = useProposals(undefined, jobIdParam);
-  const { followUps, saveFollowUp } = useFollowUps();
-  const { templates, instances, saveChecklistInstance } = useChecklists(jobIdParam);
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [isDeletingJob, setIsDeletingJob] = useState(false);
 
+  const { jobs: allJobs = [], saveJob: persistCanonicalJob } = useJobs();
   const [directJob, setDirectJob] = useState<CanonicalJob | null>(null);
   const [directCustomer, setDirectCustomer] = useState<CanonicalCustomer | null>(null);
   const [localJobOverrides, setLocalJobOverrides] = useState<Partial<JobDetails>>({});
@@ -564,11 +563,33 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
   const [viewingPdfInvoice, setViewingPdfInvoice] = useState<any | null>(null);
   const [viewingPdfProposal, setViewingPdfProposal] = useState<any | null>(null);
 
+  const queryJobIdentifier = directJob?.jobNumber
+    ? String(directJob.jobNumber)
+    : jobIdParam.startsWith('appt-')
+    ? undefined
+    : jobIdParam;
+  const { appointments = [], saveAppointment, deleteAppointment } = useAppointments(undefined, queryJobIdentifier);
+  const { customers = [] } = useCustomers();
+  const { invoices: allInvoices = [] } = useInvoices(undefined, jobIdParam);
+  const { proposals: allProposals = [] } = useProposals(undefined, jobIdParam);
+  const { followUps, saveFollowUp } = useFollowUps();
+  const { templates, instances, saveChecklistInstance } = useChecklists(jobIdParam);
+
   useEffect(() => {
     let isMounted = true;
     async function loadDirectData() {
       try {
-        const j = await client.fetchJobById(jobIdParam, databaseMode);
+        let j = await client.fetchJobById(jobIdParam, databaseMode);
+        if (!j && jobIdParam.startsWith('appt-')) {
+          const appt = await client.fetchAppointmentById(jobIdParam, databaseMode);
+          if (appt) {
+            const jNum = appt.jobNumber ? String(appt.jobNumber) : undefined;
+            const jId = appt.jobId || (jNum ? `job-${jNum}` : undefined);
+            if (jId || jNum) {
+              j = await client.fetchJobById(jId || jNum!, databaseMode);
+            }
+          }
+        }
         if (j && isMounted) {
           setDirectJob(j);
         }
@@ -625,6 +646,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
         String(a.jobNumber) === jobIdParam ||
         String(a.jobNumber) === rawJobId ||
         a.jobId === jobIdParam ||
+        a.id === jobIdParam ||
         (foundJob && (String(a.jobNumber) === String(foundJob.jobNumber) || a.jobId === foundJob.id))
     );
 
@@ -668,16 +690,16 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
         fullCityStateZip = '';
       } else {
         fullStreet = locClean;
-        const city = (foundJob as any)?.locationCity || cust?.address?.city || 'Winter Park';
+        const city = (foundJob as any)?.locationCity || cust?.address?.city || 'Destin';
         const state = (foundJob as any)?.locationState || cust?.address?.state || 'FL';
-        const zip = (foundJob as any)?.locationZip || cust?.address?.zipCode || '32789';
+        const zip = (foundJob as any)?.locationZip || cust?.address?.zipCode || '32541';
         fullCityStateZip = `${city}, ${state} ${zip}`.trim();
       }
     } else if (cust?.address?.street) {
       fullStreet = cust.address.street;
-      const city = cust.address.city || 'Winter Park';
+      const city = cust.address.city || 'Destin';
       const state = cust.address.state || 'FL';
-      const zip = cust.address.zipCode || '32789';
+      const zip = cust.address.zipCode || '32541';
       fullCityStateZip = `${city}, ${state} ${zip}`.trim();
     } else if (databaseMode === 'mock') {
       fullStreet = initialJob.address?.street || '';
@@ -715,10 +737,13 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
       ? `$${propTotal.toFixed(2)}`
       : '$0.00';
 
+    const rawCustName = (foundJob as any)?.customerName || cust?.name || relatedAppts[0]?.customerName || (databaseMode === 'mock' ? initialJob.customerName : 'Customer');
+    const formattedCustName = rawCustName && rawCustName !== 'Customer' ? formatCustomerDisplayName(rawCustName) : rawCustName;
+
     const baseJob: JobDetails = {
       id: foundJob?.id || `job-${jobIdParam}`,
       jobNumber: String(foundJob?.jobNumber || rawJobId),
-      customerName: (foundJob as any)?.customerName || cust?.name || relatedAppts[0]?.customerName || (databaseMode === 'mock' ? initialJob.customerName : 'Customer'),
+      customerName: formattedCustName,
       customerId: custId || cust?.id || (databaseMode === 'mock' ? initialJob.customerId : `cust-${rawJobId}`),
       isStarred: Boolean(foundJob?.isStarred),
       address: {
@@ -789,6 +814,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
         String(a.jobNumber) === jobIdParam ||
         a.jobId === job.id ||
         a.jobId === jobIdParam ||
+        a.id === jobIdParam ||
         (directJob && (String(a.jobNumber) === String(directJob.jobNumber) || a.jobId === directJob.id))
     );
   }, [appointments, job.jobNumber, job.id, jobIdParam, directJob]);
@@ -854,7 +880,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
   // Edit Location State
   const [selectedLocation, setSelectedLocation] = useState<string>(
-    initialJob.address ? `${initialJob.address.street}, ${initialJob.address.cityStateZip}` : '1420 Lakeview Drive, Winter Park, FL 32789'
+    initialJob.address ? `${initialJob.address.street}, ${initialJob.address.cityStateZip}` : '184 Eglin Pkwy NE, Fort Walton Beach, FL 32547'
   );
 
   useEffect(() => {
@@ -1600,6 +1626,38 @@ Status: Verified & Archived
       setActiveModal('cannot-delete');
     } else {
       setActiveModal('delete-confirm');
+    }
+  };
+
+  const handleDeleteJob = async () => {
+    setIsDeletingJob(true);
+    try {
+      const rawJobId = jobIdParam.replace(/^job-/, '');
+      await client.deleteJob(job.id || jobIdParam, databaseMode);
+      if (jobIdParam !== job.id) {
+        await client.deleteJob(jobIdParam, databaseMode);
+      }
+      if (rawJobId && rawJobId !== jobIdParam) {
+        await client.deleteJob(rawJobId, databaseMode);
+      }
+
+      // Also delete any associated appointments for this job
+      for (const appt of allJobAppointments) {
+        if (appt.id) {
+          await client.deleteAppointment(appt.id, databaseMode);
+        }
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      await queryClient.invalidateQueries({ queryKey: ['paginated-jobs'] });
+      await queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      await queryClient.invalidateQueries({ queryKey: ['calls'] });
+
+      setActiveModal(null);
+      router.push('/jobs/list');
+    } catch (err) {
+      console.error('Failed to delete job:', err);
+      setIsDeletingJob(false);
     }
   };
 
@@ -3083,17 +3141,27 @@ Status: Verified & Archived
             <div className="bg-[#f5f5f5] px-5 py-3 border-t border-slate-200 flex items-center justify-end gap-2.5">
               <button
                 type="button"
+                disabled={isDeletingJob}
                 onClick={() => setActiveModal(null)}
                 className="bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 text-xs font-semibold px-4 py-1.5 rounded shadow-2xs transition-colors cursor-pointer"
               >
                 Cancel
               </button>
-              <Link
-                href="/jobs/list"
-                className="bg-[#be4646] hover:bg-[#a63a3a] text-white text-xs font-bold px-5 py-1.5 rounded shadow-2xs transition-colors cursor-pointer inline-flex items-center justify-center"
+              <button
+                type="button"
+                disabled={isDeletingJob}
+                onClick={handleDeleteJob}
+                className="bg-[#be4646] hover:bg-[#a63a3a] disabled:opacity-50 text-white text-xs font-bold px-5 py-1.5 rounded shadow-2xs transition-colors cursor-pointer inline-flex items-center justify-center gap-1.5"
               >
-                Delete
-              </Link>
+                {isDeletingJob ? (
+                  <>
+                    <span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <span>Delete</span>
+                )}
+              </button>
             </div>
           </div>
         </div>

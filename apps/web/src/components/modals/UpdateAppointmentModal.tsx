@@ -34,6 +34,7 @@ import {
 import { useDatabaseMode } from '@/contexts/database-mode-context';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useJobs } from '@/hooks/useJobs';
+import { useQueryClient } from '@tanstack/react-query';
 import { APPOINTMENT_STATUSES, APPOINTMENT_FREQUENCIES, PAYMENT_TERMS } from '@/constants/globalChoices';
 
 export interface CustomerEquipment {
@@ -818,7 +819,9 @@ function formatInstallDate(rawDate?: string | null): string {
   const [selectedUnscheduleOption, setSelectedUnscheduleOption] = useState<'Unschedule' | 'Cancel' | 'Delete'>('Unschedule');
   const [cancelAllPastAppts, setCancelAllPastAppts] = useState(false);
 
+  const queryClient = useQueryClient();
   const { saveAppointment: saveLiveAppointment, deleteAppointment: deleteLiveAppointment } = useAppointments();
+  const { deleteJob: deleteLiveJob } = useJobs();
 
   const handleExecuteUnscheduleCancelDelete = async () => {
     const targetId = editingAppointmentId || initialValues?.id || (editingJobId ? (editingJobId.startsWith('job-') ? `appt-${editingJobId.replace('job-', '')}` : `appt-${editingJobId}`) : null);
@@ -848,11 +851,27 @@ function formatInstallDate(rawDate?: string | null): string {
         } as any);
       }
     } else if (selectedUnscheduleOption === 'Delete') {
+      const targetJobNum = initialValues?.jobNumber ? String(initialValues.jobNumber).replace(/[^0-9]/g, '') : '';
+      const targetJobId = editingJobId || (targetJobNum ? `job-${targetJobNum}` : null);
+      if (targetJobId) {
+        try {
+          if (deleteLiveJob) {
+            await deleteLiveJob(targetJobId);
+          } else if (client?.deleteJob) {
+            await client.deleteJob(targetJobId, databaseMode);
+          }
+        } catch (e) {}
+      }
       if (onDeleteAppointment) {
         onDeleteAppointment(targetId || undefined);
       } else if (targetId && deleteLiveAppointment) {
         await deleteLiveAppointment(targetId);
       }
+      try {
+        queryClient.invalidateQueries({ queryKey: ['appointments'] });
+        queryClient.invalidateQueries({ queryKey: ['jobs'] });
+        queryClient.invalidateQueries({ queryKey: ['paginated-jobs'] });
+      } catch (e) {}
     }
     setShowCancelUnscheduleModal(false);
     onClose();

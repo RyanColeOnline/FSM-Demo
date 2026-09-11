@@ -292,6 +292,100 @@ export interface MapStopMarker {
   address: string;
   latPercent: number; // For map positioning
   lngPercent: number; // For map positioning
+  stopNumber: number;
+  techId?: string;
+}
+
+/**
+ * Accurately maps Emerald Coast addresses (Fort Walton Beach, Destin, Niceville, Miramar Beach, 30A)
+ * to bounding percentages within the map iframe (30.3935, -86.4958, zoom 11).
+ */
+function getEmeraldCoastCoordinates(address: string, seed: string = ''): { latPercent: number; lngPercent: number } {
+  const norm = (address || '').toLowerCase();
+  
+  // Deterministic subtle jitter (±1.5%) so multiple stops in the same community don't directly stack
+  const hash = (seed + address).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const jitterLat = ((hash % 11) - 5) * 0.35;
+  const jitterLng = (((hash >> 3) % 11) - 5) * 0.45;
+
+  if (norm.includes('rosemary') || norm.includes('alys') || norm.includes('inlet') || norm.includes('32561')) {
+    return { latPercent: Math.max(10, Math.min(90, 76 + jitterLat)), lngPercent: Math.max(10, Math.min(95, 92 + jitterLng)) };
+  }
+  if (norm.includes('seaside') || norm.includes('seagrove') || norm.includes('watercolor') || norm.includes('grayton')) {
+    return { latPercent: Math.max(10, Math.min(90, 68 + jitterLat)), lngPercent: Math.max(10, Math.min(95, 84 + jitterLng)) };
+  }
+  if (norm.includes('30a') || norm.includes('santa rosa beach') || norm.includes('32559') || norm.includes('dune allen')) {
+    return { latPercent: Math.max(10, Math.min(90, 62 + jitterLat)), lngPercent: Math.max(10, Math.min(95, 76 + jitterLng)) };
+  }
+  if (norm.includes('miramar') || norm.includes('sandestin') || norm.includes('grand blvd') || norm.includes('32550')) {
+    return { latPercent: Math.max(10, Math.min(90, 54 + jitterLat)), lngPercent: Math.max(10, Math.min(95, 63 + jitterLng)) };
+  }
+  if (norm.includes('niceville') || norm.includes('bluewater') || norm.includes('valparaiso') || norm.includes('32578')) {
+    return { latPercent: Math.max(10, Math.min(90, 19 + jitterLat)), lngPercent: Math.max(10, Math.min(95, 48 + jitterLng)) };
+  }
+  if (norm.includes('shalimar') || norm.includes('32579') || norm.includes('eglin')) {
+    return { latPercent: Math.max(10, Math.min(90, 32 + jitterLat)), lngPercent: Math.max(10, Math.min(95, 27 + jitterLng)) };
+  }
+  if (norm.includes('destin') || norm.includes('32541') || norm.includes('harbor blvd') || norm.includes('legendary marina') || norm.includes('gulf terrace')) {
+    return { latPercent: Math.max(10, Math.min(90, 50 + jitterLat)), lngPercent: Math.max(10, Math.min(95, 43 + jitterLng)) };
+  }
+  if (norm.includes('fort walton') || norm.includes('walton beach') || norm.includes('fwb') || norm.includes('mary esther') || norm.includes('okaloosa') || norm.includes('32548')) {
+    return { latPercent: Math.max(10, Math.min(90, 44 + jitterLat)), lngPercent: Math.max(10, Math.min(95, 18 + jitterLng)) };
+  }
+
+  // Fallback to central Destin area with jitter
+  return { latPercent: 50 + jitterLat, lngPercent: 45 + jitterLng };
+}
+
+/**
+ * Interval lane allocation algorithm to ensure overlapping appointment tiles stack
+ * vertically with zero visual overlap, expanding the technician row height.
+ */
+function computeJobLanes(jobs: ScheduledJob[], timeDisplayMode: 'scheduled' | 'actual') {
+  if (!jobs || jobs.length === 0) return { jobsWithLanes: [], laneCount: 1 };
+
+  const parsed = jobs.map((job) => {
+    const startStr = timeDisplayMode === 'actual' ? (job.actualStartTime || job.startTime) : job.startTime;
+    const startHour = parseTimeToDecimalHours(startStr);
+    const duration = timeDisplayMode === 'actual' ? (job.actualDurationHours || job.durationHours) : job.durationHours;
+    const endHour = startHour + Math.max(0.5, duration || 2);
+    return {
+      job,
+      startHour,
+      endHour,
+      duration,
+    };
+  });
+
+  parsed.sort((a, b) => {
+    if (a.startHour !== b.startHour) return a.startHour - b.startHour;
+    return b.endHour - a.endHour;
+  });
+
+  const laneEndTimes: number[] = [];
+  const assignedJobs: (ScheduledJob & { laneIndex: number })[] = [];
+
+  for (const item of parsed) {
+    let placedLane = -1;
+    for (let i = 0; i < laneEndTimes.length; i++) {
+      if (laneEndTimes[i] <= item.startHour + 0.01) {
+        placedLane = i;
+        laneEndTimes[i] = item.endHour;
+        break;
+      }
+    }
+    if (placedLane === -1) {
+      placedLane = laneEndTimes.length;
+      laneEndTimes.push(item.endHour);
+    }
+    assignedJobs.push({
+      ...item.job,
+      laneIndex: placedLane,
+    });
+  }
+
+  const laneCount = Math.max(1, laneEndTimes.length);
+  return { jobsWithLanes: assignedJobs, laneCount };
 }
 
 export interface HoverDetailsData {
@@ -2047,22 +2141,36 @@ function formatInstallDate(rawDate?: string | null): string {
     return items.sort((a, b) => a.startTimeStr.localeCompare(b.startTimeStr));
   }, [techUsers, selectedTechNames]);
 
-  // Live Map Markers computed dynamically with live job trip colors
-  const liveMapMarkers = useMemo(() => {
+  // Live Map Markers & Routes computed dynamically with real Emerald Coast coordinates and numbered stops
+  const { liveMapMarkers, techRoutes } = useMemo(() => {
     const markers: MapStopMarker[] = [];
-    let index = 0;
+    const routes: Array<{
+      techId: string;
+      techName: string;
+      colorHex: string;
+      stops: Array<{ job: ScheduledJob; latPercent: number; lngPercent: number; stopNumber: number }>;
+    }> = [];
+
     const activeTechs = techUsers.filter((tech) => selectedTechNames.includes(tech.name));
 
     for (const tech of activeTechs) {
-      for (const job of tech.scheduledJobs || []) {
-        const hash = (job.id + index).split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
-        const latPercent = 25 + ((hash * 17) % 55); // 25% to 80%
-        const lngPercent = 20 + ((hash * 31) % 65); // 20% to 85%
+      const sortedJobs = [...(tech.scheduledJobs || [])].sort((a, b) =>
+        (a.startTime || '').localeCompare(b.startTime || '')
+      );
+
+      const techStops: Array<{ job: ScheduledJob; latPercent: number; lngPercent: number; stopNumber: number }> = [];
+      let techBaseColor = '#be4646';
+
+      sortedJobs.forEach((job, idx) => {
+        const stopNumber = idx + 1;
+        const fullAddr = `${job.addressStreet || ''}, ${job.addressCityStateZip || ''}`.replace(/^, /, '').trim() || 'Fort Walton Beach, FL';
+        const { latPercent, lngPercent } = getEmeraldCoastCoordinates(fullAddr, job.id);
         const techName = (job.technicians && job.technicians[0]) || tech.name;
         const initials = techName.split(' ').map((n: string) => n[0]).join('').slice(0, 4).toUpperCase();
         const colorHex = job.colorHex || getTripTypeWebHex(job.jobType) || '#10b981';
+        if (idx === 0) techBaseColor = colorHex;
 
-        markers.push({
+        const markerObj: MapStopMarker = {
           id: job.id,
           techInitials: initials,
           techName: techName,
@@ -2071,14 +2179,33 @@ function formatInstallDate(rawDate?: string | null): string {
           timeRange: `${formatTimeTo12h(job.startTime)} - ${formatTimeTo12h(job.endTime || '09:00')}`,
           jobNumber: job.jobNumber,
           customer: job.customer,
-          address: `${job.addressStreet || ''}, ${job.addressCityStateZip || ''}`.replace(/^, /, '').trim() || 'Fort Walton Beach, FL',
+          address: fullAddr,
           latPercent,
           lngPercent,
+          stopNumber,
+          techId: tech.id,
+        };
+
+        markers.push(markerObj);
+        techStops.push({
+          job,
+          latPercent,
+          lngPercent,
+          stopNumber,
         });
-        index++;
+      });
+
+      if (techStops.length > 0) {
+        routes.push({
+          techId: tech.id,
+          techName: tech.name,
+          colorHex: techBaseColor,
+          stops: techStops,
+        });
       }
     }
-    return markers;
+
+    return { liveMapMarkers: markers, techRoutes: routes };
   }, [techUsers, selectedTechNames]);
 
   return (
@@ -2335,7 +2462,7 @@ function formatInstallDate(rawDate?: string | null): string {
                         </td>
                         <td className="p-3 font-semibold text-slate-700 whitespace-nowrap">
                           <Link 
-                            href={`/jobs/${item.id}`}
+                            href={`/jobs/${item.jobNumber || item.id.replace(/^appt-/, '')}`}
                             className="text-[#be4646] hover:text-[#a63a3a] hover:underline font-semibold"
                           >
                             {item.jobNumber}
@@ -2905,6 +3032,8 @@ function formatInstallDate(rawDate?: string | null): string {
                             displayedTechUsers.map((tech) => {
                               const isBeingDragged = draggedTechId === tech.id;
                               const isDragTarget = dragOverTechId === tech.id;
+                              const { jobsWithLanes, laneCount } = computeJobLanes(tech.scheduledJobs, timeDisplayMode);
+                              const rowMinHeightPx = Math.max(56, 8 + laneCount * 50);
                               
                               return (
                                 <div 
@@ -2912,7 +3041,8 @@ function formatInstallDate(rawDate?: string | null): string {
                                   onDragOver={(e) => handleTechRowDragOver(e, tech.id)}
                                   onDragLeave={() => handleTechRowDragLeave(tech.id)}
                                   onDrop={(e) => handleTechRowDrop(e, tech.id)}
-                                  className={`flex min-h-[56px] transition-all duration-150 relative ${
+                                  style={{ minHeight: `${rowMinHeightPx}px` }}
+                                  className={`flex transition-all duration-150 relative ${
                                     isBeingDragged 
                                       ? 'opacity-30 bg-slate-100 scale-[0.995]' 
                                       : isDragTarget 
@@ -2924,7 +3054,7 @@ function formatInstallDate(rawDate?: string | null): string {
                                     draggable
                                     onDragStart={(e) => handleTechDragStart(e, tech.id)}
                                     onDragEnd={handleTechDragEnd}
-                                    className={`w-36 p-2 border-r border-slate-200 shrink-0 flex items-center justify-between group transition-colors cursor-grab active:cursor-grabbing select-none ${
+                                    className={`w-36 p-2 border-r border-slate-200 shrink-0 flex items-center justify-between group transition-colors cursor-grab active:cursor-grabbing select-none self-stretch ${
                                       isDragTarget ? 'bg-blue-100/50' : 'bg-white hover:bg-slate-50'
                                     }`}
                                     title="Grab to switch / reorder technician row"
@@ -2963,8 +3093,10 @@ function formatInstallDate(rawDate?: string | null): string {
                                         style={{
                                           left: `${Math.max(0, dragOverTarget.posXPercent)}%`,
                                           width: `${((draggedAppointment.job.durationHours || 2) / 12) * 100}%`,
+                                          top: '4px',
+                                          bottom: '4px',
                                         }}
-                                        className="absolute top-1 bottom-1 rounded border-2 border-dashed border-[#2d82b7] bg-[#2d82b7]/20 z-20 pointer-events-none flex items-center justify-between px-2 shadow-xs transition-none"
+                                        className="absolute rounded border-2 border-dashed border-[#2d82b7] bg-[#2d82b7]/20 z-20 pointer-events-none flex items-center justify-between px-2 shadow-xs transition-none"
                                       >
                                         <span className="text-[10px] font-bold text-[#1e5d83] bg-white/95 px-1.5 py-0.5 rounded shadow-2xs">
                                           {dragOverTarget.snappedStartTime}
@@ -2973,7 +3105,7 @@ function formatInstallDate(rawDate?: string | null): string {
                                     )}
 
                                     {/* Draggable Appointment Tiles */}
-                                    {tech.scheduledJobs.map((job) => {
+                                    {jobsWithLanes.map((job) => {
                                       const isBeingDragged = draggedAppointment?.job.id === job.id;
                                       const startHourStr = timeDisplayMode === 'actual' ? (job.actualStartTime || job.startTime) : job.startTime;
                                       const decimalHours = parseTimeToDecimalHours(startHourStr);
@@ -2982,6 +3114,7 @@ function formatInstallDate(rawDate?: string | null): string {
                                       const startOffset = decimalHours - 7;
                                       const startPercent = (startOffset / 12) * 100;
                                       const widthPercent = (duration / 12) * 100;
+                                      const tileTopPx = 4 + job.laneIndex * 50;
 
                                       return (
                                         <div
@@ -3002,11 +3135,13 @@ function formatInstallDate(rawDate?: string | null): string {
                                           style={{
                                             left: `${Math.max(0, startPercent)}%`,
                                             width: `${widthPercent}%`,
+                                            top: `${tileTopPx}px`,
+                                            height: '46px',
                                             backgroundColor: !job.isCompleted ? (getTripTypeWebHex(job.jobType) || job.colorHex) : undefined,
                                             borderColor: !job.isCompleted ? (getTripTypeWebHex(job.jobType) || job.colorHex) : undefined,
                                           }}
                                           title="Drag to reassign appointment or click to edit"
-                                          className={`absolute top-1 bottom-1 rounded px-1.5 py-0.5 border shadow-xs flex flex-col justify-center gap-0 z-10 cursor-grab active:cursor-grabbing overflow-hidden leading-tight hover:brightness-95 ${
+                                          className={`absolute rounded px-1.5 py-0.5 border shadow-xs flex flex-col justify-center gap-0 z-10 cursor-grab active:cursor-grabbing overflow-hidden leading-tight hover:brightness-95 ${
                                             isBeingDragged
                                               ? 'opacity-25 border-dashed border-2 border-slate-500'
                                               : job.isCompleted
@@ -3040,8 +3175,8 @@ function formatInstallDate(rawDate?: string | null): string {
                   </div>
                 )
               ) : (
-                /* VIEW 3: ACTUAL GOOGLE MAPS VIEW */
-                <div className="bg-[#f8fafc] rounded-lg border border-slate-200 overflow-hidden shadow-xs relative w-full h-[600px]">
+                /* VIEW 3: ACTUAL GOOGLE MAPS VIEW WITH EMERALD COAST ROUTES */
+                <div className="bg-[#f8fafc] rounded-lg border border-slate-200 overflow-hidden shadow-xs relative w-full h-[650px]">
                   <iframe
                     title="Google Maps Coverage Area"
                     src="https://maps.google.com/maps?q=30.3935,-86.4958&z=11&output=embed"
@@ -3050,6 +3185,80 @@ function formatInstallDate(rawDate?: string | null): string {
                     loading="lazy"
                   />
 
+                  {/* SVG Route Lines Connecting Stops Per Technician */}
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible">
+                    <defs>
+                      {techRoutes.map((route) => (
+                        <marker
+                          key={`arrow-${route.techId}`}
+                          id={`arrow-${route.techId}`}
+                          viewBox="0 0 10 10"
+                          refX="6"
+                          refY="5"
+                          markerWidth="6"
+                          markerHeight="6"
+                          orient="auto-start-reverse"
+                        >
+                          <path d="M 0 1 L 8 5 L 0 9 z" fill={route.colorHex} />
+                        </marker>
+                      ))}
+                    </defs>
+                    {techRoutes.map((route) => {
+                      if (route.stops.length < 2) return null;
+                      const pointsStr = route.stops.map((s) => `${s.lngPercent},${s.latPercent}`).join(' ');
+                      return (
+                        <g key={`route-${route.techId}`}>
+                          {/* Background Glow/Outline */}
+                          <polyline
+                            points={pointsStr}
+                            fill="none"
+                            stroke="#ffffff"
+                            strokeWidth="4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="opacity-90"
+                          />
+                          {/* Colored Route Line */}
+                          <polyline
+                            points={pointsStr}
+                            fill="none"
+                            stroke={route.colorHex}
+                            strokeWidth="2.4"
+                            strokeDasharray="4 2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            markerEnd={`url(#arrow-${route.techId})`}
+                          />
+                        </g>
+                      );
+                    })}
+                  </svg>
+
+                  {/* Emerald Coast Technician Routes Legend */}
+                  <div className="absolute top-3 right-3 z-40 bg-white/95 backdrop-blur-xs border border-slate-200 rounded-lg shadow-md p-2.5 max-w-xs text-xs space-y-1.5 pointer-events-auto">
+                    <div className="font-bold text-slate-800 text-[11px] flex items-center justify-between pb-1 border-b border-slate-100">
+                      <span>Emerald Coast Routes</span>
+                      <span className="text-[10px] text-slate-500 font-normal">{liveMapMarkers.length} stops</span>
+                    </div>
+                    <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
+                      {techRoutes.map((tr) => (
+                        <div key={tr.techId} className="flex flex-col gap-0.5 text-[11px]">
+                          <div className="flex items-center justify-between font-semibold">
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: tr.colorHex }} />
+                              <span className="text-slate-800">{tr.techName}</span>
+                            </div>
+                            <span className="text-slate-500 text-[10px]">{tr.stops.length} stop{tr.stops.length === 1 ? '' : 's'}</span>
+                          </div>
+                          <div className="pl-4 text-[10px] text-slate-500 truncate">
+                            {tr.stops.map((s) => `${s.stopNumber}. ${s.job.addressCityStateZip?.split(',')[0] || s.job.addressStreet || 'Stop'}`).join(' → ')}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Stop Markers */}
                   {liveMapMarkers.map((marker) => {
                     const isSelected = selectedMarkerId === marker.id;
 
@@ -3066,9 +3275,13 @@ function formatInstallDate(rawDate?: string | null): string {
                         <div className="flex flex-col items-center">
                           <div
                             style={{ backgroundColor: marker.colorHex }}
-                            className="w-8 h-8 rounded-full text-white font-bold text-xs flex items-center justify-center border-2 border-white shadow-xl transform transition-transform hover:scale-110"
+                            className="relative w-8 h-8 rounded-full text-white font-bold text-xs flex items-center justify-center border-2 border-white shadow-xl transform transition-transform hover:scale-110"
                           >
                             {marker.techInitials}
+                            {/* Numbered Stop Badge */}
+                            <span className="absolute -top-1.5 -right-1.5 bg-slate-900 text-white border border-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+                              {marker.stopNumber}
+                            </span>
                           </div>
                           <div
                             style={{ backgroundColor: marker.colorHex }}
@@ -3076,17 +3289,19 @@ function formatInstallDate(rawDate?: string | null): string {
                           />
                         </div>
 
-                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 bg-white rounded-lg shadow-2xl border border-slate-200 p-2.5 w-56 text-[11px] z-50 animate-in fade-in zoom-in-95 duration-100">
+                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 bg-white rounded-lg shadow-2xl border border-slate-200 p-2.5 w-60 text-[11px] z-50 animate-in fade-in zoom-in-95 duration-100">
                           <div className="font-bold border-b border-slate-100 pb-1 flex justify-between items-center" style={{ color: marker.colorHex }}>
-                            <Link href={`/jobs/${marker.id}`} className="flex items-center gap-1.5 hover:underline">
-                              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: marker.colorHex }} />
-                              <span>{marker.jobNumber}</span>
-                            </Link>
+                            <div className="flex items-center gap-1.5">
+                              <span className="bg-slate-900 text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">Stop {marker.stopNumber}</span>
+                              <Link href={`/jobs/${marker.jobNumber || marker.id.replace(/^appt-/, '')}`} className="flex items-center gap-1 hover:underline">
+                                <span>{marker.jobNumber}</span>
+                              </Link>
+                            </div>
                             <span className="text-[10px] text-slate-500 font-semibold">{marker.techName}</span>
                           </div>
                           <div className="font-bold text-slate-900 mt-1">{marker.customer}</div>
                           <div className="text-slate-600 text-[10px] font-medium">{marker.jobType} • {marker.timeRange}</div>
-                          <div className="text-slate-400 text-[10px] truncate">{marker.address}</div>
+                          <div className="text-slate-500 text-[10px] truncate">{marker.address}</div>
                         </div>
                       </div>
                     );
@@ -3137,7 +3352,7 @@ function formatInstallDate(rawDate?: string | null): string {
 
           {/* Job Number */}
           <div className="font-bold text-[#be4646]">
-            <Link href={`/jobs/${hoverDetails.id || hoverDetails.jobNumberStr.replace(/[^0-9]/g, '') || 'job-1'}`} className="hover:underline">
+            <Link href={`/jobs/${hoverDetails.jobNumberStr?.replace(/[^0-9]/g, '') || hoverDetails.id?.replace(/^appt-/, '') || 'job-1'}`} className="hover:underline">
               {hoverDetails.jobNumberStr}
             </Link>
           </div>
@@ -3251,7 +3466,7 @@ function formatInstallDate(rawDate?: string | null): string {
                 Close
               </button>
               <Link
-                href={`/jobs/${selectedJobModal.id || selectedJobModal.jobNumber.replace(/[^0-9]/g, '')}`}
+                href={`/jobs/${selectedJobModal.jobNumber?.replace(/[^0-9]/g, '') || selectedJobModal.id?.replace(/^appt-/, '')}`}
                 className="px-4 py-2 bg-[#be4646] hover:bg-[#a63a3a] text-white font-bold rounded-md transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <FileText className="w-4 h-4" />
