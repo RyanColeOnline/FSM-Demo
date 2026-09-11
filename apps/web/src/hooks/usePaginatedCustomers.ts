@@ -30,7 +30,7 @@ export function usePaginatedCustomers(options: UsePaginatedCustomersOptions = {}
   const [statusFilter, setStatusFilter] = useState<string>(initialStatusFilter);
 
   // Stack of cursors for each page: cursorStack[0] = null (page 1), cursorStack[1] = endCursor of page 1, etc.
-  const cursorStackRef = useRef<Array<{ qbName: string; id: string } | null>>([null]);
+  const cursorStackRef = useRef<Array<{ name?: string; qbName?: string; id: string } | null>>([null]);
 
   const loadPage = useCallback(async (targetPage: number) => {
     setLoading(true);
@@ -78,15 +78,21 @@ export function usePaginatedCustomers(options: UsePaginatedCustomersOptions = {}
     return () => clearTimeout(timer);
   }, [databaseMode, searchField, searchQuery, syncFilter, statusFilter, loadPage]);
 
-  // Database mode change listener
+  // Database mode and customer save/update change listener
   useEffect(() => {
-    const handleModeChange = () => {
+    const handleReload = () => {
       cursorStackRef.current = [null];
       setPage(1);
       loadPage(1);
     };
-    window.addEventListener('fsm_database_mode_changed', handleModeChange);
-    return () => window.removeEventListener('fsm_database_mode_changed', handleModeChange);
+    window.addEventListener('fsm_database_mode_changed', handleReload);
+    window.addEventListener('fsm_customer_saved', handleReload);
+    window.addEventListener('fsm_customers_updated', handleReload);
+    return () => {
+      window.removeEventListener('fsm_database_mode_changed', handleReload);
+      window.removeEventListener('fsm_customer_saved', handleReload);
+      window.removeEventListener('fsm_customers_updated', handleReload);
+    };
   }, [loadPage]);
 
   const nextPage = () => {

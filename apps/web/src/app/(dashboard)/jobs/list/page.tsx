@@ -126,7 +126,10 @@ import {
   getEasternDateString, 
   formatEasternDate, 
   formatEasternDateTime, 
-  normalizeToEasternDateString 
+  normalizeToEasternDateString,
+  formatCalendarDateMdy,
+  cleanUserDisplayName,
+  formatCustomerDisplayName
 } from '@/domain';
 
 interface JobRecord {
@@ -267,7 +270,7 @@ const initialJobs: JobRecord[] = [
     status: 'Opened',
     isFlagged: true,
     followUpType: 'Need Quote/Autho',
-    assignee: 'Justin Lung',
+    assignee: 'Alex Reynolds',
     notes: [],
   },
   {
@@ -340,8 +343,7 @@ function getCurrentFormattedTimestamp(): string {
 
 function parseDateCreatedFromIso(iso: string) {
   if (!iso) return 'Today';
-  const formatted = formatEasternDate(iso);
-  return formatted || iso.slice(0, 10);
+  return formatCalendarDateMdy(iso);
 }
 
 function JobListContent() {
@@ -392,8 +394,6 @@ function JobListContent() {
   }, [debouncedSearch, startDate, endDate, jobTypeFilter, statusFilter, showFlaggedOnly, followUpTypeFilter, assigneeFilter]);
 
   const rawJobsList = paginatedData?.jobs ?? [];
-  const totalJobs = showFlaggedOnly ? paginatedJobs.length : (paginatedData?.total ?? 0);
-  const totalPages = showFlaggedOnly ? (Math.ceil(paginatedJobs.length / pageSize) || 1) : (paginatedData?.totalPages ?? 1);
 
   // Edit Follow Up Flag Modal State
   const [editingFlagJob, setEditingFlagJob] = useState<JobRecord | null>(null);
@@ -420,7 +420,7 @@ function JobListContent() {
 
         const isFlagged = Boolean(j.isFlagged || (j.followUpFlag && j.followUpFlag !== 'N') || (j as any).flagged || matchedFollowUp);
 
-        const custName = j.customerName || 'Customer';
+        const custName = formatCustomerDisplayName({ name: j.customerName, customerType: (j as any).customerType, businessName: (j as any).businessName }) || j.customerName || 'Customer';
         const line2 = j.address?.addressLine2 || (j.address as any)?.street2 || '';
         let addrFromObj = '';
         if (j.address) {
@@ -444,17 +444,19 @@ function JobListContent() {
 
         const matchedNotes: FlagNoteEntry[] = (matchedFollowUp?.notes || (j as any).followUpNotes || []).map((n: any) => ({
           id: n.id || `note-${Date.now()}`,
-          authorName: n.author || n.authorName || 'Ryan Cole',
+          authorName: cleanUserDisplayName(n.author || n.authorName || 'Ryan Cole'),
           timestamp: n.timestamp || '',
           text: n.text || '',
           isEditing: false,
         }));
 
+        const rawCreationDate = j.jobCreationDate || (j as any).createdDate || (j as any).createdAt || (j as any).creationDate;
+
         return {
           id: j.id,
           customerId: j.customerId,
           customerNumber: j.customerNumber,
-          dateCreated: j.jobCreationDate ? parseDateCreatedFromIso(j.jobCreationDate) : 'Today',
+          dateCreated: rawCreationDate ? parseDateCreatedFromIso(rawCreationDate) : 'Today',
           jobNumber: j.jobNumber || j.id.replace('job-', ''),
           customerName: custName,
           locationAddress: {
@@ -466,7 +468,7 @@ function JobListContent() {
           status: statusVal,
           isFlagged,
           followUpType: isFlagged ? (matchedFollowUp?.followUpType || j.followUpType || 'Need Quote/Autho') : undefined,
-          assignee: matchedFollowUp?.assignedTo || j.assignee || (j as any).followUpAssignee || (isFlagged ? 'Technician' : undefined),
+          assignee: cleanUserDisplayName(matchedFollowUp?.assignedTo || j.assignee || (j as any).followUpAssignee || (isFlagged ? 'Technician' : undefined)),
           dueDate: matchedFollowUp?.dueDate || j.followUpDate || j.dueDate || undefined,
           isFlagComplete: Boolean(matchedFollowUp?.isComplete || j.isFlagComplete),
           notes: matchedNotes,
@@ -490,6 +492,9 @@ function JobListContent() {
     }
     return [];
   }, [rawJobsList, followUps, showFlaggedOnly, followUpTypeFilter, assigneeFilter]);
+
+  const totalJobs = showFlaggedOnly ? paginatedJobs.length : (paginatedData?.total ?? 0);
+  const totalPages = showFlaggedOnly ? (Math.ceil(paginatedJobs.length / pageSize) || 1) : (paginatedData?.totalPages ?? 1);
 
   useEffect(() => {
     if (flaggedParam === 'true') {

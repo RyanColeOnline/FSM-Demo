@@ -193,7 +193,7 @@ export default function WexInvoiceListPage() {
       billToCustomer: updatedData.billToCustomer || updatedData.customerName,
       billingAddress: rawInv?.billingAddress || '',
       jobLocation: rawInv?.jobLocation || '',
-      technician: rawInv?.technician || 'Minor Cover',
+      technician: rawInv?.technician || 'Marcus Vance',
       paymentTerms: rawInv?.paymentTerms || 'Due Upon Receipt',
       acceptedPaymentMethods: rawInv?.acceptedPaymentMethods || ['Card', 'Check', 'Cash'],
       issueDate: updatedData.issueDate,
@@ -504,7 +504,7 @@ export default function WexInvoiceListPage() {
             paymentStatus={viewingPdfInvoice.paymentStatus}
             paymentTerms={(rawInv as any)?.paymentTerms || 'Due upon Receipt'}
             paymentsCredits={(rawInv as any)?.payments || (viewingPdfInvoice.paymentStatus === 'Paid' ? [viewingPdfInvoice.invoiceAmount] : [])}
-            technician={rawInv?.technician || 'Minor Cover'}
+            technician={rawInv?.technician || 'Marcus Vance'}
             lineItems={rawInv?.lineItems?.map((li: any) => ({
               id: li.id,
               name: li.name || li.description || 'Service Item',

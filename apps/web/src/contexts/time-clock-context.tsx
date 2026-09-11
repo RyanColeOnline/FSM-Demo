@@ -41,7 +41,7 @@ export function TimeClockProvider({ children }: { children: React.ReactNode }) {
               const now = new Date();
               const elapsed = Math.max(0, Math.floor((now.getTime() - inTime.getTime()) / 1000));
               setActiveShiftSeconds(elapsed);
-              setClockInTime(inTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+              setClockInTime(inTime.toLocaleTimeString('en-US', { timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit' }));
             } else if (latest.type === 'On Break') {
               setIsClockedIn(true);
               setIsOnBreak(true);
@@ -84,7 +84,7 @@ export function TimeClockProvider({ children }: { children: React.ReactNode }) {
       setActiveShiftSeconds(0);
       setClockInTime('');
     } else {
-      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const timeStr = now.toLocaleTimeString('en-US', { timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit' });
       setClockInTime(timeStr);
       setIsClockedIn(true);
       setActiveShiftSeconds(0);
@@ -98,8 +98,8 @@ export function TimeClockProvider({ children }: { children: React.ReactNode }) {
         userName: 'Ryan Cole',
         userId: 'usr-ryan-cole',
         date: now.toISOString().slice(0, 10),
-        clockInTime: willClockOut ? clockInTime : now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        clockOutTime: willClockOut ? now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : undefined,
+        clockInTime: willClockOut ? clockInTime : now.toLocaleTimeString('en-US', { timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit' }),
+        clockOutTime: willClockOut ? now.toLocaleTimeString('en-US', { timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit' }) : undefined,
       }, databaseMode);
     }
   };

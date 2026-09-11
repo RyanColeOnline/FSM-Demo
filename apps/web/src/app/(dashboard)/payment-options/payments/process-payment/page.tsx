@@ -111,51 +111,51 @@ interface CustomerResult {
 const mockCustomerResults: CustomerResult[] = [
   {
     id: 'cust-1',
-    name: 'Tammy Cohen',
+    name: 'Eleanor Vance',
     location: {
       name: 'Primary Residence',
-      street: '71 Coquina Pl',
-      cityStateZip: 'Santa Rosa Beach, FL 32459',
+      street: '742 Evergreen Terrace',
+      cityStateZip: 'Springfield, IL 62704',
     },
-    email: 'tammy@ccrarchitecture.com',
-    phone: '(205) 335-8038',
-    custNumber: '49106',
+    email: 'eleanor.vance@example.com',
+    phone: '(217) 555-0142',
+    custNumber: 'CUST-1001',
   },
   {
     id: 'cust-2',
-    name: '179 Enchanted Way LLC',
+    name: 'Apex Commercial Plaza',
     location: {
       name: 'Commercial Facility',
-      street: '179 Enchanted Way',
-      cityStateZip: 'Santa Rosa Beach, FL 32459',
+      street: '1200 Innovation Parkway, Suite 400',
+      cityStateZip: 'Chicago, IL 60601',
     },
-    email: 'contact@enchantedway.com',
-    phone: '(855) 026-0161',
-    custNumber: '50219',
+    email: 'operations@apexplaza.com',
+    phone: '(312) 555-0199',
+    custNumber: 'CUST-1002',
   },
   {
     id: 'cust-3',
-    name: '21 First Mortgage',
+    name: 'Summit Ridge Properties',
     location: {
-      name: 'Headquarters',
-      street: '4000 Gulf Terrace 294',
-      cityStateZip: 'Destin, FL 32541',
+      name: 'Corporate Office',
+      street: '850 Summit Ridge Way',
+      cityStateZip: 'Peoria, IL 61614',
     },
-    email: 'm.vance@firstmortgage21.com',
-    phone: '(850) 582-7446',
-    custNumber: '51042',
+    email: 'billing@summitridge.com',
+    phone: '(309) 555-0187',
+    custNumber: 'CUST-1003',
   },
   {
     id: 'cust-4',
-    name: 'Bryan Billman',
+    name: 'Robert Chen',
     location: {
-      name: 'Bryan Billman',
-      street: '4200 Blue Heron View',
-      cityStateZip: 'Niceville, FL 32578',
+      name: 'Primary Residence',
+      street: '415 Meadow Lane',
+      cityStateZip: 'Naperville, IL 60540',
     },
-    email: '',
-    phone: 'h: (850) 499-9679',
-    custNumber: '7785',
+    email: 'rchen@example.com',
+    phone: '(630) 555-0163',
+    custNumber: 'CUST-1004',
   },
 ];
 
@@ -170,9 +170,9 @@ interface InvoiceItem {
 }
 
 const mockInvoices: InvoiceItem[] = [
-  { id: 'inv-101', invoiceNumber: 'INV-130086', date: '5/28/2026', description: 'Appliance Service & FSIM Cleaning', total: '$160.00', balanceDue: '$160.00', selected: false },
-  { id: 'inv-102', invoiceNumber: 'INV-131781', date: '6/19/2026', description: 'HVAC Maintenance Checkup', total: '$220.00', balanceDue: '$220.00', selected: false },
-  { id: 'inv-103', invoiceNumber: 'INV-103242', date: '8/01/2026', description: 'Duct Repair & Filter Install', total: '$140.00', balanceDue: '$140.00', selected: false },
+  { id: 'inv-101', invoiceNumber: 'INV-2041', date: '9/02/2026', description: 'Commercial Rooftop HVAC Quarterly Tune-Up', total: '$480.00', balanceDue: '$480.00', selected: false },
+  { id: 'inv-102', invoiceNumber: 'INV-2042', date: '9/05/2026', description: 'Dual Capacitor & Blower Motor Replacement', total: '$325.00', balanceDue: '$325.00', selected: false },
+  { id: 'inv-103', invoiceNumber: 'INV-2043', date: '9/09/2026', description: 'Ductwork Inspection & HEPA Filtration Setup', total: '$210.00', balanceDue: '$210.00', selected: false },
 ];
 
 function ProcessPaymentContent() {
@@ -195,15 +195,15 @@ function ProcessPaymentContent() {
         (c) => c.id === customerIdParam || c.custNumber === customerIdParam
       ) || {
         id: customerIdParam,
-        name: 'Tammy Cohen',
+        name: 'Eleanor Vance',
         location: {
           name: 'Primary Residence',
-          street: '71 Coquina Pl',
-          cityStateZip: 'Santa Rosa Beach, FL 32459',
+          street: '742 Evergreen Terrace',
+          cityStateZip: 'Springfield, IL 62704',
         },
-        email: 'tammy@ccrarchitecture.com',
-        phone: '(205) 335-8038',
-        custNumber: '49106',
+        email: 'eleanor.vance@example.com',
+        phone: '(217) 555-0142',
+        custNumber: 'CUST-1001',
       };
       setSelectedCustomer(found);
       setActiveStep(2);

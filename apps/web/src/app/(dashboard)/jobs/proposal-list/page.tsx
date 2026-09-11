@@ -171,7 +171,7 @@ export default function WexProposalListPage() {
       notes: updatedData.notes || null,
       billToCustomer: updatedData.billToCustomer,
       jobLocation: rawProp?.jobLocation || '71 Coquina Pl, Santa Rosa Beach, FL 32459',
-      technician: rawProp?.technician || 'Justin Lung',
+      technician: rawProp?.technician || 'Unassigned',
       createdAt: rawProp?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

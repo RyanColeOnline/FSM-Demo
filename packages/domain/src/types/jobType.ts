@@ -124,10 +124,76 @@ export function extractTripType(raw: string | null | undefined): CanonicalTripTy
   return 'Diagnostic';
 }
 
+export const VIBRANT_JOB_TYPE_PALETTE: Record<string, string> = {
+  'hvac repair': '#0284c7',             // Vivid Sky Blue
+  'commercial appliance': '#d97706',      // Warm Amber Gold
+  'preventative maintenance': '#16a34a', // Emerald / Green
+  'preventive maintenance': '#16a34a',
+  'pm': '#16a34a',
+  'maintenance': '#16a34a',
+  'appliance repair': '#7c3aed',         // Royal Purple / Violet
+  'commercial hvac': '#059669',          // Deep Teal Green
+  'commercial refrigeration': '#059669',
+  'equipment replacement': '#e11d48',    // Vibrant Rose Red
+  'hvac installation': '#4f46e5',        // Deep Indigo
+  'installation': '#4f46e5',
+  'install': '#4f46e5',
+  'diagnostic': '#2563eb',               // Cobalt Blue
+  'diagnostic & repair': '#0891b2',      // Ocean Cyan
+  'recall': '#dc2626',                   // Red
+  'parts': '#c026d3',                    // Magenta Fuchsia
+  'home warranty': '#ea580c',            // Tangerine Orange
+  'warranty': '#ea580c',
+  'ahs': '#ea580c',
+  'residential repair': '#0284c7',       // Sky Blue
+  'residential': '#0284c7',
+  'commercial': '#059669',
+  'cod': '#6366f1',                      // Soft Indigo
+};
+
+export const VIBRANT_COLOR_POOL = [
+  '#0284c7', // Sky Blue
+  '#7c3aed', // Purple
+  '#059669', // Emerald
+  '#d97706', // Amber
+  '#4f46e5', // Indigo
+  '#e11d48', // Rose Red
+  '#0891b2', // Cyan
+  '#16a34a', // Green
+  '#c026d3', // Fuchsia
+  '#ea580c', // Orange
+  '#2563eb', // Royal Blue
+  '#0d9488', // Teal
+  '#9333ea', // Violet
+  '#dc2626', // Crimson
+];
+
 /**
  * Returns the exact web hex color string for a given trip type or job type string.
+ * Diversifies job types across a distinct vibrant palette.
  */
 export function getTripTypeWebHex(raw: string | null | undefined): string {
-  const tripType = extractTripType(raw);
-  return CANONICAL_TRIP_COLORS[tripType]?.webHex || '#0088ff';
+  if (!raw) return VIBRANT_COLOR_POOL[0];
+  const clean = raw.trim().toLowerCase();
+
+  // 1. Direct match in dictionary
+  if (VIBRANT_JOB_TYPE_PALETTE[clean]) {
+    return VIBRANT_JOB_TYPE_PALETTE[clean];
+  }
+
+  // 2. Keyword substring match
+  for (const [key, color] of Object.entries(VIBRANT_JOB_TYPE_PALETTE)) {
+    if (clean.includes(key)) {
+      return color;
+    }
+  }
+
+  // 3. Deterministic hash fallback to ensure unique, reproducible color per job type
+  let hash = 0;
+  for (let i = 0; i < clean.length; i++) {
+    hash = (hash << 5) - hash + clean.charCodeAt(i);
+    hash |= 0;
+  }
+  const index = Math.abs(hash) % VIBRANT_COLOR_POOL.length;
+  return VIBRANT_COLOR_POOL[index];
 }

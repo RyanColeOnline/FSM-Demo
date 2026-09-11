@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect, use, useMemo } from 'react';
 import Link from 'next/link';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -71,12 +71,19 @@ import { usePayments } from '@/hooks/usePayments';
 import { useAuthorizedPersons } from '@/hooks/useAuthorizedPersons';
 import { useCalls } from '@/hooks/useCalls';
 import { getTripTypeWebHex } from '@/domain/types/jobType';
-import { formatEasternDateTime, formatEasternDate } from '@/domain';
+import { 
+  formatEasternDateTime, 
+  formatEasternDate, 
+  cleanUserDisplayName, 
+  formatCalendarDateMdy, 
+  formatAppointmentScheduleDisplay 
+} from '@/domain';
 import { AddMaintenancePlanModal } from '@/components/modals/AddMaintenancePlanModal';
 import { AddEquipmentModal } from '@/components/modals/AddEquipmentModal';
 import { AddAuthorizedPersonModal } from '@/components/modals/AddAuthorizedPersonModal';
 import { useDatabaseMode } from '@/contexts/database-mode-context';
 import { firestoreClient } from '@/domain/firestore/client';
+import { US_STATES } from '@/constants/globalChoices';
 import { 
   CanonicalCustomer, 
   CanonicalNote, 
@@ -90,7 +97,15 @@ import {
   CANONICAL_OFFICIAL_USERS
 } from '@murphys/domain';
 import { useUsers } from '@/hooks/useUsers';
+import { useSession } from '@/auth/sessionStore';
 import { getTechsForJobType } from '@/components/modals/UpdateAppointmentModal';
+
+export function cleanCustomerNumberDigits(val?: string | number): string {
+  if (!val) return '';
+  const str = String(val).trim();
+  const digits = str.replace(/\D/g, '');
+  return digits || str.replace(/^cust[-_]?/i, '').trim();
+}
 
 export function formatPhoneNumber(phone?: string | null): string {
   if (!phone) return '';
@@ -108,16 +123,46 @@ export function formatPhoneNumber(phone?: string | null): string {
 }
 
 function formatServiceNoteStamp(author?: string | null, dateStr?: string | null): string {
-  const user = author || 'Justin Lung';
-  if (!dateStr) return `${user} • 8/27/2026 - 4:00pm`;
+  const user = cleanUserDisplayName(author || 'Staff');
+  if (!dateStr) return `${user} • 9/11/2026 - 4:00pm`;
   try {
     // If it already matches "X/X/XXXX - X:XXam", return with user
     if (/^\d{1,2}\/\d{1,2}\/\d{4}\s*-\s*\d{1,2}:\d{2}(am|pm)$/i.test(dateStr.trim())) {
       return `${user} • ${dateStr.trim().toLowerCase()}`;
     }
+    const s = String(dateStr).trim();
+    const mdy = s.match(/^0?(\d{1,2})[/-]0?(\d{1,2})[/-](\d{4})/);
+    const ymd = s.match(/^(\d{4})[/-]0?(\d{1,2})[/-]0?(\d{1,2})/);
+
+    let datePart = '';
+    if (mdy) {
+      datePart = `${parseInt(mdy[1], 10)}/${parseInt(mdy[2], 10)}/${mdy[3]}`;
+    } else if (ymd) {
+      datePart = `${parseInt(ymd[2], 10)}/${parseInt(ymd[3], 10)}/${ymd[1]}`;
+    }
+
+    let timePart = '';
+    const timeMatch = s.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(am|pm)?/i);
+    if (timeMatch) {
+      let h = parseInt(timeMatch[1], 10);
+      const min = timeMatch[2];
+      let ampm = timeMatch[3]?.toLowerCase();
+      if (!ampm) {
+        ampm = h >= 12 ? 'pm' : 'am';
+        h = h % 12 || 12;
+      }
+      timePart = `${h}:${min}${ampm}`;
+    }
+
+    if (datePart && timePart) {
+      return `${user} • ${datePart} - ${timePart}`;
+    }
+    if (datePart) {
+      return `${user} • ${datePart}`;
+    }
+
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) {
-      // Clean up strings like "May 28, 2026 12:15pm" or "5/28/2026, 12:15pm"
       const cleaned = dateStr.replace(/,\s*/, ' - ').replace(/\s+EST|\s+EDT|\s+CDT/i, '');
       return `${user} • ${cleaned}`;
     }
@@ -135,9 +180,40 @@ function formatServiceNoteStamp(author?: string | null, dateStr?: string | null)
 }
 
 function formatApptCreatorStamp(author?: string | null, dateStr?: string | null): string {
-  const user = author || 'Justin Lung';
-  if (!dateStr) return `${user} - 8/27/2026, 1:03pm`;
+  const user = cleanUserDisplayName(author || 'Staff');
+  if (!dateStr) return `${user} - 9/11/2026, 1:03pm`;
   try {
+    const s = String(dateStr).trim();
+    const mdy = s.match(/^0?(\d{1,2})[/-]0?(\d{1,2})[/-](\d{4})/);
+    const ymd = s.match(/^(\d{4})[/-]0?(\d{1,2})[/-]0?(\d{1,2})/);
+
+    let datePart = '';
+    if (mdy) {
+      datePart = `${parseInt(mdy[1], 10)}/${parseInt(mdy[2], 10)}/${mdy[3]}`;
+    } else if (ymd) {
+      datePart = `${parseInt(ymd[2], 10)}/${parseInt(ymd[3], 10)}/${ymd[1]}`;
+    }
+
+    let timePart = '';
+    const timeMatch = s.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(am|pm)?/i);
+    if (timeMatch) {
+      let h = parseInt(timeMatch[1], 10);
+      const min = timeMatch[2];
+      let ampm = timeMatch[3]?.toLowerCase();
+      if (!ampm) {
+        ampm = h >= 12 ? 'pm' : 'am';
+        h = h % 12 || 12;
+      }
+      timePart = `${h}:${min}${ampm}`;
+    }
+
+    if (datePart && timePart) {
+      return `${user} - ${datePart}, ${timePart}`;
+    }
+    if (datePart) {
+      return `${user} - ${datePart}`;
+    }
+
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return `${user} - ${dateStr}`;
     const m = d.getMonth() + 1;
@@ -154,14 +230,8 @@ function formatApptCreatorStamp(author?: string | null, dateStr?: string | null)
 }
 
 function formatCustomerNoteDate(dateStr?: string | null): string {
-  if (!dateStr) return '8/27/2026';
-  try {
-    const d = new Date(dateStr);
-    if (!isNaN(d.getTime())) {
-      return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
-    }
-  } catch (e) {}
-  return dateStr;
+  if (!dateStr) return '9/11/2026';
+  return formatCalendarDateMdy(dateStr);
 }
 
 function parseTimelineDate(dateStr?: string | null): number {
@@ -263,7 +333,7 @@ const TAMMY_COHEN_MOCK: CustomerProfileMock = {
       { id: 'loc-3', addr1: '44 Seacrest Dr', addr2: '', city: 'Panama City', state: 'FL', zip: '32461', description: '', isDefault: false },
     ],
     notes: [
-      { id: 'note-1', title: 'Customer Note', meta: 'Justin Lung - 8/8/2026 - 9:54am', content: 'Real cool dude', isPinned: false, location: undefined as string | undefined }
+      { id: 'note-1', title: 'Customer Note', meta: 'Wes Ryleskey - 8/8/2026 - 9:54am', content: 'Real cool dude', isPinned: false, location: undefined as string | undefined }
     ],
     invoices: [
       {
@@ -335,7 +405,7 @@ const TAMMY_COHEN_MOCK: CustomerProfileMock = {
         note: { date: '5/28/2026 - 12:15pm', body: 'Unit cleaned and tested thoroughly. Operational ATG Wes', author: 'Wes Ryleskey' },
         notesList: [
           { authorDate: 'Wes Ryleskey • 5/28/2026 - 12:15pm', body: 'Unit cleaned and tested thoroughly. Operational ATG Wes' },
-          { authorDate: 'Justin Lung • 5/28/2026 - 2:30pm', body: 'Followed up with customer regarding maintenance schedule. All clear.' }
+          { authorDate: 'Alex Reynolds • 5/28/2026 - 2:30pm', body: 'Followed up with customer regarding maintenance schedule. All clear.' }
         ],
         appointment: { date: '5/28/2026, 1:00 pm - 3:00 pm', status: 'Complete', tech: 'Wes Ryleskey' },
         call: {
@@ -482,7 +552,7 @@ const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
         note: { date: '11/05/2025, 3:00pm EST', body: 'Tightened shutoff valve under breakroom sink and pressure tested.' },
         notesList: [
           { authorDate: 'Wes Ryleskey - Nov 05, 2025 3:00pm', body: 'Tightened shutoff valve under breakroom sink and pressure tested.' },
-          { authorDate: 'Justin Lung - Nov 05, 2025 4:10pm', body: 'Cleaned work site and verified no further moisture under cabinet.' }
+          { authorDate: 'Alex Reynolds - Nov 05, 2025 4:10pm', body: 'Cleaned work site and verified no further moisture under cabinet.' }
         ],
         appointment: { date: '11/05/2025, 2:00 pm - 4:00 pm EST', status: 'Complete', tech: 'Wes Ryleskey' },
         call: {
@@ -526,15 +596,15 @@ const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
         location: 'P.O. Box 71207, Albany, GA 31708',
         jobType: 'Electrical Service',
         jobTypeColor: 'bg-[#805ad5]',
-        createdBy: 'Justin Lung - Oct 20, 2025 10:00am',
+        createdBy: 'Alex Reynolds - Oct 20, 2025 10:00am',
         payment: { date: '10/22/2025', amount: '$410.00' },
         invoice: { number: '127500-1', issued: '10/20/2025', amount: '$410.00', status: 'Closed', billTo: '229 Holdings LLC' },
         note: { date: '10/20/2025, 11:30am EST', body: 'Re-torqued main breaker connections and balanced load.' },
         notesList: [
-          { authorDate: 'Justin Lung - Oct 20, 2025 11:30am', body: 'Re-torqued main breaker connections and balanced load.' },
+          { authorDate: 'Alex Reynolds - Oct 20, 2025 11:30am', body: 'Re-torqued main breaker connections and balanced load.' },
           { authorDate: 'Amanda Hoover - Oct 20, 2025 2:00pm', body: 'Panel inspection report emailed to accounting department.' }
         ],
-        appointment: { date: '10/20/2025, 10:00 am - 12:00 pm EST', status: 'Complete', tech: 'Justin Lung' },
+        appointment: { date: '10/20/2025, 10:00 am - 12:00 pm EST', status: 'Complete', tech: 'Alex Reynolds' },
         call: {
           title: 'Initial Call',
           callType: 'Inbound',
@@ -542,7 +612,7 @@ const MOCK_CUSTOMERS_DB: Record<string, CustomerProfileMock> = {
           contact: 'Andy Boyett (229-435-0911)',
           location: 'P.O. Box 71207, Albany, GA 31708',
           callWith: 'Andy Boyett',
-          authorDate: 'Justin Lung - Oct 20, 2025 9:30am',
+          authorDate: 'Alex Reynolds - Oct 20, 2025 9:30am',
           note: 'Breaker trip inquiry and panel inspection.'
         }
       }
@@ -999,18 +1069,22 @@ function MaintenancePlanLocationCard({ plan, jobs, onDeletePlan, onScheduleWindo
               <tr key={sw.id} className="hover:bg-slate-50 transition-colors">
                 <td className="p-2.5 font-medium text-slate-800 whitespace-nowrap">{sw.window}</td>
                 <td className="p-2.5 text-[#be4646]">
-                  <a
-                    href={sw.jobNumber ? `/jobs/${sw.jobNumber}` : '#'}
-                    onClick={(e) => {
-                      if (!sw.jobNumber) {
-                        e.preventDefault();
-                        onScheduleWindow?.(sw);
-                      }
-                    }}
-                    className="hover:underline font-medium text-[#be4646]"
-                  >
-                    {sw.jobNumber ? `${sw.jobNumber}, ` : ''}{sw.jobName || '1st visit 1 system'}
-                  </a>
+                  {sw.jobNumber ? (
+                    <Link
+                      href={`/jobs/${sw.jobNumber}`}
+                      className="hover:underline font-medium text-[#be4646]"
+                    >
+                      {sw.jobNumber}, {sw.jobName || '1st visit 1 system'}
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onScheduleWindow?.(sw)}
+                      className="hover:underline font-medium text-[#be4646] text-left cursor-pointer"
+                    >
+                      {sw.jobName || '1st visit 1 system'}
+                    </button>
+                  )}
                 </td>
                 <td className="p-2.5">
                   <div className="inline-flex items-center gap-1.5 font-medium">
@@ -1068,6 +1142,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
   const customerId = resolvedParams.id;
 
   // Domain Hooks
+  const { currentUser } = useSession();
   const { databaseMode, client } = useDatabaseMode();
   const [fetchedCustomer, setFetchedCustomer] = useState<CanonicalCustomer | null>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState<boolean>(true);
@@ -1231,9 +1306,28 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
   const [mobilePhone, setMobilePhone] = useState(currentDbCustomer?.mobilePhone || (!currentDbCustomer?.homePhone ? currentDbCustomer?.phone : '') || currentMockData.mobilePhone);
   const [email, setEmail] = useState(currentDbCustomer?.email || currentMockData.email);
   const [noEmail, setNoEmail] = useState(!currentDbCustomer?.email && !currentMockData.email);
-  const [customerNumber, setCustomerNumber] = useState(currentMockData.customerNumber);
+  const [customerNumber, setCustomerNumber] = useState(() => cleanCustomerNumberDigits(currentMockData.customerNumber));
   const [contactType, setContactType] = useState('Primary');
   const [isSavedPrimary, setIsSavedPrimary] = useState(false);
+
+  const isCommercialCust = custType === 'Commercial' || currentDbCustomer?.customerType === 'commercial' || Boolean(businessName);
+  const displayProfileName = useMemo(() => {
+    if (isCommercialCust) {
+      return (businessName || currentDbCustomer?.businessName || currentDbCustomer?.name || 'Commercial Customer').trim();
+    }
+    const f = (firstName || currentDbCustomer?.firstName || '').trim();
+    const l = (lastName || currentDbCustomer?.lastName || '').trim();
+    if (f && l) return `${f} ${l}`;
+    if (f || l) return f || l;
+    const raw = (currentDbCustomer?.name || '').trim();
+    if (raw.includes(',')) {
+      const parts = raw.split(',').map((s) => s.trim());
+      const last = parts[0] || '';
+      const first = parts[1] || '';
+      return first && last ? `${first} ${last}` : (first || last || raw);
+    }
+    return raw || 'Customer Profile';
+  }, [isCommercialCust, businessName, firstName, lastName, currentDbCustomer]);
 
   // Settings & Preferences State
   const [acceptedPayment, setAcceptedPayment] = useState('All');
@@ -1263,7 +1357,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
       setHomePhone(formatPhoneNumber(currentDbCustomer.homePhone || ''));
       setEmail(currentDbCustomer.email || '');
       setNoEmail(!currentDbCustomer.email);
-      setCustomerNumber(currentDbCustomer.customerNumber || currentDbCustomer.accountNumber || currentDbCustomer.id || customerId);
+      setCustomerNumber(cleanCustomerNumberDigits(currentDbCustomer.customerNumber || currentDbCustomer.accountNumber || currentDbCustomer.id || customerId));
       setCustomerStatus(
         currentDbCustomer.customerStatus === 'Inactive'
           ? 'Inactive'
@@ -1531,9 +1625,9 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
         jobType: a.jobType || a.title || 'Service Appointment',
         status: a.status || (a.isScheduled ? 'Scheduled' : 'Unscheduled'),
         location: a.locationAddress || a.locationStreet || a.location || (currentDbCustomer?.address ? `${currentDbCustomer.address.street}, ${currentDbCustomer.address.city}` : ''),
-        tech: a.assignedTech || 'Unassigned',
-        date: a.dateTime ? formatEasternDateTime(a.dateTime) : (a.appointmentDate || 'Unscheduled'),
-        rawDate: a.dateTime || a.appointmentDate || a.createdAt || '',
+        tech: cleanUserDisplayName(a.assignedTech || 'Unassigned'),
+        date: formatAppointmentScheduleDisplay(a),
+        rawDate: a.appointmentDate || a.dateTime || a.createdAt || '',
         notes: a.serviceNotes || a.summaryNotes || a.notes || '',
         jobTypeColor: tripColor,
       };
@@ -1653,7 +1747,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
             jobType: j.jobType || 'HVAC service',
             jobTypeColor: tripColor,
             rawDate,
-            createdBy: formatApptCreatorStamp(j.createdBy || firstAppt?.assignedTech || 'Justin Lung', j.jobCreationDate || firstAppt?.createdAt || j.createdAt),
+            createdBy: formatApptCreatorStamp(j.createdBy || firstAppt?.assignedTech || 'Staff', j.jobCreationDate || firstAppt?.createdAt || j.createdAt),
             payments: matchingPayments.map((p: any) => ({
               id: p.id,
               date: p.paymentDate || p.dateTime || 'Completed',
@@ -1713,15 +1807,15 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
             notesList: uniqueNotesList,
             appointments: matchingAppts.map((a) => ({
               id: a.id,
-              date: a.dateTime ? formatEasternDateTime(a.dateTime) : 'Scheduled',
+              date: formatAppointmentScheduleDisplay(a),
               status: a.status || 'Complete',
-              tech: a.assignedTech || 'Justin Lung',
+              tech: cleanUserDisplayName(a.assignedTech || 'Unassigned'),
             })),
             appointment: firstAppt
               ? {
-                  date: firstAppt.dateTime ? formatEasternDateTime(firstAppt.dateTime) : 'Unscheduled',
+                  date: formatAppointmentScheduleDisplay(firstAppt),
                   status: firstAppt.status,
-                  tech: firstAppt.assignedTech || 'Unassigned',
+                  tech: cleanUserDisplayName(firstAppt.assignedTech || 'Unassigned'),
                 }
               : null,
             calls: matchingCalls.map((c) => ({
@@ -1828,7 +1922,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
             jobType: a.jobType || 'HVAC service',
             jobTypeColor: tripColor,
             rawDate: a.dateTime || a.createdAt || 'Today',
-            createdBy: formatApptCreatorStamp(a.assignedTech || 'Justin Lung', a.createdAt || a.createdDate || a.dateTime),
+            createdBy: formatApptCreatorStamp(a.assignedTech || 'Staff', a.createdAt || a.createdDate || a.dateTime),
             payments: [],
             payment: null,
             invoices: matchingInvoices.map((inv) => ({
@@ -1869,14 +1963,14 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
             notesList: uniqueNotesList,
             appointments: [{
               id: a.id,
-              date: a.dateTime ? formatEasternDateTime(a.dateTime) : 'Scheduled',
+              date: formatAppointmentScheduleDisplay(a),
               status: a.status || 'Complete',
-              tech: a.assignedTech || 'Justin Lung',
+              tech: cleanUserDisplayName(a.assignedTech || 'Unassigned'),
             }],
             appointment: {
-              date: a.dateTime ? formatEasternDateTime(a.dateTime) : 'Unscheduled',
+              date: formatAppointmentScheduleDisplay(a),
               status: a.status,
-              tech: a.assignedTech || 'Unassigned',
+              tech: cleanUserDisplayName(a.assignedTech || 'Unassigned'),
             },
             calls: matchingCalls.map((c) => ({
               id: c.id,
@@ -1994,7 +2088,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
             jobType: a.jobType || 'HVAC service',
             jobTypeColor: tripColor,
             rawDate: a.dateTime || a.createdAt || 'Today',
-            createdBy: formatApptCreatorStamp(a.assignedTech || 'Justin Lung', a.createdAt || a.createdDate || a.dateTime),
+            createdBy: formatApptCreatorStamp(a.assignedTech || 'Staff', a.createdAt || a.createdDate || a.dateTime),
             payments: [],
             payment: null,
             invoices: matchingInvoices.map((inv) => ({
@@ -2035,14 +2129,14 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
             notesList: uniqueNotesList,
             appointments: [{
               id: a.id,
-              date: a.dateTime ? formatEasternDateTime(a.dateTime) : 'Scheduled',
+              date: formatAppointmentScheduleDisplay(a),
               status: a.status || 'Complete',
-              tech: a.assignedTech || 'Justin Lung',
+              tech: cleanUserDisplayName(a.assignedTech || 'Unassigned'),
             }],
             appointment: {
-              date: a.dateTime ? formatEasternDateTime(a.dateTime) : 'Unscheduled',
+              date: formatAppointmentScheduleDisplay(a),
               status: a.status,
-              tech: a.assignedTech || 'Unassigned',
+              tech: cleanUserDisplayName(a.assignedTech || 'Unassigned'),
             },
             calls: matchingCalls.map((c) => ({
               id: c.id,
@@ -2206,7 +2300,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
     setMobilePhone(currentMockData.mobilePhone);
     setHomePhone(currentMockData.homePhone);
     setEmail(currentMockData.email);
-    setCustomerNumber(currentMockData.customerNumber);
+    setCustomerNumber(cleanCustomerNumberDigits(currentMockData.customerNumber));
     setLocationsList(currentMockData.locationsList);
   }, [customerId]);
 
@@ -2835,7 +2929,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
   const [reqDurationHour, setReqDurationHour] = useState('1 hour');
   const [reqDurationMin, setReqDurationMin] = useState('00 min');
   const [reqMinTechLevel, setReqMinTechLevel] = useState('Level 1');
-  const [allTechNamesList] = useState(['Wes Ryleskey', 'Ethan Mitchell', 'Andrew Murphy', 'Justin Lung', 'Amanda Hoover']);
+  const [allTechNamesList] = useState(['Wes Ryleskey', 'Ethan Mitchell', 'Marcus Vance', 'Amanda Hoover', 'Alex Reynolds']);
 
   // Primary Appointment Contact Inline State (Matching schedule/page.tsx)
   const [showPrimaryApptContact, setShowPrimaryApptContact] = useState(false);
@@ -2931,6 +3025,9 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
       ? Math.floor(100000 + Math.random() * 900000)
       : (parseInt(bookingSelectedJob.replace(/\D/g, '') || '135000', 10));
 
+    const start12h = `${hr}:${bookingStartMin || '00'} ${bookingStartAmpm}`;
+    const cleanPrimaryTech = bookingAssignLater ? 'Unassigned' : cleanUserDisplayName(bookingPrimaryTech || 'Wes Rykoskey');
+
     const newAppt: CanonicalAppointment = {
       id: apptId,
       customerId: customerId,
@@ -2942,8 +3039,11 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
       jobNumber: generatedJobNumber,
       jobId: `job-${generatedJobNumber}`,
       jobType: bookingJobType || 'HVAC service',
+      appointmentDate: bookingDate,
+      startTime: start12h,
       dateTime: dateTimeIso,
-      assignedTech: bookingAssignLater ? 'Unassigned' : (bookingPrimaryTech || 'Wes Rykoskey'),
+      assignedTech: cleanPrimaryTech,
+      technicians: [cleanPrimaryTech],
       status: bookingScheduleMode === 'schedule' ? 'Scheduled' : 'Unscheduled',
       isScheduled: bookingScheduleMode === 'schedule',
       serviceNotes: bookingCallNotes || '',
@@ -2966,9 +3066,9 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
         jobType: bookingJobType || 'HVAC service',
         status: 'Opened',
         locationAddress: locAddr,
-        jobCreationDate: new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
+        jobCreationDate: formatCalendarDateMdy(new Date()),
         jobDescription: bookingCallNotes || (bookingScheduleMode === 'schedule' ? 'Scheduled appointment.' : 'Service Request'),
-        assignedTech: bookingAssignLater ? null : (bookingPrimaryTech || 'Wes Rykoskey'),
+        assignedTech: bookingAssignLater ? null : cleanPrimaryTech,
         invoicesTotal: 0,
         balance: 0,
         createdAt: new Date().toISOString(),
@@ -2988,9 +3088,9 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
       await persistNote({
         id: newNoteId,
         customerId,
-        authorId: 'usr-admin',
-        authorName: 'Justin Lung',
-        authorRole: 'Admin',
+        authorId: currentUser?.id || 'usr-admin',
+        authorName: currentUser?.name || 'Staff',
+        authorRole: (currentUser?.accountType as any) || 'Admin',
         title: 'Customer Note',
         content: noteText,
         isPinned: false,
@@ -3008,9 +3108,9 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
       await persistNote({
         id: editingNote.id,
         customerId,
-        authorId: (editingNote as any).authorId || 'usr-admin',
-        authorName: 'Justin Lung',
-        authorRole: 'Admin',
+        authorId: (editingNote as any).authorId || currentUser?.id || 'usr-admin',
+        authorName: (editingNote as any).authorName || currentUser?.name || 'Staff',
+        authorRole: (editingNote as any).authorRole || (currentUser?.accountType as any) || 'Admin',
         title: editingNote.title || 'Customer Note',
         content: editNoteText,
         isPinned: (editingNote as any).isPinned || false,
@@ -3322,14 +3422,9 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
           {/* Customer Title & Status Badges */}
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-              {currentDbCustomer?.name || (firstName || lastName ? `${firstName} ${lastName}`.trim() : (businessName || 'Customer Profile'))}
+              {displayProfileName}
             </h1>
             <div className="flex items-center gap-2">
-              {(currentDbCustomer?.customerNumber || customerNumber) && (
-                <span className="inline-flex items-center h-6 px-2.5 py-0.5 text-xs font-semibold text-slate-600 bg-slate-100 rounded border border-slate-200 select-all leading-none">
-                  #{currentDbCustomer?.customerNumber || customerNumber}
-                </span>
-              )}
               {/* Customer Status Clickable Indicator */}
               <div className="relative inline-flex items-center">
                 <button
@@ -3596,7 +3691,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
                   </label>
                   <input
                     type="text"
-                    value={customerNumber}
+                    value={cleanCustomerNumberDigits(customerNumber)}
                     disabled
                     readOnly
                     className="w-full px-2.5 py-1.5 bg-slate-100 border border-slate-300 rounded text-xs text-slate-500 cursor-not-allowed focus:outline-none"
@@ -3708,10 +3803,11 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
                           onChange={(e) => setBillingState(e.target.value)}
                           className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-[#2d82b7]"
                         >
-                          <option value="FL">FL</option>
-                          <option value="AL">AL</option>
-                          <option value="GA">GA</option>
-                          <option value="CO">CO</option>
+                          {US_STATES.map((s) => (
+                            <option key={s.code} value={s.code}>
+                              {s.code} - {s.name}
+                            </option>
+                          ))}
                         </select>
                       </div>
                       <div>
@@ -3886,10 +3982,11 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
                           onChange={(e) => setLocState(e.target.value)}
                           className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-[#2d82b7]"
                         >
-                          <option value="FL">Florida (FL)</option>
-                          <option value="AL">Alabama (AL)</option>
-                          <option value="GA">Georgia (GA)</option>
-                          <option value="CO">Colorado (CO)</option>
+                          {US_STATES.map((s) => (
+                            <option key={s.code} value={s.code}>
+                              {s.name} ({s.code})
+                            </option>
+                          ))}
                         </select>
                       </div>
                       <div>
@@ -5981,7 +6078,9 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
           initialValues={bookingInitialValues || undefined}
           customer={{
             id: customerId,
-            name: `${firstName} ${lastName}`,
+            name: displayProfileName,
+            customerType: isCommercialCust ? 'commercial' : 'residential',
+            businessName: isCommercialCust ? businessName : undefined,
             phone: mobilePhone || '(850) 555-0100',
             email: email || 'customer@example.com',
             address: bookingInitialValues?.locationAddress || locAddr1 || (locationsList[0] ? `${locationsList[0].addr1}, ${locationsList[0].city}, ${locationsList[0].state} ${locationsList[0].zip}` : ''),
@@ -6008,13 +6107,18 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
         }))}
         defaultLocation={locationsList[0] ? `${locationsList[0].addr1}, ${locationsList[0].city}, ${locationsList[0].state} ${locationsList[0].zip}` : ''}
         onSave={async (data) => {
+          const authorName = currentUser?.name || 'Staff';
+          const authorId = currentUser?.id || 'usr-staff';
+          const authorRole = currentUser?.accountType || 'Staff';
+          const nowStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          const nowTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
           const newNoteItem = {
             id: `note-${Date.now()}`,
             type: 'note' as const,
             title: data.isPinned ? 'Pinned Customer Note' : 'Customer Note',
-            meta: `Justin Lung - Aug 14, 2026 9:54am`,
-            createdMeta: `Created: 08/14/2026, 8:54 pm by Justin Lung`,
-            updatedMeta: `Updated: 08/14/2026, 8:54 pm by Justin Lung`,
+            meta: `${authorName} - ${nowStr} ${nowTime}`,
+            createdMeta: `Created: ${nowStr}, ${nowTime} by ${authorName}`,
+            updatedMeta: `Updated: ${nowStr}, ${nowTime} by ${authorName}`,
             content: data.text,
             location: data.location,
             isPinned: data.isPinned,
@@ -6024,9 +6128,9 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
             await persistNote({
               id: newNoteItem.id,
               customerId,
-              authorId: 'usr-admin',
-              authorName: 'Justin Lung',
-              authorRole: 'Admin',
+              authorId,
+              authorName,
+              authorRole,
               title: newNoteItem.title,
               content: data.text,
               isPinned: data.isPinned || false,
@@ -6060,13 +6164,16 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
             setEditingNote(null);
           }}
           onSave={async (data) => {
+            const authorName = (editingNote as any).authorName || currentUser?.name || 'Staff';
+            const authorId = (editingNote as any).authorId || currentUser?.id || 'usr-staff';
+            const authorRole = (editingNote as any).authorRole || currentUser?.accountType || 'Staff';
             if (persistNote) {
               await persistNote({
                 id: editingNote.id,
                 customerId,
-                authorId: (editingNote as any).authorId || 'usr-admin',
-                authorName: 'Justin Lung',
-                authorRole: 'Admin',
+                authorId,
+                authorName,
+                authorRole,
                 title: data.isPinned ? 'Pinned Customer Note' : 'Customer Note',
                 content: data.text,
                 isPinned: data.isPinned || false,

@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from '@/auth/sessionStore';
-import { Smartphone, ShieldAlert, LogOut, RefreshCw, Loader2 } from 'lucide-react';
+import { Smartphone, ShieldAlert, LogOut, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui';
 
 export function WebPortalAuthGuard({ children }: { children: React.ReactNode }) {
@@ -22,28 +22,13 @@ export function WebPortalAuthGuard({ children }: { children: React.ReactNode }) 
     }
   }, [isLoading, currentUser, router]);
 
-  // Loading state while verifying Firebase Auth & Firestore session
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <div className="text-2xl font-extrabold text-white tracking-tight animate-pulse">Demo FSM</div>
-          <div className="flex items-center gap-2 text-slate-400 text-sm font-medium">
-            <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-            <span>Loading portal session...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Not authenticated
-  if (!currentUser) {
+  // Not authenticated once loading completes
+  if (!isLoading && !currentUser) {
     return null; // Will redirect via useEffect
   }
 
   // If user is logged in as a field technician or lacks web portal access
-  if (!permissions.hasWebPortalAccess || currentUser.accountType === 'field') {
+  if (currentUser && (!permissions.hasWebPortalAccess || currentUser.accountType === 'field')) {
     return (
       <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between p-4 sm:p-6 lg:p-12">
         {/* Top Header Brand */}

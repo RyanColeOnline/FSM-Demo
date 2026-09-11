@@ -90,3 +90,26 @@ export function normalizeToCentralDateString(dateStr?: string | null): string {
   return dateStr;
 }
 export const normalizeToEasternDateString = normalizeToCentralDateString;
+
+export function extractTime12hFromIsoOrString(val?: string | null): string | null {
+  if (!val) return null;
+  const s = String(val).trim();
+  if (/\b(am|pm)\b/i.test(s)) {
+    const match = s.match(/(\d{1,2}):(\d{2})\s*(am|pm)/i);
+    if (match) {
+      return `${parseInt(match[1], 10)}:${match[2]} ${match[3].toUpperCase()}`;
+    }
+  }
+  if (s.includes('T')) {
+    const timePart = s.split('T')[1];
+    const match = timePart.match(/^(\d{1,2}):(\d{2})/);
+    if (match) {
+      const h24 = parseInt(match[1], 10);
+      const min = match[2];
+      const ampm = h24 >= 12 ? 'PM' : 'AM';
+      const h12 = h24 % 12 || 12;
+      return `${h12}:${min} ${ampm}`;
+    }
+  }
+  return null;
+}

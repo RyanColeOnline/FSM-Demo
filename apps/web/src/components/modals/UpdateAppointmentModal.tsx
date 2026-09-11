@@ -26,8 +26,14 @@ import {
 import { DatePicker, HierarchicalJobTypeSelector } from '@/components/ui';
 import { TagGroup, TagList, Tag, Button as AriaButton } from 'react-aria-components';
 import { CanonicalAuthorizedPerson } from '@murphys/domain';
+import { 
+  cleanUserDisplayName, 
+  extractTime12hFromIsoOrString, 
+  formatCalendarDateMdy 
+} from '@/domain';
 import { useDatabaseMode } from '@/contexts/database-mode-context';
 import { useAppointments } from '@/hooks/useAppointments';
+import { useJobs } from '@/hooks/useJobs';
 import { APPOINTMENT_STATUSES, APPOINTMENT_FREQUENCIES, PAYMENT_TERMS } from '@/constants/globalChoices';
 
 export interface CustomerEquipment {
@@ -84,6 +90,10 @@ export interface UpdateAppointmentModalProps {
     address: string;
     locations?: any[];
     balance?: string;
+    customerType?: string;
+    businessName?: string;
+    firstName?: string;
+    lastName?: string;
   } | null;
   editingJobId?: string | null;
   editingAppointmentId?: string | null;
@@ -197,6 +207,20 @@ export function getTechsForJobType(jobType?: string): string[] {
 
 export const defaultTechsList = ALL_USERS_LIST;
 
+export function extractYmdDate(val?: string | null): string | null {
+  if (!val) return null;
+  const s = String(val).trim();
+  const ymd = s.match(/^(\d{4})[/-]0?(\d{1,2})[/-]0?(\d{1,2})/);
+  if (ymd) {
+    return `${ymd[1]}-${ymd[2].padStart(2, '0')}-${ymd[3].padStart(2, '0')}`;
+  }
+  const mdy = s.match(/^0?(\d{1,2})[/-]0?(\d{1,2})[/-](\d{4})/);
+  if (mdy) {
+    return `${mdy[3]}-${mdy[1].padStart(2, '0')}-${mdy[2].padStart(2, '0')}`;
+  }
+  return null;
+}
+
 export function JobLocationDropdown({
   value,
   onChange,
@@ -280,6 +304,26 @@ export function JobLocationDropdown({
   );
 }
 
+export function formatCustomerDisplayName(c: any): string {
+  if (!c) return 'Customer';
+  const isCommercial = c.customerType === 'commercial' || c.custType === 'Commercial' || Boolean(c.businessName);
+  if (isCommercial) {
+    return (c.businessName || c.name || 'Commercial Customer').trim();
+  }
+  const f = (c.firstName || '').trim();
+  const l = (c.lastName || '').trim();
+  if (f && l) return `${f} ${l}`;
+  if (f || l) return f || l;
+  const raw = (c.name || '').trim();
+  if (raw.includes(',')) {
+    const parts = raw.split(',').map((s: string) => s.trim());
+    const last = parts[0] || '';
+    const first = parts[1] || '';
+    return first && last ? `${first} ${last}` : (first || last || raw);
+  }
+  return raw || 'Customer';
+}
+
 export function UpdateAppointmentModal({
   isOpen,
   onClose,
@@ -295,6 +339,7 @@ export function UpdateAppointmentModal({
 }: UpdateAppointmentModalProps) {
   const isNew = !editingAppointmentId && (!editingJobId || editingJobId === 'new') && !initialValues?.id;
   const { databaseMode, client } = useDatabaseMode();
+  const { jobs: allJobsList } = useJobs();
   const [liveCustomer, setLiveCustomer] = useState<any>(null);
 
   useEffect(() => {
@@ -501,19 +546,58 @@ function extractAdditionalTechs(initialValues?: UpdateAppointmentModalProps['ini
   return [];
 }
 
-  const [bookingPrimaryTech, setBookingPrimaryTech] = useState('Justin Lung');
-  const [bookingAssignLater, setBookingAssignLater] = useState(false);
+  const [bookingPrimaryTech, setBookingPrimaryTech] = useState(() => {
+    const raw = initialValues?.primaryTech || '';
+    return raw.toLowerCase() === 'unassigned' ? '' : raw;
+  });
+  const [bookingAssignLater, setBookingAssignLater] = useState(() => Boolean(initialValues?.assignLater));
   const [bookingAdditionalTechs, setBookingAdditionalTechs] = useState<string[]>(() => extractAdditionalTechs(initialValues));
   const bookingAdditionalTech = bookingAdditionalTechs.join(', ');
   const [bookingSelectedJob, setBookingSelectedJob] = useState(() => {
     if (initialValues?.jobNumber) {
-      const digits = String(initialValues.jobNumber).replace(/^#|^Job\s*/i, '').trim();
-      return `#${digits}`;
+      const raw = String(initialValues.jobNumber).replace(/^#|^Job\s*/i, '').trim();
+      return raw.toLowerCase() === 'new' || raw.toLowerCase() === 'new job' || !raw ? 'New Job' : `#${raw}`;
     }
     return 'New Job';
   });
   const [bookingJobType, setBookingJobType] = useState('');
   const [bookingLocation, setBookingLocation] = useState(currentCustomer.address);
+
+  const priorCustomerJobs = useMemo(() => {
+    const jobNumbers = new Set<string>();
+    const cId = currentCustomer?.id;
+    const cNum = (currentCustomer as any)?.customerNumber || (currentCustomer as any)?.accountNumber;
+    const cName = (currentCustomer?.name || '').toLowerCase().trim();
+
+    for (const j of allJobsList || []) {
+      const match =
+        (cId && j.customerId === cId) ||
+        (cNum && ((j as any).customerNumber === cNum || j.customerId === cNum)) ||
+        (cName && (j.customerName || '').toLowerCase().trim() === cName);
+      if (match) {
+        const raw = String(j.jobNumber || j.id || '').replace(/^#|^Job\s*/i, '').replace(/^(job|appt|sr)-/i, '').trim();
+        if (raw && raw.toLowerCase() !== 'new' && raw.toLowerCase() !== 'new job') {
+          jobNumbers.add(`#${raw}`);
+        }
+      }
+    }
+
+    if (Array.isArray((initialValues as any)?.customerJobs)) {
+      for (const cj of (initialValues as any).customerJobs) {
+        const raw = String(cj).replace(/^#|^Job\s*/i, '').trim();
+        if (raw && raw.toLowerCase() !== 'new' && raw.toLowerCase() !== 'new job') {
+          jobNumbers.add(`#${raw}`);
+        }
+      }
+    }
+
+    return Array.from(jobNumbers).sort();
+  }, [allJobsList, currentCustomer, initialValues]);
+
+  const isSaveDisabled =
+    !bookingLocation?.trim() ||
+    !bookingJobType?.trim() ||
+    (bookingScheduleMode === 'schedule' && (!bookingDate?.trim() || (!bookingAssignLater && !bookingPrimaryTech?.trim())));
 
   const [bookingApptStatus, setBookingApptStatus] = useState<'Scheduled' | 'Missed' | 'In Progress' | 'Complete' | 'Incomplete'>('Scheduled');
   const [bookingApptConfirmed, setBookingApptConfirmed] = useState<'Not Confirmed' | 'Confirmed'>('Not Confirmed');
@@ -775,8 +859,8 @@ function formatInstallDate(rawDate?: string | null): string {
   };
 
   const dynamicTechsList = React.useMemo(() => {
-    if (allTechsList && allTechsList.length > 0) return allTechsList;
-    return getTechsForJobType(bookingJobType);
+    const list = (allTechsList && allTechsList.length > 0) ? allTechsList : getTechsForJobType(bookingJobType);
+    return list.map(cleanUserDisplayName);
   }, [allTechsList, bookingJobType]);
 
   const initialValuesKey = JSON.stringify(initialValues || {});
@@ -790,8 +874,8 @@ function formatInstallDate(rawDate?: string | null): string {
     if (isNew) {
       const dynamicSlot = getClosestCentralTimeSlot();
       if (initialValues?.jobNumber) {
-        const digits = String(initialValues.jobNumber).replace(/^#|^Job\s*/i, '').trim();
-        setBookingSelectedJob(`#${digits}`);
+        const raw = String(initialValues.jobNumber).replace(/^#|^Job\s*/i, '').trim();
+        setBookingSelectedJob(raw.toLowerCase() === 'new' || raw.toLowerCase() === 'new job' || !raw ? 'New Job' : `#${raw}`);
       } else {
         setBookingSelectedJob('New Job');
       }
@@ -811,12 +895,17 @@ function formatInstallDate(rawDate?: string | null): string {
       setBookingScheduleMode(initialValues?.scheduleMode || 'schedule');
       setBookingApptStatus((initialValues?.appointmentStatus as any) || (initialValues?.scheduleMode === 'request' ? 'Unscheduled' : 'Scheduled'));
       setBookingApptConfirmed((initialValues?.appointmentConfirmation as any) || 'Not Confirmed');
-      setBookingPrimaryTech(initialValues?.primaryTech || 'Justin Lung');
-      setBookingAdditionalTechs(extractAdditionalTechs(initialValues));
+      const initialTech = cleanUserDisplayName(initialValues?.primaryTech || '');
+      setBookingPrimaryTech(
+        initialTech.toLowerCase() === 'unassigned' ? '' : initialTech
+      );
+      setBookingAdditionalTechs(extractAdditionalTechs(initialValues).map(cleanUserDisplayName));
       setBookingAssignLater(initialValues?.assignLater || initialValues?.scheduleMode === 'request');
-      setBookingDate(initialValues?.appointmentDate || dynamicSlot.dateStr);
-      if (initialValues?.startTime) {
-        const parsed = parseTimeStrToParts(initialValues.startTime);
+      const resolvedDate = initialValues?.appointmentDate || extractYmdDate((initialValues as any)?.dateTime) || dynamicSlot.dateStr;
+      setBookingDate(resolvedDate);
+      const effectiveStartTime = initialValues?.startTime || extractTime12hFromIsoOrString((initialValues as any)?.dateTime);
+      if (effectiveStartTime) {
+        const parsed = parseTimeStrToParts(effectiveStartTime);
         setBookingStartHour(parsed.hour);
         setBookingStartMin(parsed.min);
         setBookingStartAmpm(parsed.ampm);
@@ -841,15 +930,17 @@ function formatInstallDate(rawDate?: string | null): string {
       setBookingLocation(initialValues?.locationAddress || customerLocationsList[0] || currentCustomer.address || '');
     } else {
       if (initialValues) {
-        if (initialValues.appointmentDate) setBookingDate(initialValues.appointmentDate);
+        const resolvedDate = initialValues.appointmentDate || extractYmdDate((initialValues as any)?.dateTime);
+        if (resolvedDate) setBookingDate(resolvedDate);
         if (initialValues.frequency) setBookingFrequency(initialValues.frequency);
-        if (initialValues.primaryTech) setBookingPrimaryTech(initialValues.primaryTech);
+        if (initialValues.primaryTech) setBookingPrimaryTech(cleanUserDisplayName(initialValues.primaryTech));
         if (initialValues.additionalTech !== undefined || initialValues.additionalTechs !== undefined || initialValues.technicians !== undefined) {
-          setBookingAdditionalTechs(extractAdditionalTechs(initialValues));
+          setBookingAdditionalTechs(extractAdditionalTechs(initialValues).map(cleanUserDisplayName));
         }
         if (initialValues.assignLater !== undefined) setBookingAssignLater(initialValues.assignLater);
-        if (initialValues.startTime) {
-          const parsed = parseTimeStrToParts(initialValues.startTime);
+        const effectiveStartTime = initialValues.startTime || extractTime12hFromIsoOrString((initialValues as any)?.dateTime);
+        if (effectiveStartTime) {
+          const parsed = parseTimeStrToParts(effectiveStartTime);
           setBookingStartHour(parsed.hour);
           setBookingStartMin(parsed.min);
           setBookingStartAmpm(parsed.ampm);
@@ -876,8 +967,8 @@ function formatInstallDate(rawDate?: string | null): string {
           setBookingScheduleMode('schedule');
         }
         if (initialValues.jobNumber) {
-          const digits = String(initialValues.jobNumber).replace(/^#|^Job\s*/i, '').trim();
-          setBookingSelectedJob(`#${digits}`);
+          const raw = String(initialValues.jobNumber).replace(/^#|^Job\s*/i, '').trim();
+          setBookingSelectedJob(raw.toLowerCase() === 'new' || raw.toLowerCase() === 'new job' || !raw ? 'New Job' : `#${raw}`);
         } else if (editingJobId && editingJobId !== 'new') {
           const digits = editingJobId.replace(/^(job|appt|sr)-/i, '').trim();
           setBookingSelectedJob(`#${digits}`);
@@ -994,7 +1085,10 @@ function formatInstallDate(rawDate?: string | null): string {
       return `${String(hr).padStart(2, '0')}:${String(mn).padStart(2, '0')}`;
     };
 
-    const targetTech = bookingAssignLater ? '' : bookingPrimaryTech;
+    const targetTech = bookingAssignLater ? '' : cleanUserDisplayName(bookingPrimaryTech);
+    const cleanAdditionalTechs = bookingAdditionalTechs.map(cleanUserDisplayName);
+    const allAssignedTechs = [targetTech, ...cleanAdditionalTechs].filter(Boolean);
+    const additionalTechStr = cleanAdditionalTechs.join(', ');
 
     // Persist Call & Note directly to Firestore
     (async () => {
@@ -1006,17 +1100,16 @@ function formatInstallDate(rawDate?: string | null): string {
 
         // 1. Save / Update Appointment in Firestore appointments collection
         const apptId = editingAppointmentId || initialValues?.id || (isServiceRequest ? `sr-${Date.now()}` : `appt-${Date.now()}`);
-        const additionalTechStr = bookingAdditionalTechs.join(', ');
-        const allAssignedTechs = [targetTech, ...bookingAdditionalTechs].filter(Boolean);
         const liveApptRecord: any = {
           id: apptId,
           jobNumber: jNum,
           customerId: currentCustomer.id || '',
           customerName: currentCustomer.name || 'Customer',
           jobType: bookingJobType || 'HVAC service',
-          assignedTech: isServiceRequest ? null : targetTech,
-          additionalTech: !isServiceRequest && bookingAdditionalTechs.length > 0 ? additionalTechStr : null,
-          additionalTechs: isServiceRequest ? [] : bookingAdditionalTechs,
+          assignedTech: isServiceRequest ? null : (targetTech || null),
+          primaryTech: isServiceRequest ? null : (targetTech || null),
+          additionalTech: !isServiceRequest && cleanAdditionalTechs.length > 0 ? additionalTechStr : null,
+          additionalTechs: isServiceRequest ? [] : cleanAdditionalTechs,
           technicians: isServiceRequest ? [] : allAssignedTechs,
           appointmentDate: isServiceRequest ? null : bookingDate,
           startTime: isServiceRequest ? null : `${bookingStartHour}:${bookingStartMin} ${bookingStartAmpm}`,
@@ -1045,9 +1138,11 @@ function formatInstallDate(rawDate?: string | null): string {
           jobType: bookingJobType || 'HVAC service',
           status: 'Opened',
           locationAddress: bookingLocation || (typeof currentCustomer.address === 'string' ? currentCustomer.address : ''),
-          jobCreationDate: new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
+          jobCreationDate: formatCalendarDateMdy(new Date()),
           jobDescription: bookingCallNotes || (isServiceRequest ? 'Service Request' : 'Scheduled appointment.'),
           assignedTech: isServiceRequest ? null : (targetTech || null),
+          primaryTech: isServiceRequest ? null : (targetTech || null),
+          technicians: isServiceRequest ? [] : allAssignedTechs,
           invoicesTotal: 0,
           balance: 0,
           createdAt: new Date().toISOString(),
@@ -1109,18 +1204,16 @@ function formatInstallDate(rawDate?: string | null): string {
     })();
 
     if (onSave) {
-      const additionalTechStr = bookingAdditionalTechs.join(', ');
-      const allAssignedTechs = [targetTech, ...bookingAdditionalTechs].filter(Boolean);
       onSave({
         editingJobId,
         customer: currentCustomer,
         primaryTech: targetTech,
         additionalTech: additionalTechStr,
-        additionalTechs: bookingAdditionalTechs,
+        additionalTechs: cleanAdditionalTechs,
         technicians: allAssignedTechs,
         appointmentDate: bookingDate,
-        startTime: format24hTimeStr(startFloat),
-        endTime: format24hTimeStr(endFloat),
+        startTime: `${bookingStartHour}:${bookingStartMin} ${bookingStartAmpm}`,
+        endTime: `${bookingEndHour}:${bookingEndMin} ${bookingEndAmpm}`,
         durationHours: durHours,
         appointmentStatus: bookingApptStatus,
         appointmentConfirmation: bookingApptConfirmed,
@@ -1217,7 +1310,7 @@ function formatInstallDate(rawDate?: string | null): string {
                       href={`/customers/${currentCustomer.id}`}
                       className="font-bold text-[#be4646] text-sm hover:underline cursor-pointer"
                     >
-                      {currentCustomer.name}
+                      {formatCustomerDisplayName(currentCustomer)}
                     </Link>
                   </div>
                   <div className="text-[11px] text-slate-600 space-x-3">
@@ -1424,11 +1517,13 @@ function formatInstallDate(rawDate?: string | null): string {
                       onChange={(e) => setBookingSelectedJob(e.target.value)}
                       className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#2d82b7] cursor-pointer"
                     >
-                      {!editingJobId && <option value="New Job">New Job</option>}
-                      {bookingSelectedJob && bookingSelectedJob !== 'New Job' && (
+                      <option value="New Job">New Job</option>
+                      {priorCustomerJobs.map((jNum) => (
+                        <option key={jNum} value={jNum}>{jNum}</option>
+                      ))}
+                      {bookingSelectedJob && bookingSelectedJob !== 'New Job' && !priorCustomerJobs.includes(bookingSelectedJob) && (
                         <option value={bookingSelectedJob}>{bookingSelectedJob}</option>
                       )}
-                      <option value="#134375">#134375</option>
                     </select>
                   </div>
 
@@ -2503,8 +2598,13 @@ function formatInstallDate(rawDate?: string | null): string {
 
                 <button
                   type="button"
+                  disabled={isSaveDisabled}
                   onClick={handleSaveModal}
-                  className="px-6 py-2 bg-[#be4646] hover:bg-[#a63a3a] text-white font-bold rounded text-xs shadow-2xs transition-colors cursor-pointer"
+                  className={`px-6 py-2 text-white font-bold rounded text-xs shadow-2xs transition-colors ${
+                    isSaveDisabled
+                      ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
+                      : 'bg-[#be4646] hover:bg-[#a63a3a] cursor-pointer'
+                  }`}
                 >
                   {isNew ? (bookingScheduleMode === 'request' ? 'Save Request' : 'Schedule') : 'Save'}
                 </button>

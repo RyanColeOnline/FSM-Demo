@@ -548,7 +548,7 @@ export function AddMaintenancePlanModal({
           isScheduled: isFirst,
           isComplete: false,
           appointmentId: null,
-          assignedTech: salesAgent || 'Justin Lung',
+          assignedTech: salesAgent || 'Unassigned',
         });
         jobIdCounter++;
       });

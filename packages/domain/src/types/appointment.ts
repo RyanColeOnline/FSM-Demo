@@ -48,9 +48,11 @@ export interface CanonicalAppointment {
   assignedTech?: string | null;
   assignedTechId?: string | null;
   technician?: string;
+  technicians?: string[];
   userId?: string | null;
   isFlaggedForFollowUp?: boolean;
   isConfirmed?: boolean;
+  confirmed?: boolean | string;
   accessCodes?: CanonicalAccessCode[];
   serviceNotes?: string | null;
   appointmentNote?: string | null;
@@ -60,6 +62,12 @@ export interface CanonicalAppointment {
   phone?: string | null;
   email?: string | null;
   locationAddress?: string | null;
+  location?: string | null;
+  locationStreet?: string | null;
+  appointmentDate?: string | null;
+  appointmentDateTime?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
   coverageZone?: string;
   type?: string;
   createdDate?: string;

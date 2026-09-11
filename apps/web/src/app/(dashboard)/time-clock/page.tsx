@@ -116,21 +116,47 @@ export default function PersonalTimeClockPage() {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
         {/* Left Column: Clocking Action Card */}
         <div className="md:col-span-5 bg-white border border-slate-200 rounded-xl p-6 shadow-2xs flex flex-col justify-between min-h-[300px] relative overflow-hidden">
-          {/* Top Row: Clock In Timestamp / Current Local Time */}
+          {/* Top Row: Clock In Timestamp / Current Central Time */}
           <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
             <span className="flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full ${isClockedIn ? (isOnBreak ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500') : 'bg-slate-300'}`} />
               {isClockedIn ? (isOnBreak ? 'On Break' : 'Clocked In') : 'Clocked Out'}
             </span>
-            <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-medium">
-              {currentTime ? currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '--:--:--'}
-            </span>
+            <div className="bg-slate-100 px-2.5 py-1 rounded text-slate-700 font-semibold text-xs flex items-center shadow-2xs">
+              <span className="inline-flex items-center">
+                {(currentTime 
+                  ? currentTime.toLocaleTimeString('en-US', { 
+                      timeZone: 'America/Chicago', 
+                      hour: '2-digit', 
+                      minute: '2-digit', 
+                      second: '2-digit' 
+                    }) + ' CT'
+                  : '--:--:--'
+                ).split('').map((ch, idx) => (
+                  <span
+                    key={idx}
+                    className={`inline-block text-center ${ch === ':' ? 'w-1.5' : ch === ' ' ? 'w-1' : 'w-2.5'}`}
+                  >
+                    {ch}
+                  </span>
+                ))}
+              </span>
+            </div>
           </div>
 
-          {/* Center: Shift Elapsed Timer */}
+          {/* Center: Shift Elapsed Timer with spaced digits to prevent shifting */}
           <div className="py-6 text-center space-y-2">
-            <div className="text-4xl font-extrabold tracking-tight text-slate-900">
-              {formatDuration(activeShiftSeconds)}
+            <div className="text-4xl font-extrabold text-slate-900 flex items-center justify-center">
+              <div className="inline-flex items-center justify-center select-none">
+                {formatDuration(activeShiftSeconds).split('').map((ch, idx) => (
+                  <span
+                    key={idx}
+                    className={`inline-block text-center font-extrabold ${ch === ':' ? 'w-4 text-slate-400' : 'w-7 text-slate-900'}`}
+                  >
+                    {ch}
+                  </span>
+                ))}
+              </div>
             </div>
             <p className="text-xs text-slate-500">
               {isClockedIn 

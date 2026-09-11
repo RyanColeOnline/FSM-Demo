@@ -36,7 +36,7 @@ export interface ProcessingStatement {
   fileId: string;
   filename: string;
   monthYear?: string;
-  provider: 'Stripe' | 'CardConnect' | 'WEX FSM';
+  provider: 'Stripe' | 'Merchant Archive' | string;
   type: string;
   downloadUrl?: string;
   fileSize?: string;
@@ -46,62 +46,89 @@ export interface ProcessingStatement {
   viewUrl?: string;
 }
 
+const defaultStripeStatements: ProcessingStatement[] = [
+  {
+    id: 'stmt-stripe-2026-08',
+    fileId: 'file_stripe_2026_08',
+    filename: 'monthly_processing_statement_august_2026.pdf',
+    monthYear: 'August 2026',
+    provider: 'Stripe',
+    type: 'Monthly Processing',
+    fileSize: '1.6 MB',
+    status: 'Ready',
+    isLegacy: false,
+    year: '2026',
+    viewUrl: '#',
+  },
+  {
+    id: 'stmt-stripe-2026-07',
+    fileId: 'file_stripe_2026_07',
+    filename: 'monthly_processing_statement_july_2026.pdf',
+    monthYear: 'July 2026',
+    provider: 'Stripe',
+    type: 'Monthly Processing',
+    fileSize: '1.8 MB',
+    status: 'Ready',
+    isLegacy: false,
+    year: '2026',
+    viewUrl: '#',
+  },
+  {
+    id: 'stmt-stripe-2026-06',
+    fileId: 'file_stripe_2026_06',
+    filename: 'monthly_processing_statement_june_2026.pdf',
+    monthYear: 'June 2026',
+    provider: 'Stripe',
+    type: 'Monthly Processing',
+    fileSize: '1.5 MB',
+    status: 'Ready',
+    isLegacy: false,
+    year: '2026',
+    viewUrl: '#',
+  },
+  {
+    id: 'stmt-stripe-2025-1099k',
+    fileId: 'file_stripe_2025_1099k',
+    filename: 'form_1099k_tax_year_2025.pdf',
+    monthYear: 'Annual Tax 2025',
+    provider: 'Stripe',
+    type: '1099-K Tax Form',
+    fileSize: '840 KB',
+    status: 'Ready',
+    isLegacy: false,
+    year: '2025',
+    viewUrl: '#',
+  },
+];
+
 const legacyMockStatements: ProcessingStatement[] = [
   {
-    id: 'stmt-cc-2026-05',
-    fileId: 'file_cc_2026_05',
-    filename: 'cardconnect_monthly_statement_may_2026.pdf',
-    monthYear: 'May 2026',
-    provider: 'CardConnect',
-    type: 'Monthly Processing',
-    downloadUrl: '/assets/legacy/may_2026_cardconnect.pdf',
-    fileSize: '2.1 MB',
-    status: 'Ready',
-    isLegacy: true,
-    year: '2026',
-    viewUrl: '/api/stripe/statements/file_cc_2026_05/view',
-  },
-  {
-    id: 'stmt-cc-2026-04',
-    fileId: 'file_cc_2026_04',
-    filename: 'cardconnect_monthly_statement_april_2026.pdf',
-    monthYear: 'April 2026',
-    provider: 'CardConnect',
-    type: 'Monthly Processing',
-    downloadUrl: '/assets/legacy/april_2026_cardconnect.pdf',
-    fileSize: '1.9 MB',
-    status: 'Ready',
-    isLegacy: true,
-    year: '2026',
-    viewUrl: '/api/stripe/statements/file_cc_2026_04/view',
-  },
-  {
-    id: 'stmt-cc-2025-12',
-    fileId: 'file_cc_2025_12',
-    filename: 'cardconnect_monthly_statement_december_2025.pdf',
+    id: 'stmt-legacy-2025-12',
+    fileId: 'file_legacy_2025_12',
+    filename: 'merchant_payout_statement_december_2025.pdf',
     monthYear: 'December 2025',
-    provider: 'CardConnect',
+    provider: 'Merchant Archive',
     type: 'Monthly Processing',
-    downloadUrl: '/assets/legacy/december_2025_cardconnect.pdf',
+    downloadUrl: '#',
     fileSize: '2.0 MB',
     status: 'Ready',
     isLegacy: true,
     year: '2025',
-    viewUrl: '/api/stripe/statements/file_cc_2025_12/view',
+    viewUrl: '#',
   },
   {
-    id: 'stmt-wex-2024-09',
-    fileId: 'file_wex_2024_09',
-    filename: 'wex_fsm_payout_statement_september_2024.pdf',
+    id: 'stmt-legacy-2024-09',
+    fileId: 'file_legacy_2024_09',
+    filename: 'merchant_payout_statement_september_2024.pdf',
     monthYear: 'September 2024',
-    provider: 'WEX FSM',
+    provider: 'Merchant Archive',
     type: 'Monthly Processing',
-    downloadUrl: '/assets/legacy/september_2024_wex.pdf',
+    downloadUrl: '#',
     fileSize: '980 KB',
     status: 'Ready',
     isLegacy: true,
     year: '2024',
-    viewUrl: '/api/stripe/statements/file_wex_2024_09/view',
+    viewUrl: '#',
   },
 ];
 
@@ -141,7 +168,7 @@ export default function WexStatementsPage() {
   // Default: Only Stripe Processing Documents expanded, Legacy collapsed
   const [isStripeGroupOpen, setIsStripeGroupOpen] = useState<boolean>(true);
   const [isLegacyGroupOpen, setIsLegacyGroupOpen] = useState<boolean>(false);
-  const [stripeStatements, setStripeStatements] = useState<ProcessingStatement[]>([]);
+  const [stripeStatements, setStripeStatements] = useState<ProcessingStatement[]>(defaultStripeStatements);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   
   // Shared PDF Viewer Modal state
@@ -309,7 +336,7 @@ export default function WexStatementsPage() {
         >
           <div className="flex items-center gap-2">
             <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isLegacyGroupOpen ? 'rotate-90' : 'rotate-0'}`} />
-            <span className="text-sm font-semibold">Legacy Statements (CardConnect / WEX FSM)</span>
+            <span className="text-sm font-semibold">Historical Merchant Processing Archives</span>
           </div>
         </button>
 

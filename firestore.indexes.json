@@ -5,7 +5,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "customerStatus", "order": "ASCENDING" },
-        { "fieldPath": "qbName", "order": "ASCENDING" }
+        { "fieldPath": "name", "order": "ASCENDING" }
       ]
     },
     {
@@ -13,7 +13,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "customerStatus", "order": "ASCENDING" },
-        { "fieldPath": "qbName", "order": "ASCENDING" }
+        { "fieldPath": "name", "order": "ASCENDING" }
       ]
     },
     {
@@ -21,7 +21,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "autoSyncStatus", "order": "ASCENDING" },
-        { "fieldPath": "qbName", "order": "ASCENDING" }
+        { "fieldPath": "name", "order": "ASCENDING" }
       ]
     },
     {
@@ -29,7 +29,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "autoSyncStatus", "order": "ASCENDING" },
-        { "fieldPath": "qbName", "order": "ASCENDING" }
+        { "fieldPath": "name", "order": "ASCENDING" }
       ]
     },
     {

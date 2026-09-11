@@ -56,9 +56,14 @@ export function TopNavTabs() {
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const canViewReporting = currentUser?.accountType === 'admin' || permissions.reportingTabVisibility;
-  const canViewMore = currentUser?.accountType === 'admin' || permissions.moreAppsAndSettingsVisibility;
+  const canViewMore = isMounted && (currentUser?.accountType === 'admin' || permissions.moreAppsAndSettingsVisibility);
 
   // Safe Mouse Zone Handlers
   const handleMouseEnterNav = (key: string | null) => {

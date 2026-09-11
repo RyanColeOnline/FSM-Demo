@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { X, UserPlus } from 'lucide-react';
 import { CanonicalCustomer } from '@murphys/domain';
 import { useCustomers } from '@/hooks/useCustomers';
-import { REFERRAL_LIST, TAX_GROUPS } from '@/constants/globalChoices';
+import { REFERRAL_LIST, TAX_GROUPS, US_STATES } from '@/constants/globalChoices';
 
 interface AddCustomerModalProps {
   isOpen: boolean;
@@ -78,6 +78,12 @@ export function AddCustomerModal({
       ? newCustCompany.trim() || `${newCustLastName.trim()}, ${newCustFirstName.trim()}`.replace(/^,\s*|,\s*$/g, '') || 'Commercial Customer'
       : `${newCustLastName.trim()}, ${newCustFirstName.trim()}`.replace(/^,\s*|,\s*$/g, '') || 'New Customer';
 
+    const qbName = isCommercial
+      ? newCustCompany.trim() || computedName
+      : (newCustLastName.trim() && newCustFirstName.trim() ? `${newCustLastName.trim()}, ${newCustFirstName.trim()}` : computedName);
+
+    const custNum = `CUST-${Math.floor(10000 + Math.random() * 90000)}`;
+
     const addrObj = {
       street: newCustAddress.trim(),
       addr2: newCustAddress2.trim() || undefined,
@@ -90,8 +96,10 @@ export function AddCustomerModal({
 
     const newCust: CanonicalCustomer = {
       id: `cust-${Date.now()}`,
-      accountNumber: `CUST-${Math.floor(10000 + Math.random() * 90000)}`,
+      accountNumber: custNum,
+      customerNumber: custNum,
       name: computedName,
+      qbName: qbName,
       firstName: newCustFirstName.trim() || undefined,
       lastName: newCustLastName.trim() || undefined,
       customerType: isCommercial ? 'commercial' : 'residential',
@@ -113,6 +121,9 @@ export function AddCustomerModal({
     };
 
     await saveCustomer(newCust);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('fsm_customer_saved', { detail: newCust }));
+    }
     if (onCustomerCreated) {
       onCustomerCreated(newCust);
     }
@@ -296,14 +307,11 @@ export function AddCustomerModal({
                 onChange={(e) => setNewCustState(e.target.value)}
                 className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-400"
               >
-                <option value="FL">FL</option>
-                <option value="AL">AL</option>
-                <option value="GA">GA</option>
-                <option value="MS">MS</option>
-                <option value="TX">TX</option>
-                <option value="TN">TN</option>
-                <option value="NC">NC</option>
-                <option value="SC">SC</option>
+                {US_STATES.map((s) => (
+                  <option key={s.code} value={s.code}>
+                    {s.code} - {s.name}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="space-y-1">

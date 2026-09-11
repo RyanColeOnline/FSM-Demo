@@ -192,11 +192,14 @@ import { getTripTypeWebHex } from '@/domain/types/jobType';
 import { 
   getEasternDateString, 
   formatEasternDateTime, 
-  normalizeToEasternDateString 
+  normalizeToEasternDateString,
+  cleanUserDisplayName,
+  extractTime12hFromIsoOrString,
+  formatCalendarDateMdy
 } from '@/domain';
 import { AddCustomerModal } from '@/components/modals/AddCustomerModal';
 import { HierarchicalJobTypeSelector } from '@/components/ui';
-import { UpdateAppointmentModal, getTechsForJobType } from '@/components/modals/UpdateAppointmentModal';
+import { UpdateAppointmentModal, getTechsForJobType, formatCustomerDisplayName } from '@/components/modals/UpdateAppointmentModal';
 
 export interface ScheduledJob {
   id: string;
@@ -473,24 +476,37 @@ export function sortTechsDeterministically(a: TechUser, b: TechUser): number {
 
 export function getAppointmentTechs(appt: CanonicalAppointment | any): string[] {
   const list: string[] = [];
+  const rawAssigned = cleanUserDisplayName(appt.assignedTech || appt.primaryTech || appt.technician || '');
+
   if (Array.isArray(appt.technicians) && appt.technicians.length > 0) {
     for (const t of appt.technicians) {
       if (typeof t === 'string' && t.trim()) {
-        const parts = t.split(',').map((p: string) => p.trim()).filter(Boolean);
+        const cleanT = cleanUserDisplayName(t);
+        const parts = cleanT.split(',').map((p: string) => p.trim()).filter(Boolean);
         list.push(...parts);
       }
     }
   }
-  const rawTech = appt.assignedTech || appt.technician || '';
-  if (rawTech && typeof rawTech === 'string') {
-    const parts = rawTech.split(',').map((p: string) => p.trim()).filter(Boolean);
-    for (const p of parts) {
-      if (!list.some((existing) => normalizeTechName(existing) === normalizeTechName(p))) {
-        list.push(p);
-      }
+
+  // If assignedTech is explicitly specified, ensure it is the primary tech.
+  // If technicians had only an old/stale tech (e.g. David Ross) while assignedTech is Tyler Reed,
+  // replace the stale single tech with assignedTech!
+  if (rawAssigned && normalizeTechName(rawAssigned) !== 'unassigned') {
+    if (list.length <= 1) {
+      list.length = 0;
+      list.push(rawAssigned);
+    } else if (!list.some((existing) => normalizeTechName(existing) === normalizeTechName(rawAssigned))) {
+      list.unshift(rawAssigned);
     }
+  } else if (rawAssigned && list.length === 0) {
+    list.push(rawAssigned);
   }
-  return list.length > 0 ? list : ['Unassigned'];
+
+  const filtered = list.map(cleanUserDisplayName).filter((t) => {
+    const norm = normalizeTechName(t);
+    return norm && norm !== 'unassigned';
+  });
+  return filtered.length > 0 ? Array.from(new Set(filtered)) : ['Unassigned'];
 }
 
 export function getCentralTimeParts(date: Date = new Date()): { hours: number; minutes: number; floatHours: number; displayStr: string } {
@@ -552,6 +568,11 @@ export function parseAppointmentTimes(appt: any): { startTime: string; endTime: 
     } else if (timeLine) {
       if (!startTime) startTime = timeLine;
     }
+  } else if (!startTime && raw) {
+    const extracted = extractTime12hFromIsoOrString(raw);
+    if (extracted) {
+      startTime = extracted;
+    }
   }
 
   if (appt.hoursScheduled && typeof appt.hoursScheduled === 'string') {
@@ -587,7 +608,11 @@ export function mapCanonicalAppointmentToScheduledJob(
     c.accountNumber === appt.customerId ||
     (c.name && appt.customerName && c.name.toLowerCase() === appt.customerName.toLowerCase())
   );
-  const custName = appt.customerName || cust?.name || `${cust?.lastName || ''}, ${cust?.firstName || ''}`.replace(/^,\s*|,\s*$/g, '') || 'Customer';
+  const custObj = cust || {
+    name: appt.customerName,
+    customerType: (appt as any).customerType,
+  };
+  const custName = formatCustomerDisplayName(custObj as any) || appt.customerName || 'Customer';
 
   const custLine2 = cust?.address?.addressLine2 || (cust?.address as any)?.street2 || '';
   let fullCustAddr = '';
@@ -679,7 +704,7 @@ const TECH_AVATAR_COLORS = [
 
 const initialTechUsers: TechUser[] = CANONICAL_OFFICIAL_USERS.map((u, i) => ({
   id: u.id,
-  name: u.displayName || `${u.firstName} ${u.lastName}`.trim() || 'Tech',
+  name: cleanUserDisplayName(u.displayName || `${u.firstName} ${u.lastName}`.trim() || 'Tech'),
   avatarColor: TECH_AVATAR_COLORS[i % TECH_AVATAR_COLORS.length],
   initials: u.initials || 'TC',
   dispatchGroup: u.dispatchGroups?.[0] || 'Appliance Techs',
@@ -701,7 +726,7 @@ export default function WexSchedulePage() {
   }, [liveUsers]);
 
   const allTechNamesList = useMemo(() => {
-    return allUsersList.map((u) => u.displayName || `${u.firstName} ${u.lastName}`.trim() || 'Tech');
+    return allUsersList.map((u) => cleanUserDisplayName(u.displayName || `${u.firstName} ${u.lastName}`.trim() || 'Tech'));
   }, [allUsersList]);
 
   const availableDispatchGroups = useMemo(() => {
@@ -932,7 +957,9 @@ export default function WexSchedulePage() {
     setBookingEndMin(endParsed.min);
     setBookingEndAmpm(endParsed.ampm as 'AM' | 'PM');
 
-    setBookingPrimaryTech(job.technicians?.[0] || 'Justin Lung');
+    const tech0 = job.technicians?.[0] || '';
+    const cleanTech = tech0.toLowerCase() === 'unassigned' ? '' : tech0;
+    setBookingPrimaryTech(cleanTech);
     setBookingAdditionalTech(job.technicians?.[1] || '');
     setBookingCallNotes(job.callNotes || '');
     setBookingPhoneNumber(job.phone || '(850) 556-8402');
@@ -1051,7 +1078,7 @@ export default function WexSchedulePage() {
   const { databaseMode, client } = useDatabaseMode();
   const { appointments, saveAppointment: saveLiveAppointment } = useAppointments();
   const { customers } = useCustomers();
-  const { jobs } = useJobs();
+  const { jobs, saveJob: saveLiveJob } = useJobs();
   const { calls, saveCall: saveLiveCall } = useCalls();
   const queryClient = useQueryClient();
 
@@ -1368,10 +1395,20 @@ function formatInstallDate(rawDate?: string | null): string {
       });
     });
 
-    // Strict deterministic sorting so technician row order never jumps on load/re-render
-    generatedTechs.sort(sortTechsDeterministically);
-
     setTechUsers((prev) => {
+      if (prev.length > 0) {
+        const orderMap = new Map(prev.map((t, idx) => [t.id, idx]));
+        generatedTechs.sort((a, b) => {
+          const aIdx = orderMap.get(a.id);
+          const bIdx = orderMap.get(b.id);
+          if (aIdx !== undefined && bIdx !== undefined) return aIdx - bIdx;
+          if (aIdx !== undefined) return -1;
+          if (bIdx !== undefined) return 1;
+          return sortTechsDeterministically(a, b);
+        });
+      } else {
+        generatedTechs.sort(sortTechsDeterministically);
+      }
       const prevSerialized = JSON.stringify(prev);
       const nextSerialized = JSON.stringify(generatedTechs);
       if (prevSerialized === nextSerialized) return prev;
@@ -1470,15 +1507,13 @@ function formatInstallDate(rawDate?: string | null): string {
   }, [activeGroupTechNames]);
 
   const displayedTechUsers = useMemo(() => {
-    return techUsers
-      .filter((t) => {
-        if (dispatchGroup !== 'All Techs') {
-          const userObj = allUsersList.find((u) => normalizeTechName(u.displayName || `${u.firstName} ${u.lastName}`) === normalizeTechName(t.name));
-          if (!matchesDispatchGroup(userObj?.dispatchGroups, t.dispatchGroup, dispatchGroup, t.name)) return false;
-        }
-        return selectedTechNames.includes(t.name);
-      })
-      .sort(sortTechsDeterministically);
+    return techUsers.filter((t) => {
+      if (dispatchGroup !== 'All Techs') {
+        const userObj = allUsersList.find((u) => normalizeTechName(u.displayName || `${u.firstName} ${u.lastName}`) === normalizeTechName(t.name));
+        if (!matchesDispatchGroup(userObj?.dispatchGroups, t.dispatchGroup, dispatchGroup, t.name)) return false;
+      }
+      return selectedTechNames.includes(t.name);
+    });
   }, [techUsers, dispatchGroup, selectedTechNames, allUsersList, liveDispatchGroups]);
 
   // Appointment Drag & Drop State
@@ -1764,7 +1799,7 @@ function formatInstallDate(rawDate?: string | null): string {
 
     // Find target tech
     const targetTech = techUsers.find((t) => t.id === targetTechId);
-    const targetTechName = targetTech?.name || 'Technician';
+    const targetTechName = cleanUserDisplayName(targetTech?.name || 'Technician');
 
     movedJob.startTime = newStartTime;
     movedJob.endTime = newEndTime;
@@ -1779,35 +1814,45 @@ function formatInstallDate(rawDate?: string | null): string {
         const updatedDate = new Date(currentDateObj);
         updatedDate.setHours(h, m, 0, 0);
 
+        const apptDateStr = `${updatedDate.getFullYear()}-${String(updatedDate.getMonth() + 1).padStart(2, '0')}-${String(updatedDate.getDate()).padStart(2, '0')}`;
+
         const updatedAppt: CanonicalAppointment = {
           ...liveAppt,
           dateTime: updatedDate.toISOString(),
           durationHours: duration,
           assignedTech: targetTechName,
+          technicians: [targetTechName],
+          appointmentDate: apptDateStr,
+          startTime: newStartTime,
+          endTime: newEndTime,
         };
         saveLiveAppointment(updatedAppt);
+
+        const matchingJob = jobs.find(
+          (j) => j.id === (liveAppt.jobId || liveAppt.id) || (j.appointments && (j.appointments as any).some((a: any) => (typeof a === 'string' ? a : a.id) === liveAppt.id))
+        );
+        if (matchingJob) {
+          saveLiveJob({
+            ...matchingJob,
+            assignedTech: targetTechName,
+          });
+        }
       }
     }
 
     setTechUsers((prevTechs) => {
       return prevTechs.map((tech) => {
-        if (tech.id === sourceTechId && sourceTechId === targetTechId) {
-          return {
-            ...tech,
-            scheduledJobs: tech.scheduledJobs.map((j) => (j.id === movedJob.id ? movedJob : j)),
-          };
-        } else if (tech.id === sourceTechId) {
-          return {
-            ...tech,
-            scheduledJobs: tech.scheduledJobs.filter((j) => j.id !== movedJob.id),
-          };
-        } else if (tech.id === targetTechId) {
+        if (tech.id === targetTechId) {
           return {
             ...tech,
             scheduledJobs: [...tech.scheduledJobs.filter((j) => j.id !== movedJob.id), movedJob],
           };
+        } else {
+          return {
+            ...tech,
+            scheduledJobs: tech.scheduledJobs.filter((j) => j.id !== movedJob.id),
+          };
         }
-        return tech;
       });
     });
 
@@ -2611,35 +2656,37 @@ function formatInstallDate(rawDate?: string | null): string {
                     <button
                       type="button"
                       onClick={handleToday}
-                      className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 rounded border border-slate-300 transition-colors cursor-pointer"
+                      className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 rounded border border-slate-300 transition-colors cursor-pointer select-none"
                     >
                       Today
                     </button>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 select-none">
                       <button
                         type="button"
                         onClick={handlePrevDate}
-                        className="p-1 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 transition-colors cursor-pointer"
+                        onMouseDown={(e) => e.preventDefault()}
+                        className="p-1 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 transition-colors cursor-pointer select-none"
                         title="Previous date/month"
                       >
-                        <ChevronLeft className="w-3.5 h-3.5 text-slate-700" />
+                        <ChevronLeft className="w-3.5 h-3.5 text-slate-700 pointer-events-none" />
                       </button>
 
                       <button
                         type="button"
                         onClick={handleNextDate}
-                        className="p-1 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 transition-colors cursor-pointer"
+                        onMouseDown={(e) => e.preventDefault()}
+                        className="p-1 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 transition-colors cursor-pointer select-none"
                         title="Next date/month"
                       >
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-700" />
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-700 pointer-events-none" />
                       </button>
                     </div>
 
-                    <div className="flex items-center bg-slate-100 p-0.5 rounded border border-slate-300">
+                    <div className="flex items-center bg-slate-100 p-0.5 rounded border border-slate-300 select-none">
                       <button
                         onClick={() => setViewMode('daily')}
-                        className={`px-2 py-0.5 text-xs font-semibold rounded cursor-pointer ${
+                        className={`px-2 py-0.5 text-xs font-semibold rounded cursor-pointer select-none ${
                           viewMode === 'daily' ? 'bg-white shadow-2xs text-slate-900 font-bold' : 'text-slate-600'
                         }`}
                       >
@@ -2647,7 +2694,7 @@ function formatInstallDate(rawDate?: string | null): string {
                       </button>
                       <button
                         onClick={() => setViewMode('monthly')}
-                        className={`px-2 py-0.5 text-xs font-semibold rounded cursor-pointer ${
+                        className={`px-2 py-0.5 text-xs font-semibold rounded cursor-pointer select-none ${
                           viewMode === 'monthly' ? 'bg-white shadow-2xs text-slate-900 font-bold' : 'text-slate-600'
                         }`}
                       >
@@ -2706,7 +2753,7 @@ function formatInstallDate(rawDate?: string | null): string {
                                   item.isCompleted ? 'bg-slate-200/90 text-slate-600' : 'bg-white text-slate-800 hover:bg-slate-50'
                                 }`}
                               >
-                                <div className="w-2 h-2 rounded-full shrink-0 shadow-2xs" style={{ backgroundColor: item.colorHex || getTripTypeWebHex(item.jobType) }} />
+                                <div className="w-2 h-2 rounded-full shrink-0 shadow-2xs" style={{ backgroundColor: getTripTypeWebHex(item.jobType) || item.colorHex }} />
                                 {item.isFlagged && (
                                   <Flag className="w-3 h-3 fill-slate-800 text-slate-800 shrink-0" />
                                 )}
@@ -2794,7 +2841,7 @@ function formatInstallDate(rawDate?: string | null): string {
                                   }`}
                                 >
                                   {/* 1. Trip Type Colored Dot Badge */}
-                                  <div className="w-2 h-2 rounded-full shrink-0 shadow-2xs" style={{ backgroundColor: job.colorHex || getTripTypeWebHex(job.jobType) }} />
+                                  <div className="w-2 h-2 rounded-full shrink-0 shadow-2xs" style={{ backgroundColor: getTripTypeWebHex(job.jobType) || job.colorHex }} />
 
                                   {/* 2. Flag icon if applicable (after circle, before text) */}
                                   {job.isFlagged && (
@@ -2900,16 +2947,18 @@ function formatInstallDate(rawDate?: string | null): string {
                                       : 'hover:bg-slate-50/50 bg-white'
                                   }`}
                                 >
-                                  <div className={`w-36 p-2 border-r border-slate-200 shrink-0 flex items-center justify-between group transition-colors ${
-                                    isDragTarget ? 'bg-blue-100/50' : 'bg-white'
-                                  }`}>
+                                  <div 
+                                    draggable
+                                    onDragStart={(e) => handleTechDragStart(e, tech.id)}
+                                    onDragEnd={handleTechDragEnd}
+                                    className={`w-36 p-2 border-r border-slate-200 shrink-0 flex items-center justify-between group transition-colors cursor-grab active:cursor-grabbing select-none ${
+                                      isDragTarget ? 'bg-blue-100/50' : 'bg-white hover:bg-slate-50'
+                                    }`}
+                                    title="Grab to switch / reorder technician row"
+                                  >
                                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
                                       <div 
-                                        draggable
-                                        onDragStart={(e) => handleTechDragStart(e, tech.id)}
-                                        onDragEnd={handleTechDragEnd}
-                                        className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-700 p-0.5 rounded hover:bg-slate-100 transition-colors shrink-0"
-                                        title="Drag to reorder technician row"
+                                        className="text-slate-400 group-hover:text-slate-700 p-0.5 rounded transition-colors shrink-0"
                                       >
                                         <GripVertical className="w-4 h-4" />
                                       </div>
@@ -2980,8 +3029,8 @@ function formatInstallDate(rawDate?: string | null): string {
                                           style={{
                                             left: `${Math.max(0, startPercent)}%`,
                                             width: `${widthPercent}%`,
-                                            backgroundColor: !job.isCompleted ? (job.colorHex || getTripTypeWebHex(job.jobType)) : undefined,
-                                            borderColor: !job.isCompleted ? (job.colorHex || getTripTypeWebHex(job.jobType)) : undefined,
+                                            backgroundColor: !job.isCompleted ? (getTripTypeWebHex(job.jobType) || job.colorHex) : undefined,
+                                            borderColor: !job.isCompleted ? (getTripTypeWebHex(job.jobType) || job.colorHex) : undefined,
                                           }}
                                           title="Drag to reassign appointment or click to edit"
                                           className={`absolute top-1 bottom-1 rounded px-1.5 py-0.5 border shadow-xs flex flex-col justify-center gap-0 z-10 cursor-grab active:cursor-grabbing overflow-hidden leading-tight hover:brightness-95 ${
@@ -3328,7 +3377,7 @@ function formatInstallDate(rawDate?: string | null): string {
                             setBookingEndHour('09');
                             setBookingEndMin('00');
                             setBookingEndAmpm('AM');
-                            setBookingPrimaryTech('Justin Lung');
+                            setBookingPrimaryTech('');
                             setBookingAdditionalTech('');
                             setBookingCallNotes('');
                             setJobNotesList([]);

@@ -23,8 +23,13 @@ export function TopHeader() {
   const { activeShiftSeconds, formatDuration } = useTimeClock();
   const { followUps } = useFollowUps();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const canAccessSettings = currentUser?.accountType === 'admin' || permissions.moreAppsAndSettingsVisibility;
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const canAccessSettings = isMounted && (currentUser?.accountType === 'admin' || permissions.moreAppsAndSettingsVisibility);
 
   const activeFlagsCount = React.useMemo(() => {
     if (!followUps || followUps.length === 0) return 0;
@@ -119,7 +124,7 @@ export function TopHeader() {
               aria-label="User account menu"
             >
               <span suppressHydrationWarning className="text-white hover:text-white">
-                {(currentUser?.name || currentUser?.email || 'User').replace(/\s*\(.*?\)\s*/g, '').trim()}
+                {isMounted ? (currentUser?.name || currentUser?.email || 'User').replace(/\s*\(.*?\)\s*/g, '').trim() : 'User'}
               </span>
               <ChevronDown className="w-3 h-3 text-white" />
             </MenuButton>

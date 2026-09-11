@@ -69,6 +69,7 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useJobs } from '@/hooks/useJobs';
 import { useDatabaseMode } from '@/contexts/database-mode-context';
+import { useSession } from '@/auth/sessionStore';
 import { INITIAL_JOB_TYPES } from '@/stores/jobTypeRegistry';
 import { JOB_PRICE_OPTIONS } from '@/constants/globalChoices';
 import { CanonicalFollowUpFlag, CanonicalChecklistInstance, CanonicalNote, CanonicalAttachment, CanonicalPaymentRecord, CanonicalInvoice, CanonicalProposal, CanonicalCustomer, CanonicalJob, CanonicalAppointment, formatEasternDate } from '@murphys/domain';
@@ -531,7 +532,7 @@ const mockJobsDatabase: Record<string, JobDetails> = {
     uncollected: '$0.00',
     isFlagged: true,
     followUpType: 'Need Quote/Autho',
-    assignee: 'Justin Lung',
+    assignee: 'Alex Reynolds',
     stage: 'Appointment',
     checklistsCount: 0,
     equipmentCount: 1,
@@ -660,6 +661,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
   };
 
   const { databaseMode, client } = useDatabaseMode();
+  const { currentUser } = useSession();
 
   const emptyJobData: JobDetails = {
     id: jobIdParam,
@@ -1190,7 +1192,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
     const formattedTime = `${formattedDate}, ${displayHours}:${minutes} ${ampm}`;
 
     setDraftJobNote({
-      user: 'Justin Lung',
+      user: currentUser?.name || 'Staff',
       dateTime: formattedTime,
       text: '',
     });
@@ -1212,7 +1214,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
           jobNumber: parseInt(job.jobNumber.replace(/[^0-9]/g, ''), 10) || 134100,
           authorId: 'user-1',
           authorRole: 'Staff',
-          authorName: draftJobNote.user || 'Justin Lung',
+          authorName: draftJobNote.user || currentUser?.name || 'Staff',
           title: 'Job Note',
           content: noteText,
           isPinned: false,
@@ -1256,7 +1258,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
     const formattedTime = `${formattedDate}, ${displayHours}:${minutes} ${ampm}`;
 
     setDraftLocationNote({
-      user: 'Justin Lung',
+      user: currentUser?.name || 'Staff',
       dateTime: formattedTime,
       text: '',
     });
@@ -1283,7 +1285,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
   const [appointmentTechnicians, setAppointmentTechnicians] = useState([
     {
       id: 'tech-1',
-      name: 'Justin Lung',
+      name: 'Alex Reynolds',
       scheduledTime: '2:00 pm - 4:00 pm',
       actual: 'N/A',
       jobTime: '(00:00:00)',
@@ -1292,7 +1294,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
     },
     {
       id: 'tech-2',
-      name: 'Minor Cover',
+      name: 'Marcus Vance',
       scheduledTime: '2:00 pm - 4:00 pm',
       actual: 'N/A',
       jobTime: '(00:00:00)',
@@ -1456,7 +1458,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
         id: 'att-3',
         name: 'Pre_Service_Diagnostic.pdf',
         size: '840 KB',
-        uploadedBy: 'Justin Lung',
+        uploadedBy: 'Alex Reynolds',
         date: '8/12/2026',
         type: 'pdf',
         accentColor: 'from-red-600 to-rose-400',
@@ -2648,7 +2650,7 @@ Status: Verified & Archived
                               <tr className="bg-white hover:bg-slate-50 transition-colors">
                                 <td className="px-3 py-3 font-semibold text-[#be4646] whitespace-nowrap">
                                   <Link href="/schedule" className="hover:underline">
-                                    {appt.assignedTech || appt.primaryTech || appt.technician || 'Justin Lung'}
+                                    {appt.assignedTech || appt.primaryTech || appt.technician || 'Unassigned'}
                                   </Link>
                                 </td>
                                 <td className="px-3 py-3 text-slate-700 whitespace-nowrap">
@@ -3266,7 +3268,7 @@ Status: Verified & Archived
                 appointmentStatus: appointmentScheduleMode === 'request' ? 'Unscheduled' : 'Scheduled',
                 assignLater: appointmentScheduleMode === 'request',
                 frequency: 'one time',
-                primaryTech: 'Justin Lung',
+                primaryTech: '',
                 startTime: '08:00',
                 endTime: '09:00',
                 appointmentDate: formatEasternDate(new Date()),
@@ -3296,7 +3298,7 @@ Status: Verified & Archived
                     selectedApptForEdit?.assignedTech ||
                     selectedApptForEdit?.primaryTech ||
                     selectedApptForEdit?.technician ||
-                    'Justin Lung',
+                    '',
                   additionalTech: selectedApptForEdit?.additionalTech || '',
                   additionalTechs: selectedApptForEdit?.additionalTechs || (selectedApptForEdit?.technicians && selectedApptForEdit.technicians.length > 1 ? selectedApptForEdit.technicians.slice(1) : undefined),
                   technicians: selectedApptForEdit?.technicians,
@@ -3551,7 +3553,7 @@ Status: Verified & Archived
         onSave={(data) => {
           const newEntry = {
             id: `jn-${Date.now()}`,
-            user: 'Justin Lung',
+            user: currentUser?.name || 'Staff',
             dateTime: '8/14/2026, 10:25 pm',
             notes: data.text,
           };
@@ -3622,7 +3624,7 @@ Status: Verified & Archived
           paymentStatus={viewingPdfInvoice.paymentStatus || 'Unpaid'}
           paymentTerms={viewingPdfInvoice.paymentTerms || 'Due upon Receipt'}
           paymentsCredits={viewingPdfInvoice.payments}
-          technician={viewingPdfInvoice.technician || job.assignee || 'Minor Cover'}
+          technician={viewingPdfInvoice.technician || job.assignee || 'Marcus Vance'}
           lineItems={viewingPdfInvoice.lineItems}
         />
       )}

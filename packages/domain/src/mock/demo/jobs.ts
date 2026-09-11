@@ -1,6 +1,10 @@
 import { CanonicalJob, CanonicalAppointment } from '../../types/appointment';
+import { DEMO_JOBS_SEPT_2026 } from './demo-appointments-dataset';
+
+export { DEMO_JOBS_SEPT_2026 };
 
 export const DEMO_JOBS: CanonicalJob[] = [
+  ...DEMO_JOBS_SEPT_2026,
   // 1. IN PROGRESS TODAY (Live Demo Focus)
   {
     id: 'job-1001',

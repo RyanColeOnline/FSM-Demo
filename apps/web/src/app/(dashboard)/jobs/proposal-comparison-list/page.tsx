@@ -170,13 +170,13 @@ export default function WexProposalComparisonListPage() {
                       >
                         <Star className={`w-3.5 h-3.5 ${item.isStarred ? 'fill-amber-400 text-amber-500' : 'text-slate-300'}`} />
                       </button>
-                      <a
+                      <Link
                         href="/customers"
                         className="inline-flex items-center gap-1 text-[#be4646] font-semibold hover:underline"
                       >
                         <span>{item.customerName}</span>
                         <ExternalLink className="w-3 h-3 text-[#be4646]" />
-                      </a>
+                      </Link>
                     </div>
                   </td>
 
@@ -218,13 +218,13 @@ export default function WexProposalComparisonListPage() {
 
                   {/* Job # */}
                   <td className="px-3 py-3.5 font-medium whitespace-nowrap">
-                    <a
+                    <Link
                       href={`/jobs/${item.jobNumber}`}
                       className="inline-flex items-center gap-1 text-[#be4646] font-semibold hover:underline"
                     >
                       <span>{item.jobNumber}</span>
                       <ExternalLink className="w-3 h-3 text-[#be4646]" />
-                    </a>
+                    </Link>
                   </td>
                 </tr>
               ))}

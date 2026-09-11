@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
   Gauge, 
-  ExternalLink, 
   Search, 
   FileText, 
   BarChart2, 
@@ -288,7 +287,6 @@ export default function WexReportingPage() {
         >
           <Gauge className="w-4 h-4 text-[#be4646]" />
           <span>Go to Dashboard</span>
-          <ExternalLink className="w-3 h-3 text-[#be4646] ml-0.5" />
         </Link>
 
         <div className="relative">
@@ -316,10 +314,9 @@ export default function WexReportingPage() {
                   <div key={report.id} className="space-y-0.5">
                     <Link
                       href={report.href}
-                      className="group inline-flex items-center gap-1 text-[#be4646] font-semibold text-xs hover:underline"
+                      className="inline-block text-[#be4646] font-semibold text-xs hover:underline"
                     >
-                      <span>{report.title}</span>
-                      <ExternalLink className="w-3 h-3 text-[#be4646] opacity-80 group-hover:opacity-100" />
+                      {report.title}
                     </Link>
                     <p className="text-[11px] text-slate-500 leading-snug">
                       {report.description}
@@ -343,10 +340,9 @@ export default function WexReportingPage() {
                   <div key={report.id} className="space-y-0.5">
                     <Link
                       href={report.href}
-                      className="group inline-flex items-center gap-1 text-[#be4646] font-semibold text-xs hover:underline"
+                      className="inline-block text-[#be4646] font-semibold text-xs hover:underline"
                     >
-                      <span>{report.title}</span>
-                      <ExternalLink className="w-3 h-3 text-[#be4646] opacity-80 group-hover:opacity-100" />
+                      {report.title}
                     </Link>
                     <p className="text-[11px] text-slate-500 leading-snug">
                       {report.description}
@@ -370,10 +366,9 @@ export default function WexReportingPage() {
                   <div key={report.id} className="space-y-0.5">
                     <Link
                       href={report.href}
-                      className="group inline-flex items-center gap-1 text-[#be4646] font-semibold text-xs hover:underline"
+                      className="inline-block text-[#be4646] font-semibold text-xs hover:underline"
                     >
-                      <span>{report.title}</span>
-                      <ExternalLink className="w-3 h-3 text-[#be4646] opacity-80 group-hover:opacity-100" />
+                      {report.title}
                     </Link>
                     <p className="text-[11px] text-slate-500 leading-snug">
                       {report.description}

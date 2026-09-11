@@ -127,14 +127,14 @@ const mockTimesheets: EmployeeTimesheet[] = [
 ];
 
 const mockStaffDirectory = [
-  'Andrew (Jr) Murphy',
+  'Andrew Murphy',
   'Justin Lung',
   'Justin Dunlap',
-  'Sarah Miller (Technician)',
-  'David Smith (Office Staff)',
-  'Jessica Vance (Admin Staff)',
-  'Robert Davis (Technician)',
-  'Emily Wilson (Field Specialist)',
+  'Sarah Miller',
+  'David Smith',
+  'Jessica Vance',
+  'Robert Davis',
+  'Emily Wilson',
 ];
 
 const hoursList = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];

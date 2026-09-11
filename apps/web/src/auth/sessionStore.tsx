@@ -20,6 +20,7 @@ import { AccountType, normalizeAccountType } from '@/rbac/accountTypes';
 import { DispatchGroupCategory, normalizeDispatchGroupCategory } from '@/rbac/dispatchGroups';
 import { UserPermissions, getDefaultPermissions } from '@/rbac/permissions';
 import { CANONICAL_OFFICIAL_USERS } from '@/domain/mock';
+import { cleanUserDisplayName } from '@/domain';
 
 export interface UserSession {
   id: string;
@@ -50,7 +51,61 @@ export interface SessionContextType {
 }
 
 const DEV_SANDBOX_STORAGE_KEY = 'fsm_demo_dev_sandbox_session';
+const PORTAL_CACHED_SESSION_KEY = 'fsm_portal_cached_session';
 const defaultOfficePermissions = getDefaultPermissions('office', 'office_staff');
+
+function getInitialCachedSession(): { session: UserSession | null; isSandbox: boolean } {
+  if (typeof window === 'undefined') return { session: null, isSandbox: false };
+  try {
+    if (process.env.NODE_ENV !== 'production') {
+      const savedDevSession = localStorage.getItem(DEV_SANDBOX_STORAGE_KEY);
+      if (savedDevSession) {
+        const parsed = JSON.parse(savedDevSession) as UserSession;
+        if (parsed && parsed.accountType) {
+          const cleanName = cleanUserDisplayName(parsed.name);
+          return {
+            session: {
+              ...parsed,
+              name: cleanName,
+              permissions: getDefaultPermissions(parsed.accountType, parsed.dispatchGroup),
+              isSandboxOverride: true,
+            },
+            isSandbox: true,
+          };
+        }
+      }
+    }
+    const cached = localStorage.getItem(PORTAL_CACHED_SESSION_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached) as UserSession;
+      if (parsed && parsed.accountType) {
+        return {
+          session: {
+            ...parsed,
+            name: cleanUserDisplayName(parsed.name),
+            permissions: getDefaultPermissions(parsed.accountType, parsed.dispatchGroup),
+            isSandboxOverride: false,
+          },
+          isSandbox: false,
+        };
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load cached session:', e);
+  }
+  return { session: null, isSandbox: false };
+}
+
+function persistCachedSession(session: UserSession | null) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (session) {
+      localStorage.setItem(PORTAL_CACHED_SESSION_KEY, JSON.stringify(session));
+    } else {
+      localStorage.removeItem(PORTAL_CACHED_SESSION_KEY);
+    }
+  } catch (e) {}
+}
 
 function buildUserSession(userId: string, user: FirebaseUser | null, data: any): UserSession {
   const actualId = data?.id || userId;
@@ -91,7 +146,7 @@ function buildUserSession(userId: string, user: FirebaseUser | null, data: any):
       viewJobPnL: rawPerms.viewJobPnL !== undefined ? Boolean(rawPerms.viewJobPnL) : defaultPerms.viewJobPnL,
     };
 
-    const resolvedName = data.displayName || data.name || (data.firstName && data.lastName ? `${data.firstName} ${data.lastName}` : '') || user?.displayName || (isAdminEmail ? 'Alex Reynolds' : 'Demo Staff');
+    const resolvedName = cleanUserDisplayName(data.displayName || data.name || (data.firstName && data.lastName ? `${data.firstName} ${data.lastName}` : '') || user?.displayName || (isAdminEmail ? 'Alex Reynolds' : 'Demo Staff'));
 
     return {
       id: actualId,
@@ -115,7 +170,7 @@ function buildUserSession(userId: string, user: FirebaseUser | null, data: any):
     return {
       id: user?.uid || actualId,
       uid: user?.uid || actualId,
-      name: user?.displayName || (isAdminEmail ? 'Alex Reynolds' : 'Demo Staff'),
+      name: cleanUserDisplayName(user?.displayName || (isAdminEmail ? 'Alex Reynolds' : 'Demo Staff')),
       email: user?.email || (isAdminEmail ? 'admin@apex.com' : ''),
       accountType: fallbackAccountType,
       dispatchGroup: fallbackGroup,
@@ -152,28 +207,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let unsubscribeSnapshot: (() => void) | null = null;
 
-    // Check for Dev Sandbox override in localStorage strictly during development
-    if (process.env.NODE_ENV !== 'production' && typeof window !== 'undefined') {
-      try {
-        const savedDevSession = localStorage.getItem(DEV_SANDBOX_STORAGE_KEY);
-        if (savedDevSession) {
-          const parsed = JSON.parse(savedDevSession) as UserSession;
-          if (parsed && parsed.accountType) {
-            const cleanName = (parsed.name || 'User').replace(/\s*\(.*?\)\s*/g, '').trim();
-            setCurrentUser({
-              ...parsed,
-              name: cleanName,
-              permissions: getDefaultPermissions(parsed.accountType, parsed.dispatchGroup),
-              isSandboxOverride: true,
-            });
-            setIsSandboxOverride(true);
-            setIsLoading(false);
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn('Error reading dev sandbox session:', err);
-      }
+    // Immediately hydrate cached session from localStorage on client mount
+    const cached = getInitialCachedSession();
+    if (cached.session) {
+      setCurrentUser(cached.session);
+      setIsSandboxOverride(cached.isSandbox);
+      setIsLoading(false);
+      if (cached.isSandbox) return;
     }
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
@@ -210,6 +250,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
           if (docData) {
             const session = buildUserSession(targetDocRef.id, user, docData);
             setCurrentUser(session);
+            persistCachedSession(session);
             setIsSandboxOverride(false);
             setIsLoading(false);
 
@@ -220,6 +261,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                 if (snap.exists()) {
                   const updatedSession = buildUserSession(targetDocRef.id, user, { id: snap.id, ...snap.data() });
                   setCurrentUser(updatedSession);
+                  persistCachedSession(updatedSession);
                 }
               },
               (err) => console.warn('Real-time user listener error:', err)
@@ -228,6 +270,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             // Check canonical mock matching by email or fallback
             const session = buildUserSession(user.uid, user, null);
             setCurrentUser(session);
+            persistCachedSession(session);
             setIsSandboxOverride(false);
             setIsLoading(false);
           }
@@ -235,12 +278,18 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
           console.error('Firestore user profile listener error:', err);
           const fallbackSession = buildUserSession(user.uid, user, null);
           setCurrentUser(fallbackSession);
+          persistCachedSession(fallbackSession);
           setIsSandboxOverride(false);
           setIsLoading(false);
         }
       } else {
         // Unauthenticated
-        setCurrentUser(null);
+        // Only clear if not in dev sandbox override
+        const devSession = process.env.NODE_ENV !== 'production' && typeof window !== 'undefined' ? localStorage.getItem(DEV_SANDBOX_STORAGE_KEY) : null;
+        if (!devSession) {
+          setCurrentUser(null);
+          persistCachedSession(null);
+        }
         setIsLoading(false);
       }
     });
@@ -284,6 +333,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       setFirebaseUser(user);
       const session = await fetchAndBuildSession(user);
       setCurrentUser(session);
+      persistCachedSession(session);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -300,6 +350,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       setFirebaseUser(user);
       const session = await fetchAndBuildSession(user);
       setCurrentUser(session);
+      persistCachedSession(session);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -314,8 +365,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
   // Sign out method
   const signOut = useCallback(async () => {
-    if (process.env.NODE_ENV !== 'production' && typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
       localStorage.removeItem(DEV_SANDBOX_STORAGE_KEY);
+      localStorage.removeItem(PORTAL_CACHED_SESSION_KEY);
     }
     try {
       await firebaseSignOut(auth);
@@ -368,7 +420,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       setCurrentUser({
         id: firebaseUser.uid,
         uid: firebaseUser.uid,
-        name: firebaseUser.displayName || (fallbackAccountType === 'admin' ? 'Alex Reynolds' : 'Demo Staff'),
+        name: cleanUserDisplayName(firebaseUser.displayName || (fallbackAccountType === 'admin' ? 'Alex Reynolds' : 'Demo Staff')),
         email: firebaseUser.email || '',
         accountType: fallbackAccountType,
         dispatchGroup: fallbackGroup,

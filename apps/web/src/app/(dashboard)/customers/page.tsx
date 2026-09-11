@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Store, ChevronDown, Plus, Loader2 } from 'lucide-react';
 import { 
   Button, 
@@ -24,6 +25,10 @@ interface CustomerRecord {
   customerNumber?: string;
   wexCustomerId?: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
+  rawLastName: string;
+  rawFirstName: string;
   defaultLocation: string;
   email: string | null;
   homePhone: string | null;
@@ -40,6 +45,37 @@ interface CustomerRecord {
     equipment: number;
     lastAppointmentDate: string;
   };
+}
+
+export function getCustomerNameParts(c: any): { firstName: string; lastName: string; lastFirst: string; firstLast: string } {
+  const isCommercial = c.customerType === 'commercial' || c.custType === 'Commercial' || Boolean(c.businessName);
+  if (isCommercial) {
+    const bName = (c.businessName || c.name || 'Commercial Customer').trim();
+    return { firstName: '', lastName: bName, lastFirst: bName, firstLast: bName };
+  }
+
+  let first = (c.firstName || '').trim();
+  let last = (c.lastName || '').trim();
+
+  if (!first && !last) {
+    const raw = (c.name || '').trim();
+    if (raw.includes(',')) {
+      const parts = raw.split(',').map((s: string) => s.trim());
+      last = parts[0] || '';
+      first = parts[1] || '';
+    } else if (raw.includes(' ')) {
+      const parts = raw.split(' ').map((s: string) => s.trim());
+      first = parts[0] || '';
+      last = parts.slice(1).join(' ') || '';
+    } else {
+      last = raw;
+    }
+  }
+
+  const lastFirst = last && first ? `${last}, ${first}` : (last || first || c.name || 'New Customer');
+  const firstLast = first && last ? `${first} ${last}` : (first || last || c.name || 'New Customer');
+
+  return { firstName: first, lastName: last, lastFirst, firstLast };
 }
 
 export default function WexCustomersPage() {
@@ -70,11 +106,12 @@ export default function WexCustomersPage() {
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [expandedRowIds, setExpandedRowIds] = useState<string[]>([]);
+  const [nameSortOrder, setNameSortOrder] = useState<'lastFirst' | 'firstLast'>('lastFirst');
 
   // Add Customer Modal State
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
 
-  // Map canonical customers to view records (Alphabetical Last Name, First Name)
+  // Map canonical customers to view records with formatting support
   const customers: CustomerRecord[] = canonicalList.map((c) => {
     const locStr = c.address
       ? [c.address.street, c.address.city, `${c.address.state} ${c.address.zipCode}`.trim()].filter(Boolean).join(', ')
@@ -120,14 +157,19 @@ export default function WexCustomersPage() {
 
     const effectiveTotalVolume = paidSum > 0 ? paidSum : (totalVolume > 0 ? totalVolume : (c.financials?.totalInvoiced || 0));
 
-    // Display formatted Last Name, First Name
-    const displayName = c.qbName || (c.lastName && c.firstName ? `${c.lastName}, ${c.firstName}` : c.name) || 'New Customer';
+    // Support both "Last name, First name" and "First name, Last name"
+    const nameParts = getCustomerNameParts(c);
+    const displayName = nameSortOrder === 'lastFirst' ? nameParts.lastFirst : nameParts.firstLast;
 
     return {
       id: c.id,
       customerNumber: c.customerNumber || c.accountNumber || c.id,
       wexCustomerId: c.wexCustomerId,
       name: displayName,
+      firstName: nameParts.firstName,
+      lastName: nameParts.lastName,
+      rawLastName: nameParts.lastName.toLowerCase(),
+      rawFirstName: nameParts.firstName.toLowerCase(),
       defaultLocation: locStr,
       email: c.email || null,
       homePhone: c.homePhone || null,
@@ -147,11 +189,26 @@ export default function WexCustomersPage() {
     };
   });
 
+  // Sort according to active nameSortOrder
+  const sortedCustomers = React.useMemo(() => {
+    return [...customers].sort((a, b) => {
+      if (nameSortOrder === 'lastFirst') {
+        const cmpLast = a.rawLastName.localeCompare(b.rawLastName);
+        if (cmpLast !== 0) return cmpLast;
+        return a.rawFirstName.localeCompare(b.rawFirstName);
+      } else {
+        const cmpFirst = a.rawFirstName.localeCompare(b.rawFirstName);
+        if (cmpFirst !== 0) return cmpFirst;
+        return a.rawLastName.localeCompare(b.rawLastName);
+      }
+    });
+  }, [customers, nameSortOrder]);
+
   const toggleSelectAll = () => {
-    if (selectedIds.length === customers.length) {
+    if (selectedIds.length === sortedCustomers.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(customers.map((c) => c.id));
+      setSelectedIds(sortedCustomers.map((c) => c.id));
     }
   };
 
@@ -241,16 +298,22 @@ export default function WexCustomersPage() {
                 <th className="w-10 px-3 py-3 text-center">
                   <Checkbox
                     checked={
-                      customers.length > 0 &&
-                      selectedIds.length === customers.length
+                      sortedCustomers.length > 0 &&
+                      selectedIds.length === sortedCustomers.length
                     }
                     onChange={toggleSelectAll}
                   />
                 </th>
                 <th className="px-3 py-3">
-                  <span className="inline-flex items-center gap-1">
-                    Customer Name <ChevronDown className="w-3.5 h-3.5 text-[#a82e2e]" />
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setNameSortOrder(prev => prev === 'lastFirst' ? 'firstLast' : 'lastFirst')}
+                    className="inline-flex items-center gap-1.5 hover:text-[#7f1d1d] transition-colors focus:outline-none cursor-pointer group text-left"
+                    title={`Current format: ${nameSortOrder === 'lastFirst' ? 'Last name, First name' : 'First name, Last name'}. Click to toggle format and sorting.`}
+                  >
+                    <span className="font-bold">Customer Name</span>
+                    <ChevronDown className={`w-3.5 h-3.5 text-[#a82e2e] transition-transform duration-200 ${nameSortOrder === 'firstLast' ? 'rotate-180' : ''}`} />
+                  </button>
                 </th>
                 <th className="px-3 py-3">Default Location</th>
                 <th className="px-3 py-3">Email</th>
@@ -262,14 +325,14 @@ export default function WexCustomersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-xs text-slate-700">
-              {customers.length === 0 && !loading ? (
+              {sortedCustomers.length === 0 && !loading ? (
                 <tr>
                   <td colSpan={9} className="px-6 py-12 text-center text-slate-400 italic">
                     No customer records found matching your filters.
                   </td>
                 </tr>
               ) : (
-                customers.map((customer) => {
+                sortedCustomers.map((customer) => {
                   const isSelected = selectedIds.includes(customer.id);
                   const isExpanded = expandedRowIds.includes(customer.id);
 
@@ -284,12 +347,12 @@ export default function WexCustomersPage() {
                         </td>
 
                         <td className="px-3 py-3 font-medium">
-                          <a
-                            href={`/customers/${customer.customerNumber || customer.id}`}
+                          <Link
+                            href={`/customers/${customer.id || customer.customerNumber}`}
                             className="text-[#be4646] hover:underline font-semibold"
                           >
                             {customer.name}
-                          </a>
+                          </Link>
                         </td>
 
                         <td className="px-3 py-3 text-slate-600 max-w-xs truncate">

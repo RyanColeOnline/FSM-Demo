@@ -89,7 +89,7 @@ export function PdfDocumentViewerModal({
   paymentStatus = 'Unpaid',
   paymentTerms = 'Due upon Receipt',
   paymentsCredits,
-  technician = 'Minor Cover',
+  technician = 'Marcus Vance',
   customerContact,
   lineItems = [],
 }: PdfDocumentViewerModalProps) {
@@ -280,7 +280,7 @@ export function PdfDocumentViewerModal({
                     </div>
                     <div>
                       <span className="text-[10px] font-bold text-slate-500 uppercase block">Technician</span>
-                      <span className="font-medium text-slate-700">{technician || 'Minor Cover'}</span>
+                      <span className="font-medium text-slate-700">{technician || 'Marcus Vance'}</span>
                     </div>
                     <div>
                       <span className="text-[10px] font-bold text-slate-500 uppercase block">Payment Terms</span>
@@ -298,7 +298,7 @@ export function PdfDocumentViewerModal({
                   </span>
                   <p className="font-bold text-slate-900 text-sm">{customerName}</p>
                   <p className="text-slate-600 mt-0.5 whitespace-pre-wrap">
-                    {billingAddress || 'Destin, FL 32541'}
+                    {billingAddress || 'Peoria, IL 61614'}
                   </p>
                   {customerContact?.phone && (
                     <p className="text-slate-500 text-[11px] mt-1.5">M: {customerContact.phone}</p>
@@ -314,7 +314,7 @@ export function PdfDocumentViewerModal({
                   </span>
                   <p className="font-bold text-slate-900 text-sm">{billToCustomer || customerName}</p>
                   <p className="text-slate-600 mt-0.5 whitespace-pre-wrap">
-                    {jobLocation || billingAddress || 'Destin, FL 32541'}
+                    {jobLocation || billingAddress || 'Peoria, IL 61614'}
                   </p>
                   {jobName && (
                     <p className="text-slate-500 text-[11px] mt-1.5 font-medium">Job: {jobName}</p>

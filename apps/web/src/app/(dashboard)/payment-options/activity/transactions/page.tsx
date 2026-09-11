@@ -15,6 +15,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui';
+import { PdfDocumentViewerModal } from '@/components/modals/PdfDocumentViewerModal';
 
 export interface Transaction {
   transaction_id: string;
@@ -52,14 +53,14 @@ const initialBatches: PayoutBatch[] = [
     transactions: [
       {
         transaction_id: 'tx-106',
-        date: '8/09/2026 10:15 AM',
+        date: '9/10/2026 10:15 AM',
         status: 'Pending',
         amount: 680.00,
-        customer_name: 'Tom Berghoff',
+        customer_name: 'Apex Commercial Plaza',
         card_brand: 'Visa',
         card_last4: '1190',
         payment_method: 'EMV Chip',
-        invoice_number: 'INV-134171',
+        invoice_number: 'INV-2045',
         reference_number: 'REF-984720',
         authorization_code: 'AUTH-09901',
         qb_sync_status: 'Ready',
@@ -68,95 +69,95 @@ const initialBatches: PayoutBatch[] = [
     ],
   },
   {
-    payout_batch_id: 'batch-2026-08-08',
-    batch_name: 'SETTLEMENT ID #948210 - 08/08/2026',
+    payout_batch_id: 'batch-2026-09-09',
+    batch_name: 'SETTLEMENT ID #948210 - 09/09/2026',
     total_amount: 1485.50,
     non_amex_amount: 1210.50,
     amex_amount: 275.00,
     transactions: [
       {
         transaction_id: 'tx-101',
-        date: '8/08/2026 3:45 PM',
+        date: '9/09/2026 3:45 PM',
         status: 'Settled',
         amount: 450.00,
-        customer_name: 'Dom Villareal',
+        customer_name: 'Summit Ridge Properties',
         card_brand: 'Visa',
         card_last4: '4242',
         payment_method: 'Card Swipe',
-        invoice_number: 'INV-134186',
+        invoice_number: 'INV-2044',
         reference_number: 'REF-984712',
         authorization_code: 'AUTH-09124',
         qb_sync_status: 'Synced',
-        batch_id: 'batch-2026-08-08',
+        batch_id: 'batch-2026-09-09',
       },
       {
         transaction_id: 'tx-102',
-        date: '8/08/2026 1:15 PM',
+        date: '9/09/2026 1:15 PM',
         status: 'Settled',
         amount: 760.50,
-        customer_name: '360 Blue, LLC',
+        customer_name: 'Oakwood Residences',
         card_brand: 'Mastercard',
         card_last4: '8812',
         payment_method: 'EMV Chip',
-        invoice_number: 'INV-134183',
+        invoice_number: 'INV-2043',
         reference_number: 'REF-984713',
         authorization_code: 'AUTH-09125',
         qb_sync_status: 'Synced',
-        batch_id: 'batch-2026-08-08',
+        batch_id: 'batch-2026-09-09',
       },
       {
         transaction_id: 'tx-103',
-        date: '8/08/2026 11:20 AM',
+        date: '9/09/2026 11:20 AM',
         status: 'Settled',
         amount: 275.00,
-        customer_name: 'Kurt Phillips',
+        customer_name: 'Elena Martinez',
         card_brand: 'Amex',
         card_last4: '1004',
         payment_method: 'Stored Account',
-        invoice_number: 'INV-134180',
+        invoice_number: 'INV-2042',
         reference_number: 'REF-984714',
         authorization_code: 'AUTH-09126',
         qb_sync_status: 'Ready',
-        batch_id: 'batch-2026-08-08',
+        batch_id: 'batch-2026-09-09',
       },
     ],
   },
   {
-    payout_batch_id: 'batch-2026-08-07',
-    batch_name: 'SETTLEMENT ID #948201 - 08/07/2026',
+    payout_batch_id: 'batch-2026-09-07',
+    batch_name: 'SETTLEMENT ID #948201 - 09/07/2026',
     total_amount: 2150.00,
     non_amex_amount: 2150.00,
     amex_amount: 0.00,
     transactions: [
       {
         transaction_id: 'tx-104',
-        date: '8/07/2026 4:10 PM',
+        date: '9/07/2026 4:10 PM',
         status: 'Settled',
         amount: 1200.00,
-        customer_name: 'Destin Pointe Vacation Rentals',
+        customer_name: 'Horizon Business Park',
         card_brand: 'Visa',
         card_last4: '5541',
         payment_method: 'Manual Keyed',
-        invoice_number: 'INV-134177',
+        invoice_number: 'INV-2041',
         reference_number: 'REF-984700',
         authorization_code: 'AUTH-08811',
         qb_sync_status: 'Synced',
-        batch_id: 'batch-2026-08-07',
+        batch_id: 'batch-2026-09-07',
       },
       {
         transaction_id: 'tx-105',
-        date: '8/07/2026 2:30 PM',
+        date: '9/07/2026 2:30 PM',
         status: 'Settled',
         amount: 950.00,
-        customer_name: 'Southern Vacation Rentals',
+        customer_name: 'Metro Logistics Hub',
         card_brand: 'Discover',
         card_last4: '9012',
         payment_method: 'Card Swipe',
-        invoice_number: 'INV-134173',
+        invoice_number: 'INV-2040',
         reference_number: 'REF-984701',
         authorization_code: 'AUTH-08812',
         qb_sync_status: 'Unmatched',
-        batch_id: 'batch-2026-08-07',
+        batch_id: 'batch-2026-09-07',
       },
     ],
   },
@@ -168,12 +169,13 @@ function TransactionsContent() {
   // Filter States
   const [cardBatchFilter, setCardBatchFilter] = useState('Card Batch');
   const [groupFilter, setGroupFilter] = useState('All Groups');
-  const [startDate, setStartDate] = useState('8/01/2026');
-  const [endDate, setEndDate] = useState('8/09/2026');
+  const [startDate, setStartDate] = useState('9/01/2026');
+  const [endDate, setEndDate] = useState('9/11/2026');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Expandable Tx detail card (NONE expanded on load by default!)
   const [expandedTxIds, setExpandedTxIds] = useState<string[]>([]);
+  const [viewingPdfTx, setViewingPdfTx] = useState<Transaction | null>(null);
 
   // Pagination State (50 items per page limit!)
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -545,13 +547,15 @@ function TransactionsContent() {
 
                             {/* Invoice Number */}
                             <td className="px-3 py-2.5 font-medium whitespace-nowrap">
-                              <a 
-                                href={`/jobs/invoice-list`} 
-                                className="text-[#be4646] hover:underline inline-flex items-center gap-1 font-semibold"
+                              <button 
+                                type="button"
+                                onClick={() => setViewingPdfTx(tx)}
+                                className="text-[#be4646] hover:underline inline-flex items-center gap-1 font-semibold focus:outline-none cursor-pointer"
+                                title={`View PDF for ${tx.invoice_number}`}
                               >
                                 <span>{tx.invoice_number}</span>
                                 <ExternalLink className="w-3 h-3 text-[#be4646]" />
-                              </a>
+                              </button>
                             </td>
                           </tr>
 
@@ -632,6 +636,44 @@ function TransactionsContent() {
           </div>
         </div>
       </div>
+
+      {/* Invoice PDF Lightbox Modal */}
+      {viewingPdfTx && (
+        <PdfDocumentViewerModal
+          isOpen={viewingPdfTx !== null}
+          onClose={() => setViewingPdfTx(null)}
+          documentType="Invoice"
+          documentNumber={viewingPdfTx.invoice_number}
+          customerName={viewingPdfTx.customer_name}
+          billToCustomer={viewingPdfTx.customer_name}
+          issueDate={viewingPdfTx.date.split(' ')[0] || '9/10/2026'}
+          dueDate={viewingPdfTx.date.split(' ')[0] || '9/10/2026'}
+          amount={`$${viewingPdfTx.amount.toFixed(2)}`}
+          subtotal={viewingPdfTx.amount}
+          tax={0}
+          total={viewingPdfTx.amount}
+          balanceDue={viewingPdfTx.status === 'Settled' ? 0 : viewingPdfTx.amount}
+          jobNumber={viewingPdfTx.invoice_number.replace('INV-', '')}
+          status={viewingPdfTx.status === 'Settled' ? 'Approved' : 'Pending'}
+          paymentStatus={viewingPdfTx.status === 'Settled' ? 'Paid' : 'Unpaid'}
+          paymentTerms="Due upon Receipt"
+          paymentsCredits={viewingPdfTx.status === 'Settled' ? [`$${viewingPdfTx.amount.toFixed(2)} (${viewingPdfTx.payment_method})`] : []}
+          technician="Marcus Vance"
+          lineItems={[
+            {
+              id: 'li-1',
+              name: 'Field Service & Diagnostics',
+              description: `Completed service transaction ${viewingPdfTx.transaction_id} via ${viewingPdfTx.card_brand} (x${viewingPdfTx.card_last4})`,
+              quantity: 1,
+              rate: viewingPdfTx.amount,
+              unitPrice: viewingPdfTx.amount,
+              amount: viewingPdfTx.amount,
+              totalPrice: viewingPdfTx.amount,
+              isTaxable: false,
+            },
+          ]}
+        />
+      )}
     </div>
   );
 }

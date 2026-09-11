@@ -229,13 +229,13 @@ export default function WexPaymentPlanListPage() {
                   {/* Customer Name */}
                   <td className="px-3 py-3.5 font-medium whitespace-nowrap">
                     <div className="flex items-center gap-1">
-                      <a
+                      <Link
                         href="/customers"
                         className="inline-flex items-center gap-1 text-[#be4646] font-semibold hover:underline"
                       >
                         <span>{plan.customerName}</span>
                         <ExternalLink className="w-3 h-3 text-[#be4646]" />
-                      </a>
+                      </Link>
                       <span title="Edit Customer"><Edit className="w-3 h-3 text-[#be4646] cursor-pointer ml-0.5" /></span>
                     </div>
                   </td>
@@ -274,9 +274,9 @@ export default function WexPaymentPlanListPage() {
                   <td className="px-3 py-3.5 font-medium">
                     <div className="flex items-center gap-1 text-[#be4646]">
                       <Star className="w-3.5 h-3.5 fill-slate-800 text-slate-800 shrink-0" />
-                      <a href={`/more/maintenance-plans/${plan.id}`} className="hover:underline font-semibold">
+                      <Link href={`/more/maintenance-plans/${plan.id}`} className="hover:underline font-semibold">
                         {plan.maintenancePlan}
-                      </a>
+                      </Link>
                       <span title="Edit Plan"><Edit className="w-3 h-3 text-[#be4646] cursor-pointer ml-0.5" /></span>
                     </div>
                   </td>

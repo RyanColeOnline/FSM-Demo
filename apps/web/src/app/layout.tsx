@@ -1,6 +1,7 @@
 import React from 'react';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { SessionProvider } from '@/auth/sessionStore';
+import { TurbopackDevIndicatorRemover } from '@/components/dev/TurbopackDevIndicatorRemover';
 import './globals.css';
 
 export const metadata = {
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-slate-50 antialiased font-sans">
         <QueryProvider>
           <SessionProvider>
+            <TurbopackDevIndicatorRemover />
             {children}
           </SessionProvider>
         </QueryProvider>

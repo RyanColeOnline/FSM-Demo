@@ -273,13 +273,13 @@ export default function WexPurchaseOrderListPage() {
                   <tr key={po.id} className="bg-white">
                     {/* Supplier */}
                     <td className="px-3 py-3.5 font-medium">
-                      <a
+                      <Link
                         href="/more/vendors"
                         className="inline-flex items-center gap-1 text-[#be4646] font-semibold hover:underline"
                       >
                         <span>{po.supplier}</span>
                         <ExternalLink className="w-3 h-3 text-[#be4646]" />
-                      </a>
+                      </Link>
                     </td>
 
                     {/* Favorite Heart */}
@@ -295,13 +295,13 @@ export default function WexPurchaseOrderListPage() {
 
                     {/* PO # */}
                     <td className="px-3 py-3.5 font-medium whitespace-nowrap">
-                      <a
+                      <Link
                         href={`/jobs/purchase-orders/${po.poNumber}`}
                         className="inline-flex items-center gap-1 text-[#be4646] font-semibold hover:underline"
                       >
                         <span>{po.poNumber}</span>
                         <ExternalLink className="w-3 h-3 text-[#be4646]" />
-                      </a>
+                      </Link>
                     </td>
 
                     {/* Supplier Order # */}
@@ -341,13 +341,13 @@ export default function WexPurchaseOrderListPage() {
 
                     {/* Job */}
                     <td className="px-3 py-3.5 font-medium whitespace-nowrap">
-                      <a
+                      <Link
                         href={`/jobs/${po.jobNumber}`}
                         className="inline-flex items-center gap-1 text-[#be4646] font-semibold hover:underline"
                       >
                         <span>{po.jobNumber}</span>
                         <ExternalLink className="w-3 h-3 text-[#be4646]" />
-                      </a>
+                      </Link>
                     </td>
 
                     {/* Job Type */}
